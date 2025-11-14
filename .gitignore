@@ -37,6 +37,5 @@ htmlcov/
 *.log
 
 # Build outputs
-build/
 dist/
 tmp/
