@@ -10,7 +10,7 @@
   "main": "src/index.tsx",
   "scripts": {
     "prebuild": "npm run generate",
-    "build": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vite build",
+    "build": "vite build",
     "build-flags": "node scripts/build-flags.cjs",
     "build-storybook": "storybook build",
     "change:add": "changeset add",

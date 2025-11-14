@@ -173,10 +173,11 @@ export default defineConfig(({ command, mode }) => {
       },
       rollupOptions: {
         plugins: [nodePolyfills()],
-        maxParallelFileOps: 2,
+        maxParallelFileOps: 1,
         cache: false,
         output: {
           sourcemap,
+          experimentalMinChunkSize: 500000,
           manualChunks: id => {
             if (id.includes("node_modules")) {
               return "vendor";

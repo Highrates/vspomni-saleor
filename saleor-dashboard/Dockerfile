@@ -35,6 +35,7 @@ ENV APPS_TUNNEL_URL_KEYWORDS ${APPS_TUNNEL_URL_KEYWORDS}
 ENV STATIC_URL ${STATIC_URL:-/dashboard/}
 ENV SKIP_SOURCEMAPS ${SKIP_SOURCEMAPS:-true}
 ENV LOCALE_CODE ${LOCALE_CODE:-EN}
+ENV NODE_OPTIONS="--max-old-space-size=1536 --max-semi-space-size=128"
 RUN npm run build
 
 FROM nginx:stable-alpine as runner
