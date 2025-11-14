@@ -13,7 +13,7 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=2048 vite build",
     "build-flags": "node scripts/build-flags.cjs",
     "build-storybook": "storybook build",
-    "change:add": "changeset add",s
+    "change:add": "changeset add",
     "change:status": "changeset status",
     "check-strict-null-errors": "tsc --noEmit --strictNullChecks | node scripts/count-strict-null-check-errors.cjs",
     "check-types": "npm run check-types:src && npm run check-types:playwright",
