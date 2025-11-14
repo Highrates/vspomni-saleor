@@ -94,7 +94,7 @@ services:
       context: ./saleor-dashboard
       dockerfile: Dockerfile
       args:
-        API_URL: ${API_URL:-http://localhost/graphql/}
+        API_URL: ${API_URL:-http://dashboard.miraflores-shop.com/graphql/}
         APP_MOUNT_URI: /dashboard/
         STATIC_URL: /dashboard/
     container_name: saleor_dashboard
