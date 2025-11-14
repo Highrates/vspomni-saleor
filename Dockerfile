@@ -32,7 +32,9 @@ RUN apt-get update \
   libwebp7 \
   libpq5 \
   libmagic1 \
+  # Required by celery[sqs] which uses pycurl for AWS SQS support
   libcurl4 \
+  # Required to allows to identify file types when handling file uploads
   media-types \
   libjpeg62-turbo \
   # PostgreSQL client for pg_isready command in entrypoint
