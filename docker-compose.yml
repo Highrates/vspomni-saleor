@@ -62,7 +62,7 @@ services:
     volumes:
       - static_files:/app/static
       - media_files:/app/media
-      - .:/app
+#      - .:/app
 
   celery-worker:
     build:
