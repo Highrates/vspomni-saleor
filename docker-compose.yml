@@ -113,6 +113,11 @@ services:
       - api
     networks:
       - saleor-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
 
   nginx:
     image: nginx:stable-alpine
