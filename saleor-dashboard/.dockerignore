@@ -1,3 +1,23 @@
+# Ignore everything except what we need for production
 node_modules
-build
-*.stories.tsx
+.git
+.gitignore
+*.md
+.env*
+!.env.production
+Dockerfile.build
+playwright
+.storybook
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+.husky
+.changeset
+coverage
+.vscode
+.idea
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
