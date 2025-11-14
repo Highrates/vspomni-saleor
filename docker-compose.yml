@@ -16,8 +16,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - saleor-network
 
   redis:
     image: redis:7-alpine
@@ -28,8 +26,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - saleor-network
 
   mailpit:
     image: axllent/mailpit:latest
@@ -40,8 +36,6 @@ services:
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-    networks:
-      - saleor-network
 
   api:
     build:
@@ -69,8 +63,6 @@ services:
       - static_files:/app/static
       - media_files:/app/media
       - .:/app
-    networks:
-      - saleor-network
 
   celery-worker:
     build:
@@ -96,8 +88,6 @@ services:
     volumes:
       - media_files:/app/media
       - .:/app
-    networks:
-      - saleor-network
 
   dashboard:
     build:
@@ -111,13 +101,6 @@ services:
     restart: unless-stopped
     depends_on:
       - api
-    networks:
-      - saleor-network
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '2'
 
   nginx:
     image: nginx:stable-alpine
@@ -132,15 +115,9 @@ services:
     depends_on:
       - api
       - dashboard
-    networks:
-      - saleor-network
 
 volumes:
   postgres_data:
   static_files:
   media_files:
-
-networks:
-  saleor-network:
-    driver: bridge
 
