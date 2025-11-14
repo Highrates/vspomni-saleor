@@ -1,0 +1,42 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.eggs/
+
+# Environments
+.venv/
+.env
+.env.*
+!.env.example
+
+# Django/media
+media/
+staticfiles/
+celerybeat-schedule
+
+# Node / frontend
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Testing
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+
+# Build outputs
+build/
+dist/
+tmp/

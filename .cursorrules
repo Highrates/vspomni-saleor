@@ -1,0 +1,236 @@
+# Saleor E-Commerce Platform - Cursor Rules
+
+## Project Overview
+Saleor is a headless, GraphQL-first e-commerce platform built with Django and Python. 
+This is version 3.23.0 running on Django 5.2 and Python 3.12.
+
+## Tech Stack
+- **Backend**: Django 5.2, Python 3.12
+- **API**: GraphQL (Graphene)
+- **Database**: PostgreSQL 16
+- **Cache/Queue**: Redis 7, Celery
+- **Package Manager**: uv (modern Python package manager)
+- **Task Runner**: Poe the Poet
+
+## Project Structure
+
+### Core Modules
+- `saleor/account/` - User authentication and management
+- `saleor/product/` - Product catalog, variants, attributes
+- `saleor/order/` - Order processing and fulfillment
+- `saleor/checkout/` - Shopping cart and checkout flow
+- `saleor/payment/` - Payment processing
+- `saleor/shipping/` - Shipping methods and zones
+- `saleor/discount/` - Promotions, sales, vouchers
+- `saleor/channel/` - Multi-channel support
+- `saleor/warehouse/` - Inventory management
+- `saleor/graphql/` - GraphQL API definitions
+- `saleor/plugins/` - Extension system via plugins
+- `saleor/webhook/` - Webhook event system
+- `saleor/app/` - App marketplace integration
+
+### File Organization
+- Each module follows Django convention:
+  - `models.py` - Database models
+  - `utils.py` - Helper functions
+  - `error_codes.py` - Error definitions
+  - `tests/` - Test files
+  - `migrations/` - Database migrations
+  
+### GraphQL Structure
+- `saleor/graphql/<module>/`
+  - `schema.py` - Queries and mutations
+  - `types.py` - GraphQL types
+  - `filters.py` - Filtering logic
+  - `sorters.py` - Sorting logic
+  - `mutations/` - Individual mutation files
+  - `tests/mutations/` - Mutation tests
+  - `tests/queries/` - Query tests
+
+## Coding Standards
+
+### Testing (pytest)
+- Use `pytest` with `--reuse-db` flag for faster execution
+- Structure: given/when/then pattern
+- Prefer fixtures over mocking
+- Fixtures located in `tests/fixtures/`
+- Test files should be flat (no classes)
+- Run tests: `uv run poe test`
+
+### Code Style
+- Formatter: Ruff (replaces Black)
+- Linter: Ruff
+- Type checking: mypy with django-stubs
+- Use relative imports
+- Follow Django naming conventions
+
+### Django Models
+- Prefer UUID as primary key for main models
+- Use `created_at` and `updated_at` for timestamps
+- Always set default sorting
+- Follow zero-downtime migration policy
+
+### GraphQL API
+- Use `id` instead of `model_name_id` in inputs
+- Every mutation/field needs description ending with `.`
+- Include `ADDED_IN_X` and `PREVIEW_FEATURE` labels
+- Define permissions in mutation `Meta.permissions`
+- Create specific error codes per mutation
+- Error classes in `saleor/graphql/core/types/common.py`
+
+### Locking & Concurrency
+- Use `select_for_update()` for object locking
+- Lock in consistent order (by `pk`) to avoid deadlocks
+- Place locking helpers in `lock_objects.py`
+
+### Search Implementation
+- Using SearchVector and SearchRank
+- Requires Celery beat for vector updates
+- See PR #9344 for implementation pattern
+
+## Development Commands
+
+### Start Development
+```bash
+# Start services (PostgreSQL, Redis, Mailpit)
+docker-compose up -d db redis mailpit
+
+# Run migrations
+uv run poe migrate
+
+# Load test data + create admin user
+uv run poe populatedb
+
+# Start development server
+uv run poe start
+
+# Start Celery worker
+uv run poe worker
+
+# Start Celery beat scheduler
+uv run poe scheduler
+```
+
+### Testing
+```bash
+# Run all tests
+uv run poe test
+
+# Run specific test file
+uv run poe test saleor/graphql/app/tests/mutations/test_app_create.py
+
+# Run single test
+uv run poe test path/to/test.py::test_name -n0
+
+# With debugger
+uv run poe test path/to/test.py::test_name -n0 -s --allow-hosts=127.0.0.1
+```
+
+### Database
+```bash
+# Make migrations
+uv run poe make-migrations
+
+# Apply migrations  
+uv run poe migrate
+
+# Django shell
+uv run poe shell
+```
+
+### GraphQL
+```bash
+# Build schema.graphql
+uv run poe build-schema
+```
+
+## Environment Setup
+
+### Default Admin Credentials
+- Email: `admin@example.com`
+- Password: `admin`
+
+### Services URLs
+- **GraphQL API**: http://localhost:8000/graphql/
+- **GraphQL Playground**: http://localhost:8000/graphql/
+- **Mailpit UI**: http://localhost:8025/ (email testing)
+- **Dashboard**: http://localhost:9000/ (if installed separately)
+
+### Environment Variables
+Key variables in `.env`:
+- `DEBUG=True` - Development mode
+- `DATABASE_URL` - PostgreSQL connection
+- `CELERY_BROKER_URL` - Redis for Celery
+- `EMAIL_URL` - Email backend (Mailpit)
+- `SECRET_KEY` - Django secret key
+
+## Key Patterns
+
+### Webhooks & Events
+- Webhook system for external integrations
+- Async event processing via Celery
+- Custom headers support
+
+### Multi-tenancy
+- Channel-based isolation
+- Per-channel pricing, inventory, settings
+
+### Plugin Architecture
+- Extend functionality via plugins
+- Located in `saleor/plugins/`
+- Service-oriented vs monolithic
+
+### API Extensions
+- Synchronous webhooks for API modifications
+- Subscription queries for data streaming
+- Dashboard iframe apps
+
+## Important Notes
+
+1. **No direct DB access from GraphQL** - Use DataLoaders
+2. **Optimize queries** - Test with 1000+ items
+3. **Breaking changes** - Deprecate, don't remove
+4. **Search requires Celery** - Vector updates are async
+5. **Metadata** - Available on most objects for custom data
+6. **Permissions** - Use AuthorizationFilters enum
+7. **Translations** - Fully translatable catalog
+8. **Tax handling** - Via tax classes and configurations
+
+## Common Tasks
+
+### Adding a new field to Product
+1. Add field to model in `saleor/product/models.py`
+2. Create migration: `uv run poe make-migrations`
+3. Add to GraphQL type in `saleor/graphql/product/types.py`
+4. Write tests in `saleor/graphql/product/tests/`
+5. Update documentation strings
+
+### Creating a new mutation
+1. Create file in `saleor/graphql/<module>/mutations/<mutation_name>.py`
+2. Define input type and mutation class
+3. Add to schema in `schema.py`
+4. Create error codes in `error_codes.py`
+5. Write tests in `tests/mutations/test_<mutation_name>.py`
+6. Use given/when/then structure
+
+### Debugging
+- Use `breakpoint()` for debugging (ipdb in devcontainer)
+- Check logs in terminal running server
+- Use GraphQL playground for API testing
+- Mailpit for email verification
+
+## Resources
+- Docs: https://docs.saleor.io
+- GraphQL Schema: `saleor/graphql/schema.graphql`
+- Discord: https://saleor.io/discord
+- Contributing: See CONTRIBUTING.md
+
+## AI Assistant Behavior
+- When suggesting changes, follow the existing patterns in the codebase
+- Always include tests for new features
+- Respect the given/when/then structure
+- Use proper type hints and docstrings
+- Consider multi-channel implications
+- Think about backwards compatibility
+- Optimize for database queries (use DataLoaders)
+
