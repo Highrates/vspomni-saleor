@@ -16,13 +16,35 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ### FINAL STAGE ###
 FROM python:3.12-slim
 
-WORKDIR /app
+RUN groupadd -r saleor && useradd -r -g saleor saleor
 
+# Pillow dependencies and tools for docker-entrypoint.sh
 RUN apt-get update \
-    && apt-get install -y libmagic1 libpq5 libcurl4 libjpeg62-turbo \
-    libopenjp2-7 libtiff6 libwebp7 liblcms2-2 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y \
+  libffi8 \
+  libgdk-pixbuf-2.0-0 \
+  liblcms2-2 \
+  libopenjp2-7 \
+  libssl3 \
+  libtiff6 \
+  libwebp7 \
+  libpq5 \
+  libmagic1 \
+  # Required by celery[sqs] which uses pycurl for AWS SQS support
+  libcurl4 \
+  # Required to allows to identify file types when handling file uploads
+  media-types \
+  # PostgreSQL client for pg_isready command in entrypoint
+  postgresql-client \
+  # Redis client for redis-cli command in entrypoint
+  redis-tools \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /app/media /app/static \
+  && chown -R saleor:saleor /app/
+
+WORKDIR /app
 
 # Copy environment (site-packages) from build stage
 COPY --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
