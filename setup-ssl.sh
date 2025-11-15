@@ -123,6 +123,7 @@ if [ -d "certbot/conf/live/$DOMAIN" ]; then
 fi
 
 # Получаем сертификат (переопределяем entrypoint чтобы использовать certbot напрямую)
+echo "Запуск certbot с подробным логированием..."
 docker-compose run --rm --entrypoint certbot certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
@@ -130,6 +131,7 @@ docker-compose run --rm --entrypoint certbot certbot certonly \
     --agree-tos \
     --no-eff-email \
     --preferred-challenges http \
+    --verbose \
     $STAGING_ARG \
     -d $DOMAIN
 
