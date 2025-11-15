@@ -37,3 +37,8 @@ htmlcov/
 # Build outputs
 dist/
 tmp/
+
+# SSL/Nginx (используется системный nginx вне docker)
+certbot/
+ssl-certs/
+nginx/

@@ -32,7 +32,7 @@ services:
     container_name: saleor_mailpit
     restart: unless-stopped
     ports:
-      - "8025:8025"  # Web UI
+      - "127.0.0.1:8025:8025"  # Web UI (только localhost)
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
@@ -43,6 +43,8 @@ services:
       dockerfile: Dockerfile
     container_name: saleor_api
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"  # API доступен только для nginx на localhost
     entrypoint: ["/app/docker-entrypoint.sh"]
     command: ["uvicorn", "saleor.asgi:application", "--host=0.0.0.0", "--port=8000", "--workers=2", "--lifespan=off", "--ws=none", "--no-server-header", "--no-access-log", "--timeout-keep-alive=35", "--timeout-graceful-shutdown=30", "--limit-max-requests=10000"]
     env_file:
@@ -62,7 +64,6 @@ services:
     volumes:
       - static_files:/app/static
       - media_files:/app/media
-#      - .:/app
 
   celery-worker:
     build:
@@ -87,55 +88,27 @@ services:
         condition: service_healthy
     volumes:
       - media_files:/app/media
-#      - .:/app
 
   dashboard:
     build:
       context: ./saleor-dashboard
       dockerfile: Dockerfile
       args:
-        API_URL: ${API_URL:-http://dashboard.miraflores-shop.com/graphql/}
+        API_URL: ${API_URL:-https://dashboard.miraflores-shop.com/graphql/}
         APP_MOUNT_URI: /dashboard/
         STATIC_URL: /dashboard/
     container_name: saleor_dashboard
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"  # Dashboard доступен только для nginx на localhost
     environment:
-      API_URL: ${API_URL:-http://dashboard.miraflores-shop.com/graphql/}
+      API_URL: ${API_URL:-https://dashboard.miraflores-shop.com/graphql/}
       APP_MOUNT_URI: /dashboard/
       STATIC_URL: /dashboard/
     depends_on:
       - api
 
-  nginx:
-    image: nginx:stable-alpine
-    container_name: saleor_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_files:/app/static:ro
-      - media_files:/app/media:ro
-      - ./certbot/conf:/etc/letsencrypt:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./ssl-certs/live/dashboard.miraflores-shop.com:/etc/nginx/ssl:ro
-    depends_on:
-      - api
-      - dashboard
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-
-  certbot:
-    image: certbot/certbot:latest
-    container_name: saleor_certbot
-    restart: unless-stopped
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
 volumes:
   postgres_data:
   static_files:
   media_files:
-
