@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Init script for Let's Encrypt SSL certificate setup
-# Run this script ONCE before first deployment with SSL
+# Simplified Init script for Let's Encrypt SSL certificate setup
+# This version creates dummy certificate on the host system directly
 
 set -e
 
@@ -30,13 +30,20 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
+# Check if openssl is installed
+if ! command -v openssl &> /dev/null; then
+    echo -e "${RED}Error: openssl is not installed${NC}"
+    echo -e "Install it with: ${YELLOW}apt-get install openssl${NC}"
+    exit 1
+fi
+
 # Create directories for certbot
 echo -e "${GREEN}[1/6]${NC} Creating directories..."
-mkdir -p "./certbot/conf"
+mkdir -p "./certbot/conf/live/$DOMAIN"
 mkdir -p "./certbot/www"
 
 # Check if certificate already exists
-if [ -d "./certbot/conf/live/$DOMAIN" ]; then
+if [ -f "./certbot/conf/live/$DOMAIN/fullchain.pem" ]; then
     echo -e "${YELLOW}Warning: Certificate for $DOMAIN already exists!${NC}"
     read -p "Do you want to recreate it? (y/N): " -n 1 -r
     echo
@@ -58,33 +65,48 @@ if [ ! -e "./certbot/conf/options-ssl-nginx.conf" ] || [ ! -e "./certbot/conf/ss
     echo -e "${GREEN}TLS parameters downloaded${NC}"
 fi
 
-# Create dummy certificate for nginx to start
+# Create dummy certificate on host system
 echo -e "${GREEN}[3/6]${NC} Creating dummy certificate for $DOMAIN..."
-CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
 mkdir -p "./certbot/conf/live/$DOMAIN"
-docker-compose run --rm --entrypoint "\
-  sh -c 'mkdir -p $CERT_PATH && \
-  openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-    -keyout $CERT_PATH/privkey.pem \
-    -out $CERT_PATH/fullchain.pem \
-    -subj /CN=localhost'" certbot
-echo -e "${GREEN}Dummy certificate created${NC}"
+openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+    -keyout "./certbot/conf/live/$DOMAIN/privkey.pem" \
+    -out "./certbot/conf/live/$DOMAIN/fullchain.pem" \
+    -subj "/CN=localhost" > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Dummy certificate created${NC}"
+else
+    echo -e "${RED}Failed to create dummy certificate${NC}"
+    exit 1
+fi
 
 # Start nginx with HTTP configuration
 echo -e "${GREEN}[4/6]${NC} Starting nginx..."
 docker-compose up -d nginx
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to start nginx${NC}"
+    exit 1
+fi
+
 echo -e "${GREEN}Nginx started${NC}"
 
 # Wait for nginx to start
 echo -e "${YELLOW}Waiting for nginx to be ready...${NC}"
 sleep 5
 
+# Check if nginx is running
+if ! docker-compose ps nginx | grep -q "Up"; then
+    echo -e "${RED}Nginx is not running${NC}"
+    docker-compose logs nginx
+    exit 1
+fi
+
 # Delete dummy certificate
 echo -e "${GREEN}[5/6]${NC} Removing dummy certificate..."
-docker-compose run --rm --entrypoint "\
-  sh -c 'rm -rf /etc/letsencrypt/live/$DOMAIN && \
-  rm -rf /etc/letsencrypt/archive/$DOMAIN && \
-  rm -rf /etc/letsencrypt/renewal/$DOMAIN.conf'" certbot
+rm -rf "./certbot/conf/live/$DOMAIN"
+rm -rf "./certbot/conf/archive/$DOMAIN"
+rm -rf "./certbot/conf/renewal/$DOMAIN.conf"
 echo -e "${GREEN}Dummy certificate removed${NC}"
 
 # Request Let's Encrypt certificate
@@ -106,15 +128,15 @@ else
 fi
 
 # Request certificate
-docker-compose run --rm --entrypoint "\
-  sh -c 'certbot certonly --webroot -w /var/www/certbot \
+docker-compose run --rm certbot certonly --webroot \
+    -w /var/www/certbot \
     $staging_arg \
     $email_arg \
-    --domains $DOMAIN \
+    -d $DOMAIN \
     --rsa-key-size 4096 \
     --agree-tos \
     --force-renewal \
-    --non-interactive'" certbot
+    --non-interactive
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}========================================${NC}"
@@ -122,12 +144,17 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}========================================${NC}"
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
-    echo -e "1. Update nginx configuration to use SSL"
-    echo -e "2. Restart nginx: ${YELLOW}docker-compose restart nginx${NC}"
-    echo -e "3. Enable SSL config by renaming:"
-    echo -e "   ${YELLOW}nginx/nginx.conf${NC} → ${YELLOW}nginx/nginx-http.conf.backup${NC}"
-    echo -e "   ${YELLOW}nginx/nginx-ssl.conf${NC} → ${YELLOW}nginx/nginx.conf${NC}"
-    echo -e "4. Reload services: ${YELLOW}docker-compose up -d${NC}"
+    echo -e "1. Backup current nginx config:"
+    echo -e "   ${YELLOW}mv nginx/nginx.conf nginx/nginx-http.conf.backup${NC}"
+    echo ""
+    echo -e "2. Activate SSL configuration:"
+    echo -e "   ${YELLOW}cp nginx/nginx-ssl.conf nginx/nginx.conf${NC}"
+    echo ""
+    echo -e "3. Rebuild dashboard with HTTPS URLs:"
+    echo -e "   ${YELLOW}docker-compose build --no-cache dashboard${NC}"
+    echo ""
+    echo -e "4. Restart all services:"
+    echo -e "   ${YELLOW}docker-compose down && docker-compose up -d${NC}"
     echo ""
     echo -e "${GREEN}Certificate will be automatically renewed every 12 hours${NC}"
 else
@@ -137,9 +164,19 @@ else
     echo ""
     echo -e "${YELLOW}Troubleshooting:${NC}"
     echo -e "1. Check DNS: ${YELLOW}nslookup $DOMAIN${NC}"
-    echo -e "2. Check port 80 is accessible from internet"
-    echo -e "3. Check nginx logs: ${YELLOW}docker-compose logs nginx${NC}"
-    echo -e "4. Check certbot logs: ${YELLOW}docker-compose logs certbot${NC}"
+    echo -e "   Should return: 91.229.8.83"
+    echo ""
+    echo -e "2. Check if port 80 is accessible:"
+    echo -e "   ${YELLOW}curl -I http://$DOMAIN/.well-known/acme-challenge/test${NC}"
+    echo ""
+    echo -e "3. Check nginx logs:"
+    echo -e "   ${YELLOW}docker-compose logs nginx${NC}"
+    echo ""
+    echo -e "4. Check certbot logs:"
+    echo -e "   ${YELLOW}docker-compose logs certbot${NC}"
+    echo ""
+    echo -e "5. Test with staging first:"
+    echo -e "   Edit this script and set ${YELLOW}STAGING=1${NC}"
     echo ""
     echo -e "You can retry by running this script again"
     exit 1
