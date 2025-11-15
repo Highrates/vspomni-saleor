@@ -4,14 +4,17 @@
 # Домен: dashboard.miraflores-shop.com
 # Email: fsdamp@gmail.com
 
-set -e  # Остановка при ошибке
-
 DOMAIN="dashboard.miraflores-shop.com"
 EMAIL="fsdamp@gmail.com"
-STAGING=0  # Установите 1 для тестирования (staging сертификат)
+STAGING=1  # 1 = staging (тестовый), 0 = production (настоящий сертификат)
 
 echo "============================================"
 echo "Установка SSL сертификата для $DOMAIN"
+if [ $STAGING = 1 ]; then
+    echo "РЕЖИМ: STAGING (тестовый сертификат)"
+else
+    echo "РЕЖИМ: PRODUCTION (настоящий сертификат)"
+fi
 echo "============================================"
 echo ""
 
@@ -30,7 +33,8 @@ echo ""
 # Шаг 2: Создание директорий для certbot
 echo "[2/5] Создание директорий для certbot..."
 mkdir -p certbot/conf
-mkdir -p certbot/www
+mkdir -p certbot/www/.well-known/acme-challenge
+chmod -R 755 certbot/www
 echo "✓ Директории созданы"
 echo ""
 
@@ -54,14 +58,39 @@ sleep 5
 echo "✓ Nginx перезапущен"
 echo ""
 
-# Шаг 4: Проверка доступности домена
-echo "[4/5] Проверка доступности домена..."
-if curl -s -o /dev/null -w "%{http_code}" http://$DOMAIN/.well-known/acme-challenge/test | grep -q "404"; then
-    echo "✓ Домен доступен, ACME challenge работает"
-elif curl -s -o /dev/null -w "%{http_code}" http://$DOMAIN/ | grep -q "200\|301\|302"; then
-    echo "✓ Домен доступен"
+# Шаг 4: Проверка доступности домена и ACME challenge
+echo "[4/5] Проверка доступности домена и ACME challenge..."
+
+# Создаем тестовый файл для проверки ACME challenge
+echo "test" > certbot/www/.well-known/acme-challenge/test-file
+chmod 644 certbot/www/.well-known/acme-challenge/test-file
+
+# Проверяем доступность тестового файла
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://$DOMAIN/.well-known/acme-challenge/test-file)
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "✓ Домен доступен, ACME challenge работает корректно!"
+    rm certbot/www/.well-known/acme-challenge/test-file
+elif [ "$HTTP_CODE" = "404" ]; then
+    echo "⚠️  Тестовый файл не найден (404). Проверяю общую доступность домена..."
+    if curl -s -o /dev/null -w "%{http_code}" http://$DOMAIN/ | grep -q "200\|301\|302"; then
+        echo "✓ Домен доступен, но ACME challenge может не работать"
+        echo "Попробуем продолжить..."
+    else
+        echo "❌ Домен недоступен"
+        exit 1
+    fi
+elif [ "$HTTP_CODE" = "403" ]; then
+    echo "❌ ОШИБКА: Получен 403 Forbidden для ACME challenge"
+    echo "Nginx не может прочитать файлы из /var/www/certbot"
+    echo ""
+    echo "Проверка логов nginx:"
+    docker-compose logs --tail=20 nginx
+    echo ""
+    echo "Проверка прав доступа:"
+    ls -la certbot/www/.well-known/acme-challenge/
+    exit 1
 else
-    echo "⚠️  ВНИМАНИЕ: Домен может быть недоступен"
+    echo "⚠️  ВНИМАНИЕ: Неожиданный ответ ($HTTP_CODE)"
     echo "Проверьте DNS: nslookup $DOMAIN"
     echo "Проверьте файрволл: порты 80 и 443 должны быть открыты"
     echo ""
@@ -105,32 +134,54 @@ docker-compose run --rm --entrypoint certbot certbot certonly \
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅✅✅ SSL сертификат успешно получен! ✅✅✅"
-    echo ""
-    echo "============================================"
-    echo "СЛЕДУЮЩИЕ ШАГИ - АКТИВАЦИЯ HTTPS:"
-    echo "============================================"
-    echo ""
-    echo "Выполните следующие команды:"
-    echo ""
-    echo "1. Остановите все контейнеры:"
-    echo "   docker-compose down"
-    echo ""
-    echo "2. Активируйте HTTPS конфигурацию:"
-    echo "   cp nginx/nginx-https.conf nginx/nginx.conf"
-    echo ""
-    echo "3. Запустите все сервисы:"
-    echo "   docker-compose up -d"
-    echo ""
-    echo "4. Проверьте работу HTTPS:"
-    echo "   curl -I https://$DOMAIN/dashboard/"
-    echo "   # Или откройте в браузере: https://$DOMAIN/dashboard/"
-    echo ""
-    echo "============================================"
-    echo ""
-    echo "Сертификат будет автоматически продлеваться"
-    echo "каждые 12 часов через контейнер certbot."
-    echo ""
+    if [ $STAGING = 1 ]; then
+        echo "✅✅✅ STAGING сертификат успешно получен! ✅✅✅"
+        echo ""
+        echo "============================================"
+        echo "ТЕСТОВЫЙ СЕРТИФИКАТ ПОЛУЧЕН!"
+        echo "============================================"
+        echo ""
+        echo "Всё работает корректно! Теперь получите НАСТОЯЩИЙ сертификат:"
+        echo ""
+        echo "1. Удалите тестовый сертификат:"
+        echo "   rm -rf certbot/"
+        echo ""
+        echo "2. Откройте скрипт и измените STAGING:"
+        echo "   nano setup-ssl.sh"
+        echo "   # Измените STAGING=1 на STAGING=0"
+        echo ""
+        echo "3. Запустите скрипт снова:"
+        echo "   ./setup-ssl.sh"
+        echo ""
+        echo "============================================"
+    else
+        echo "✅✅✅ SSL сертификат успешно получен! ✅✅✅"
+        echo ""
+        echo "============================================"
+        echo "СЛЕДУЮЩИЕ ШАГИ - АКТИВАЦИЯ HTTPS:"
+        echo "============================================"
+        echo ""
+        echo "Выполните следующие команды:"
+        echo ""
+        echo "1. Остановите все контейнеры:"
+        echo "   docker-compose down"
+        echo ""
+        echo "2. Активируйте HTTPS конфигурацию:"
+        echo "   cp nginx/nginx-https.conf nginx/nginx.conf"
+        echo ""
+        echo "3. Запустите все сервисы:"
+        echo "   docker-compose up -d"
+        echo ""
+        echo "4. Проверьте работу HTTPS:"
+        echo "   curl -I https://$DOMAIN/dashboard/"
+        echo "   # Или откройте в браузере: https://$DOMAIN/dashboard/"
+        echo ""
+        echo "============================================"
+        echo ""
+        echo "Сертификат будет автоматически продлеваться"
+        echo "каждые 12 часов через контейнер certbot."
+        echo ""
+    fi
 else
     echo ""
     echo "❌ ОШИБКА: Не удалось получить сертификат!"
