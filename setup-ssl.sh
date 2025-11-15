@@ -51,11 +51,23 @@ fi
 cp nginx/nginx-http.conf nginx/nginx.conf
 echo "✓ Активирована HTTP конфигурация с ACME challenge"
 
-# Перезапускаем nginx с новой конфигурацией
-echo "Перезапуск nginx..."
-docker-compose restart nginx
-sleep 5
+# Проверяем что в конфиге нет блокирующего правила
+if grep -q "location ~ /\\\\\\." nginx/nginx.conf; then
+    echo "❌ ОШИБКА: В конфигурации найдено блокирующее правило 'location ~ /\.'"
+    echo "Проверьте что nginx-http.conf обновлен через git pull"
+    exit 1
+fi
+
+# Перезапускаем nginx с новой конфигурацией (полный перезапуск контейнера)
+echo "Полный перезапуск nginx контейнера..."
+docker-compose stop nginx
+docker-compose up -d nginx
+sleep 10
 echo "✓ Nginx перезапущен"
+
+# Проверяем что nginx видит новую конфигурацию
+echo "Проверка загруженной конфигурации nginx..."
+docker-compose exec nginx nginx -T 2>&1 | grep -A 5 "\.well-known" || echo "⚠️ .well-known не найден в конфиге"
 echo ""
 
 # Шаг 4: Проверка доступности домена и ACME challenge
