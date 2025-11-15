@@ -117,8 +117,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_files:/app/static:ro
       - media_files:/app/media:ro
-      - certbot_certs:/etc/letsencrypt:ro
-      - certbot_www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     depends_on:
       - api
       - dashboard
@@ -129,14 +129,12 @@ services:
     container_name: saleor_certbot
     restart: unless-stopped
     volumes:
-      - certbot_certs:/etc/letsencrypt
-      - certbot_www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   postgres_data:
   static_files:
   media_files:
-  certbot_certs:
-  certbot_www:
 
