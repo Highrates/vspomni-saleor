@@ -29,7 +29,7 @@ echo ""
 
 # Шаг 2: Создание директорий для certbot
 echo "[2/5] Создание директорий для certbot..."
-mkdir -p certbot/conf/live/$DOMAIN
+mkdir -p certbot/conf
 mkdir -p certbot/www
 echo "✓ Директории созданы"
 echo ""
@@ -86,7 +86,11 @@ fi
 
 # Удаляем старые сертификаты если они есть (для чистой установки)
 if [ -d "certbot/conf/live/$DOMAIN" ]; then
-    docker-compose run --rm certbot delete --cert-name $DOMAIN --non-interactive 2>/dev/null || true
+    echo "Найден существующий сертификат. Удаляю..."
+    rm -rf certbot/conf/live/$DOMAIN
+    rm -rf certbot/conf/archive/$DOMAIN
+    rm -rf certbot/conf/renewal/$DOMAIN.conf
+    echo "✓ Старые сертификаты удалены"
 fi
 
 # Получаем сертификат
@@ -96,7 +100,6 @@ docker-compose run --rm certbot certonly \
     --email $EMAIL \
     --agree-tos \
     --no-eff-email \
-    --force-renewal \
     $STAGING_ARG \
     -d $DOMAIN
 
