@@ -7,7 +7,7 @@
 ```
 Интернет (HTTPS:443)
     ↓
-Nginx (системный, с SSL сертификатами)
+Nginx (системный, с SSL сертификатами от reg.ru)
     ↓
     ├─→ localhost:8000 (saleor_api контейнер)
     ├─→ localhost:3000 (saleor_dashboard контейнер)
@@ -15,7 +15,44 @@ Nginx (системный, с SSL сертификатами)
     └─→ /var/lib/docker/volumes/.../media/
 ```
 
-## Шаг 1: Установка Nginx
+## Файлы конфигурации
+
+В проекте есть 2 конфигурации nginx:
+
+- **`nginx-system-http.conf`** - HTTP конфигурация БЕЗ SSL (для первоначального запуска)
+- **`nginx-system-https.conf`** - HTTPS конфигурация С SSL (для production после установки сертификатов)
+
+---
+
+## Шаг 1: Подготовка на локальной машине
+
+```bash
+cd /Users/aliman/PycharmProjects/Saleor-miraflores
+
+# Убедитесь что изменения отправлены
+git status
+git push
+```
+
+## Шаг 2: Обновление кода на сервере
+
+```bash
+# Подключитесь к серверу
+ssh root@91.229.8.83
+cd ~/Saleor-miraflores
+
+# Остановите старые контейнеры (если запущены)
+docker-compose down
+
+# Получите обновления
+git pull
+
+# Проверьте что nginx убран из docker-compose.yml
+grep -c nginx docker-compose.yml
+# Должен вернуть: 0
+```
+
+## Шаг 3: Установка Nginx
 
 ```bash
 # Обновите пакеты
@@ -29,28 +66,132 @@ nginx -v
 
 # Включите автозапуск
 sudo systemctl enable nginx
+
+# Проверьте статус
+sudo systemctl status nginx
 ```
 
-## Шаг 2: Подготовка SSL сертификатов
-
-### Вариант A: Сертификаты от reg.ru (рекомендуется)
+## Шаг 4: Настройка HTTP конфигурации (БЕЗ SSL)
 
 ```bash
-# Создайте директорию для сертификатов
-sudo mkdir -p /etc/nginx/ssl/dashboard.miraflores-shop.com
+# Скопируйте HTTP конфигурацию
+sudo cp ~/Saleor-miraflores/nginx-system-http.conf /etc/nginx/sites-available/saleor
 
-# Скопируйте ваши сертификаты от reg.ru на сервер
-# На локальной машине:
+# Отключите дефолтный сайт
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Включите конфигурацию Saleor
+sudo ln -s /etc/nginx/sites-available/saleor /etc/nginx/sites-enabled/
+
+# Проверьте конфигурацию
+sudo nginx -t
+
+# Если ошибка про пути к static/media - НЕ страшно, исправим после запуска Docker
+
+# Перезапустите nginx
+sudo systemctl restart nginx
+```
+
+## Шаг 5: Запуск Docker контейнеров
+
+```bash
+cd ~/Saleor-miraflores
+
+# Запустите контейнеры
+docker-compose up -d
+
+# Подождите 30-60 секунд для запуска
+
+# Проверьте статус
+docker-compose ps
+
+# Проверьте что API отвечает
+curl http://localhost:8000/health/
+# Должен вернуть: {"status":"ok"} или подобное
+
+# Проверьте что Dashboard отвечает
+curl http://localhost:3000/dashboard/
+# Должен вернуть HTML
+```
+
+## Шаг 6: Настройка путей к static и media
+
+```bash
+# Найдите пути к docker volumes
+docker volume inspect saleor-miraflores_static_files | grep Mountpoint
+docker volume inspect saleor-miraflores_media_files | grep Mountpoint
+
+# Скопируйте выведенные пути (например: /var/lib/docker/volumes/saleor-miraflores_static_files/_data)
+
+# Отредактируйте конфигурацию nginx
+sudo nano /etc/nginx/sites-available/saleor
+
+# Найдите строки:
+#   location /static/ {
+#       alias /var/lib/docker/volumes/saleor-miraflores_static_files/_data/;
+#
+#   location /media/ {
+#       alias /var/lib/docker/volumes/saleor-miraflores_media_files/_data/;
+
+# Замените пути на реальные из команды выше (если отличаются)
+
+# Сохраните (Ctrl+O, Enter, Ctrl+X)
+
+# Проверьте конфигурацию
+sudo nginx -t
+
+# Перезапустите nginx
+sudo nginx -s reload
+```
+
+## Шаг 7: Проверка работы по HTTP
+
+```bash
+# Проверьте главную страницу
+curl -I http://dashboard.miraflores-shop.com/
+
+# Проверьте dashboard
+curl -I http://dashboard.miraflores-shop.com/dashboard/
+
+# Проверьте API
+curl -I http://dashboard.miraflores-shop.com/graphql/
+
+# Откройте в браузере
+# http://dashboard.miraflores-shop.com/dashboard/
+```
+
+Если всё работает - переходите к установке SSL!
+
+---
+
+## Шаг 8: Установка SSL сертификатов от reg.ru
+
+### На локальной машине - скопируйте сертификаты
+
+```bash
+# Скачайте с reg.ru 3 файла:
+# - certificate.crt (Сертификат)
+# - ca_bundle.crt (Корневой сертификат)
+# - private.key (Private Key)
+
+# Скопируйте на сервер
 scp certificate.crt root@91.229.8.83:/tmp/cert.pem
 scp ca_bundle.crt root@91.229.8.83:/tmp/chain.pem
 scp private.key root@91.229.8.83:/tmp/privkey.pem
+```
 
-# На сервере:
+### На сервере - установите сертификаты
+
+```bash
+# Создайте директорию
+sudo mkdir -p /etc/nginx/ssl/dashboard.miraflores-shop.com
+
+# Переместите файлы
 sudo mv /tmp/cert.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
 sudo mv /tmp/chain.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
 sudo mv /tmp/privkey.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
 
-# Создайте fullchain.pem (cert + chain)
+# Создайте fullchain.pem (сертификат + цепочка)
 sudo cat /etc/nginx/ssl/dashboard.miraflores-shop.com/cert.pem \
          /etc/nginx/ssl/dashboard.miraflores-shop.com/chain.pem \
          > /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem
@@ -58,87 +199,51 @@ sudo cat /etc/nginx/ssl/dashboard.miraflores-shop.com/cert.pem \
 # Установите права доступа
 sudo chmod 644 /etc/nginx/ssl/dashboard.miraflores-shop.com/*.pem
 sudo chmod 600 /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem
+
+# Проверьте сертификат
+sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -subject -dates
 ```
 
-### Вариант B: Let's Encrypt (если хотите попробовать снова)
+## Шаг 9: Переключение на HTTPS конфигурацию
 
 ```bash
-# Установите certbot
-sudo apt install certbot python3-certbot-nginx -y
-
-# Получите сертификат (ПОСЛЕ настройки nginx HTTP)
-sudo certbot --nginx -d dashboard.miraflores-shop.com --email fsdamp@gmail.com
-```
-
-## Шаг 3: Настройка конфигурации Nginx
-
-```bash
-# Скопируйте конфигурацию из репозитория
 cd ~/Saleor-miraflores
-sudo cp nginx-system.conf /etc/nginx/sites-available/saleor
 
-# Найдите пути к docker volumes
-docker volume inspect saleor-miraflores_static_files | grep Mountpoint
-docker volume inspect saleor-miraflores_media_files | grep Mountpoint
+# Сделайте бэкап текущей HTTP конфигурации
+sudo cp /etc/nginx/sites-available/saleor /etc/nginx/sites-available/saleor-http-backup
 
-# Отредактируйте конфигурацию и укажите ПРАВИЛЬНЫЕ пути к volumes
+# Замените на HTTPS конфигурацию
+sudo cp nginx-system-https.conf /etc/nginx/sites-available/saleor
+
+# Обновите пути к static/media (если нужно)
 sudo nano /etc/nginx/sites-available/saleor
 
-# Найдите строки:
-#   alias /var/lib/docker/volumes/saleor-miraflores_static_files/_data/;
-#   alias /var/lib/docker/volumes/saleor-miraflores_media_files/_data/;
-# И замените на реальные пути из предыдущей команды
-
-# Отключите дефолтный сайт nginx
-sudo rm /etc/nginx/sites-enabled/default
-
-# Включите конфигурацию Saleor
-sudo ln -s /etc/nginx/sites-available/saleor /etc/nginx/sites-enabled/
-
-# Проверьте конфигурацию на ошибки
+# Проверьте конфигурацию
 sudo nginx -t
 
 # Если всё ОК - перезапустите nginx
 sudo systemctl restart nginx
 ```
 
-## Шаг 4: Запуск Docker контейнеров
-
-```bash
-cd ~/Saleor-miraflores
-
-# Остановите старые контейнеры (если были nginx в docker)
-docker-compose down
-
-# Запустите контейнеры с новой конфигурацией
-docker-compose up -d
-
-# Проверьте что контейнеры запущены
-docker-compose ps
-
-# Проверьте что API доступен на localhost:8000
-curl http://localhost:8000/health/
-
-# Проверьте что Dashboard доступен на localhost:3000
-curl http://localhost:3000/dashboard/
-```
-
-## Шаг 5: Проверка работы
+## Шаг 10: Проверка HTTPS
 
 ```bash
 # Проверьте HTTP редирект
 curl -I http://dashboard.miraflores-shop.com/
-# Должен быть: 301 Moved Permanently
+# Должен быть: 301 Moved Permanently → https://
 
 # Проверьте HTTPS
 curl -I https://dashboard.miraflores-shop.com/dashboard/
-# Должен быть: 200 OK или 301
+# Должен быть: 200 OK
+
+# Проверьте SSL сертификат
+openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 
 # Откройте в браузере
 # https://dashboard.miraflores-shop.com/dashboard/
 ```
 
-## Шаг 6: Настройка файрволла
+## Шаг 11: Настройка файрволла
 
 ```bash
 # Проверьте статус
@@ -148,53 +253,115 @@ sudo ufw status
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 
-# Запретите прямой доступ к портам контейнеров извне (только localhost)
-# Это уже настроено в docker-compose.yml через 127.0.0.1:8000:8000
+# Проверьте что применилось
+sudo ufw status
 ```
+
+---
 
 ## Полезные команды
 
+### Управление Nginx
+
 ```bash
-# Проверка конфигурации nginx
+# Проверка конфигурации
 sudo nginx -t
 
-# Перезагрузка nginx (без остановки)
+# Перезагрузка (без остановки)
 sudo nginx -s reload
 
-# Перезапуск nginx
+# Перезапуск
 sudo systemctl restart nginx
 
-# Статус nginx
+# Статус
 sudo systemctl status nginx
 
-# Логи nginx
+# Остановка
+sudo systemctl stop nginx
+
+# Запуск
+sudo systemctl start nginx
+```
+
+### Логи
+
+```bash
+# Access логи (запросы)
 sudo tail -f /var/log/nginx/saleor_access.log
+
+# Error логи (ошибки)
 sudo tail -f /var/log/nginx/saleor_error.log
 
 # Логи Docker контейнеров
 docker-compose logs -f api
 docker-compose logs -f dashboard
-
-# Проверка портов
-sudo netstat -tlnp | grep -E '80|443|3000|8000'
 ```
+
+### Проверка портов
+
+```bash
+# Проверить какие порты слушаются
+sudo netstat -tlnp | grep -E ':80|:443|:3000|:8000'
+
+# Или через ss
+sudo ss -tlnp | grep -E ':80|:443|:3000|:8000'
+```
+
+### Docker
+
+```bash
+# Статус контейнеров
+docker-compose ps
+
+# Перезапуск контейнера
+docker-compose restart api
+
+# Логи
+docker-compose logs --tail=100 api
+
+# Остановка всех
+docker-compose down
+
+# Запуск всех
+docker-compose up -d
+```
+
+---
 
 ## Обновление SSL сертификатов
 
-Когда сертификаты от reg.ru истекут (обычно через год):
+Сертификаты от reg.ru действуют обычно 1 год. Когда они истекут:
 
 ```bash
-# Скачайте новые сертификаты от reg.ru
-# Скопируйте их на сервер в /etc/nginx/ssl/dashboard.miraflores-shop.com/
+# 1. Скачайте новые сертификаты с reg.ru
 
-# Пересоздайте fullchain.pem
+# 2. Скопируйте на сервер (с локальной машины)
+scp certificate.crt root@91.229.8.83:/tmp/cert.pem
+scp ca_bundle.crt root@91.229.8.83:/tmp/chain.pem
+scp private.key root@91.229.8.83:/tmp/privkey.pem
+
+# 3. На сервере замените файлы
+sudo mv /tmp/cert.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
+sudo mv /tmp/chain.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
+sudo mv /tmp/privkey.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
+
+# 4. Пересоздайте fullchain.pem
 sudo cat /etc/nginx/ssl/dashboard.miraflores-shop.com/cert.pem \
          /etc/nginx/ssl/dashboard.miraflores-shop.com/chain.pem \
          > /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem
 
-# Перезагрузите nginx
+# 5. Установите права
+sudo chmod 644 /etc/nginx/ssl/dashboard.miraflores-shop.com/*.pem
+sudo chmod 600 /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem
+
+# 6. Перезагрузите nginx
 sudo nginx -s reload
+
+# 7. Проверьте новый сертификат
+openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
+
+---
 
 ## Решение проблем
 
@@ -204,77 +371,161 @@ sudo nginx -s reload
 # Проверьте конфигурацию
 sudo nginx -t
 
-# Посмотрите логи ошибок
+# Посмотрите подробные ошибки
+sudo journalctl -u nginx -n 50
+
+# Посмотрите error лог
 sudo tail -50 /var/log/nginx/error.log
 
-# Проверьте что порты 80 и 443 свободны
+# Проверьте что порты свободны
 sudo netstat -tlnp | grep -E ':80|:443'
 ```
 
 ### 502 Bad Gateway
 
+Означает что nginx не может подключиться к backend (Docker контейнерам).
+
 ```bash
-# Проверьте что Docker контейнеры запущены
+# Проверьте что контейнеры запущены
 docker-compose ps
 
-# Проверьте что API отвечает
+# Проверьте что API отвечает на localhost:8000
 curl http://localhost:8000/health/
 
-# Проверьте что Dashboard отвечает
+# Проверьте что Dashboard отвечает на localhost:3000
 curl http://localhost:3000/dashboard/
 
-# Проверьте логи
+# Посмотрите логи контейнеров
 docker-compose logs api
 docker-compose logs dashboard
+
+# Проверьте nginx error лог
+sudo tail -50 /var/log/nginx/error.log
 ```
 
-### Static/Media файлы не загружаются (404)
+### 404 Not Found для static/media файлов
 
 ```bash
-# Проверьте пути к docker volumes
+# Проверьте пути к volumes
 docker volume inspect saleor-miraflores_static_files
 docker volume inspect saleor-miraflores_media_files
 
-# Обновите пути в /etc/nginx/sites-available/saleor
+# Обновите пути в конфигурации nginx
 sudo nano /etc/nginx/sites-available/saleor
+
+# Проверьте права доступа
+sudo ls -la /var/lib/docker/volumes/saleor-miraflores_static_files/_data/
 
 # Перезагрузите nginx
 sudo nginx -s reload
 ```
 
+### SSL сертификат не работает
+
+```bash
+# Проверьте что файлы существуют
+sudo ls -la /etc/nginx/ssl/dashboard.miraflores-shop.com/
+
+# Проверьте сертификат
+sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -text
+
+# Проверьте приватный ключ
+sudo openssl rsa -in /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem -check
+
+# Проверьте совпадение сертификата и ключа
+sudo openssl x509 -noout -modulus -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem | openssl md5
+sudo openssl rsa -noout -modulus -in /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem | openssl md5
+# MD5 суммы должны совпадать
+```
+
+---
+
 ## Мониторинг
 
-Рекомендуем настроить:
+### Проверка срока действия сертификата
 
-1. **Логротация nginx**
 ```bash
-# Уже настроена автоматически в /etc/logrotate.d/nginx
+# Просмотр даты истечения
+sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -enddate
+
+# Проверка через интернет
+openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
 
-2. **Мониторинг SSL сертификатов**
+### Ротация логов
+
+Nginx автоматически ротирует логи через logrotate:
+
 ```bash
-# Проверка срока действия
-sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -dates
+# Конфигурация ротации (уже настроено)
+cat /etc/logrotate.d/nginx
+
+# Принудительная ротация (если нужно)
+sudo logrotate -f /etc/logrotate.d/nginx
 ```
 
-3. **Автоматический перезапуск nginx при сбое**
-```bash
-# Уже настроено через systemd
-sudo systemctl status nginx
-```
+---
 
 ## Безопасность
 
-✅ Порты Docker контейнеров доступны только на localhost
-✅ HTTPS с современными TLS 1.2/1.3
-✅ Security headers настроены
-✅ HSTS включен
-✅ Rate limiting для API
-✅ Запрет доступа к скрытым файлам
+✅ Порты Docker контейнеров (8000, 3000) доступны **только на localhost**
+✅ HTTPS с TLS 1.2 и TLS 1.3
+✅ Современные шифры
+✅ Security headers (X-Frame-Options, X-Content-Type-Options, X-XSS-Protection)
+✅ HSTS включен (принудительный HTTPS)
+✅ HTTP → HTTPS редирект
+✅ Rate limiting для GraphQL API
+✅ Запрет доступа к скрытым файлам (.git, .env, .htaccess)
 
-## Что дальше?
+---
 
-1. Настройте регулярные бэкапы базы данных
-2. Настройте мониторинг (Prometheus, Grafana)
-3. Настройте алерты при падении сервисов
-4. Обновите сертификаты перед истечением срока
+## Структура файлов
+
+```
+/etc/nginx/
+├── sites-available/
+│   ├── saleor                  # Активная конфигурация (HTTP или HTTPS)
+│   └── saleor-http-backup      # Бэкап HTTP конфигурации
+├── sites-enabled/
+│   └── saleor -> ../sites-available/saleor
+└── ssl/
+    └── dashboard.miraflores-shop.com/
+        ├── cert.pem            # Сертификат домена
+        ├── chain.pem           # Корневой сертификат
+        ├── fullchain.pem       # cert + chain
+        └── privkey.pem         # Приватный ключ
+
+/var/log/nginx/
+├── saleor_access.log           # Логи запросов
+└── saleor_error.log            # Логи ошибок
+```
+
+---
+
+## Поддержка
+
+Если возникли проблемы, соберите информацию:
+
+```bash
+echo "=== Nginx Status ==="
+sudo systemctl status nginx
+
+echo "=== Nginx Config Test ==="
+sudo nginx -t
+
+echo "=== Docker Status ==="
+docker-compose ps
+
+echo "=== API Health ==="
+curl http://localhost:8000/health/
+
+echo "=== Dashboard Health ==="
+curl -I http://localhost:3000/dashboard/
+
+echo "=== Nginx Error Logs ==="
+sudo tail -50 /var/log/nginx/saleor_error.log
+
+echo "=== Docker Logs ==="
+docker-compose logs --tail=50 api
+docker-compose logs --tail=50 dashboard
+```
