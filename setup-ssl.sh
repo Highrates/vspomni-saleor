@@ -93,8 +93,8 @@ if [ -d "certbot/conf/live/$DOMAIN" ]; then
     echo "✓ Старые сертификаты удалены"
 fi
 
-# Получаем сертификат
-docker-compose run --rm certbot certonly \
+# Получаем сертификат (переопределяем entrypoint чтобы использовать certbot напрямую)
+docker-compose run --rm --entrypoint certbot certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $EMAIL \
