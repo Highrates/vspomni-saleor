@@ -94,7 +94,7 @@ services:
       context: ./saleor-dashboard
       dockerfile: Dockerfile
       args:
-        API_URL: ${API_URL:-https://dashboard.miraflores-shop.com/graphql/}
+        API_URL: ${API_URL:-https://miraflores-shop.com/graphql/}
         APP_MOUNT_URI: /dashboard/
         STATIC_URL: /dashboard/
     container_name: saleor_dashboard
@@ -102,7 +102,7 @@ services:
     ports:
       - "127.0.0.1:3000:80"  # Dashboard доступен только для nginx на localhost
     environment:
-      API_URL: ${API_URL:-https://dashboard.miraflores-shop.com/graphql/}
+      API_URL: ${API_URL:-https://miraflores-shop.com/graphql/}
       APP_MOUNT_URI: /dashboard/
       STATIC_URL: /dashboard/
     depends_on:

@@ -148,16 +148,16 @@ sudo nginx -s reload
 
 ```bash
 # Проверьте главную страницу
-curl -I http://dashboard.miraflores-shop.com/
+curl -I http://miraflores-shop.com/
 
 # Проверьте dashboard
-curl -I http://dashboard.miraflores-shop.com/dashboard/
+curl -I http://miraflores-shop.com/dashboard/
 
 # Проверьте API
-curl -I http://dashboard.miraflores-shop.com/graphql/
+curl -I http://miraflores-shop.com/graphql/
 
 # Откройте в браузере
-# http://dashboard.miraflores-shop.com/dashboard/
+# http://miraflores-shop.com/dashboard/
 ```
 
 Если всё работает - переходите к установке SSL!
@@ -184,24 +184,24 @@ scp private.key root@91.229.8.83:/tmp/privkey.pem
 
 ```bash
 # Создайте директорию
-sudo mkdir -p /etc/nginx/ssl/dashboard.miraflores-shop.com
+sudo mkdir -p /etc/nginx/ssl/miraflores-shop.com
 
 # Переместите файлы
-sudo mv /tmp/cert.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
-sudo mv /tmp/chain.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
-sudo mv /tmp/privkey.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
+sudo mv /tmp/cert.pem /etc/nginx/ssl/miraflores-shop.com/
+sudo mv /tmp/chain.pem /etc/nginx/ssl/miraflores-shop.com/
+sudo mv /tmp/privkey.pem /etc/nginx/ssl/miraflores-shop.com/
 
 # Создайте fullchain.pem (сертификат + цепочка)
-sudo cat /etc/nginx/ssl/dashboard.miraflores-shop.com/cert.pem \
-         /etc/nginx/ssl/dashboard.miraflores-shop.com/chain.pem \
-         > /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem
+sudo cat /etc/nginx/ssl/miraflores-shop.com/cert.pem \
+         /etc/nginx/ssl/miraflores-shop.com/chain.pem \
+         > /etc/nginx/ssl/miraflores-shop.com/fullchain.pem
 
 # Установите права доступа
-sudo chmod 644 /etc/nginx/ssl/dashboard.miraflores-shop.com/*.pem
-sudo chmod 600 /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem
+sudo chmod 644 /etc/nginx/ssl/miraflores-shop.com/*.pem
+sudo chmod 600 /etc/nginx/ssl/miraflores-shop.com/privkey.pem
 
 # Проверьте сертификат
-sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -subject -dates
+sudo openssl x509 -in /etc/nginx/ssl/miraflores-shop.com/fullchain.pem -noout -subject -dates
 ```
 
 ## Шаг 9: Переключение на HTTPS конфигурацию
@@ -229,18 +229,18 @@ sudo systemctl restart nginx
 
 ```bash
 # Проверьте HTTP редирект
-curl -I http://dashboard.miraflores-shop.com/
+curl -I http://miraflores-shop.com/
 # Должен быть: 301 Moved Permanently → https://
 
 # Проверьте HTTPS
-curl -I https://dashboard.miraflores-shop.com/dashboard/
+curl -I https://miraflores-shop.com/dashboard/
 # Должен быть: 200 OK
 
 # Проверьте SSL сертификат
-openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect miraflores-shop.com:443 -servername miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 
 # Откройте в браузере
-# https://dashboard.miraflores-shop.com/dashboard/
+# https://miraflores-shop.com/dashboard/
 ```
 
 ## Шаг 11: Настройка файрволла
@@ -341,24 +341,24 @@ scp ca_bundle.crt root@91.229.8.83:/tmp/chain.pem
 scp private.key root@91.229.8.83:/tmp/privkey.pem
 
 # 3. На сервере замените файлы
-sudo mv /tmp/cert.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
-sudo mv /tmp/chain.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
-sudo mv /tmp/privkey.pem /etc/nginx/ssl/dashboard.miraflores-shop.com/
+sudo mv /tmp/cert.pem /etc/nginx/ssl/miraflores-shop.com/
+sudo mv /tmp/chain.pem /etc/nginx/ssl/miraflores-shop.com/
+sudo mv /tmp/privkey.pem /etc/nginx/ssl/miraflores-shop.com/
 
 # 4. Пересоздайте fullchain.pem
-sudo cat /etc/nginx/ssl/dashboard.miraflores-shop.com/cert.pem \
-         /etc/nginx/ssl/dashboard.miraflores-shop.com/chain.pem \
-         > /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem
+sudo cat /etc/nginx/ssl/miraflores-shop.com/cert.pem \
+         /etc/nginx/ssl/miraflores-shop.com/chain.pem \
+         > /etc/nginx/ssl/miraflores-shop.com/fullchain.pem
 
 # 5. Установите права
-sudo chmod 644 /etc/nginx/ssl/dashboard.miraflores-shop.com/*.pem
-sudo chmod 600 /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem
+sudo chmod 644 /etc/nginx/ssl/miraflores-shop.com/*.pem
+sudo chmod 600 /etc/nginx/ssl/miraflores-shop.com/privkey.pem
 
 # 6. Перезагрузите nginx
 sudo nginx -s reload
 
 # 7. Проверьте новый сертификат
-openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect miraflores-shop.com:443 -servername miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
 
 ---
@@ -424,17 +424,17 @@ sudo nginx -s reload
 
 ```bash
 # Проверьте что файлы существуют
-sudo ls -la /etc/nginx/ssl/dashboard.miraflores-shop.com/
+sudo ls -la /etc/nginx/ssl/miraflores-shop.com/
 
 # Проверьте сертификат
-sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -text
+sudo openssl x509 -in /etc/nginx/ssl/miraflores-shop.com/fullchain.pem -noout -text
 
 # Проверьте приватный ключ
-sudo openssl rsa -in /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem -check
+sudo openssl rsa -in /etc/nginx/ssl/miraflores-shop.com/privkey.pem -check
 
 # Проверьте совпадение сертификата и ключа
-sudo openssl x509 -noout -modulus -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem | openssl md5
-sudo openssl rsa -noout -modulus -in /etc/nginx/ssl/dashboard.miraflores-shop.com/privkey.pem | openssl md5
+sudo openssl x509 -noout -modulus -in /etc/nginx/ssl/miraflores-shop.com/fullchain.pem | openssl md5
+sudo openssl rsa -noout -modulus -in /etc/nginx/ssl/miraflores-shop.com/privkey.pem | openssl md5
 # MD5 суммы должны совпадать
 ```
 
@@ -446,10 +446,10 @@ sudo openssl rsa -noout -modulus -in /etc/nginx/ssl/dashboard.miraflores-shop.co
 
 ```bash
 # Просмотр даты истечения
-sudo openssl x509 -in /etc/nginx/ssl/dashboard.miraflores-shop.com/fullchain.pem -noout -enddate
+sudo openssl x509 -in /etc/nginx/ssl/miraflores-shop.com/fullchain.pem -noout -enddate
 
 # Проверка через интернет
-openssl s_client -connect dashboard.miraflores-shop.com:443 -servername dashboard.miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
+openssl s_client -connect miraflores-shop.com:443 -servername miraflores-shop.com < /dev/null 2>/dev/null | openssl x509 -noout -dates
 ```
 
 ### Ротация логов
@@ -489,7 +489,7 @@ sudo logrotate -f /etc/logrotate.d/nginx
 ├── sites-enabled/
 │   └── saleor -> ../sites-available/saleor
 └── ssl/
-    └── dashboard.miraflores-shop.com/
+    └── miraflores-shop.com/
         ├── cert.pem            # Сертификат домена
         ├── chain.pem           # Корневой сертификат
         ├── fullchain.pem       # cert + chain
