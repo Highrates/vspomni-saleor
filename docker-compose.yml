@@ -99,6 +99,10 @@ services:
         STATIC_URL: /dashboard/
     container_name: saleor_dashboard
     restart: unless-stopped
+    environment:
+      API_URL: ${API_URL:-http://91.229.8.83/graphql/}
+      APP_MOUNT_URI: /dashboard/
+      STATIC_URL: /dashboard/
     depends_on:
       - api
 
