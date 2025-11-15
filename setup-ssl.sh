@@ -129,6 +129,7 @@ docker-compose run --rm --entrypoint certbot certbot certonly \
     --email $EMAIL \
     --agree-tos \
     --no-eff-email \
+    --preferred-challenges http \
     $STAGING_ARG \
     -d $DOMAIN
 
