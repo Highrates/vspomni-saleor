@@ -26,6 +26,8 @@ begin
          select constraint_name
          from information_schema.table_constraints
          where table_name=tab
+           and constraint_type <> 'PRIMARY KEY'
+           and position('_id_not_null' in constraint_name) = 0
       ) loop
          execute concat(
             'ALTER TABLE '||tab||' DROP CONSTRAINT IF EXISTS "'||r.constraint_name||'"'
