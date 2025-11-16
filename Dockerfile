@@ -16,6 +16,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ### FINAL STAGE ###
 FROM python:3.12-slim
 
+WORKDIR /app
+
 RUN groupadd -r saleor && useradd -r -g saleor saleor
 
 # Pillow dependencies and tools for docker-entrypoint.sh
@@ -32,6 +34,7 @@ RUN apt-get update \
   libmagic1 \
   libcurl4 \
   media-types \
+  libjpeg62-turbo \
   # PostgreSQL client for pg_isready command in entrypoint
   postgresql-client \
   # Redis client for redis-cli command in entrypoint
@@ -41,8 +44,6 @@ RUN apt-get update \
 
 RUN mkdir -p /app/media /app/static \
   && chown -R saleor:saleor /app/
-
-WORKDIR /app
 
 # Copy environment (site-packages) from build stage
 COPY --from=build /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
