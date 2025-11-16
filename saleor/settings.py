@@ -1,6 +1,7 @@
 # ============================
 # RENDER-SAFE DATABASE CONFIG
 # ============================
+
 import os
 import dj_database_url
 
@@ -15,12 +16,16 @@ if not RAW_DB_URL_REPLICA:
 
 DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 0))
 
+# ❗ Эти строки нужно оставить в любом случае
+DATABASE_CONNECTION_DEFAULT_NAME = "default"
+DATABASE_CONNECTION_REPLICA_NAME = "replica"
+
 DATABASES = {
-    "default": dj_database_url.parse(
+    DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.parse(
         RAW_DB_URL,
         conn_max_age=DB_CONN_MAX_AGE,
     ),
-    "replica": dj_database_url.parse(
+    DATABASE_CONNECTION_REPLICA_NAME: dj_database_url.parse(
         RAW_DB_URL_REPLICA,
         conn_max_age=DB_CONN_MAX_AGE,
     ),
