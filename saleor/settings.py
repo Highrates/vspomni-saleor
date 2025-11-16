@@ -119,34 +119,27 @@ INTERNAL_IPS = get_list(os.environ.get("INTERNAL_IPS", "127.0.0.1"))
 # For Django 4, the default value was changed to 0 as persistent DB connections
 # are not supported.
 DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 0))
+# =============================
+# RENDER-SAFE DATABASE CONFIG
+# =============================
 
-# TODO: For local envs will be activated in separate PR.
-# We need to update docs an saleor platform.
-# This variable should be set to `replica`
+# Saleor uses 2 DB connections: default & replica.
+# On Render we always use the same one.
+
 DATABASE_CONNECTION_DEFAULT_NAME = "default"
 DATABASE_CONNECTION_REPLICA_NAME = "replica"
 
-if "DATABASE_URL_REPLICA" in os.environ:
-    DATABASE_URL_REPLICA_ENV_NAME = "DATABASE_URL_REPLICA"
-else:
-    DATABASE_URL_REPLICA_ENV_NAME = dj_database_url.DEFAULT_ENV
-
 DATABASES = {
-    DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.config(
-        env=dj_database_url.DEFAULT_ENV,
-        default=os.environ.get("DATABASE_URL"),  # safe
-        conn_max_age=DB_CONN_MAX_AGE,
+    "default": dj_database_url.parse(
+        os.environ["DATABASE_URL"], conn_max_age=DB_CONN_MAX_AGE
     ),
-    DATABASE_CONNECTION_REPLICA_NAME: dj_database_url.config(
-        env=DATABASE_URL_REPLICA_ENV_NAME,
-        default=os.environ.get("DATABASE_URL"),  # safe
-        conn_max_age=DB_CONN_MAX_AGE,
-        test_options={"MIRROR": DATABASE_CONNECTION_DEFAULT_NAME},
+    "replica": dj_database_url.parse(
+        os.environ["DATABASE_URL_REPLICA"], conn_max_age=DB_CONN_MAX_AGE
     ),
 }
 
-
 DATABASE_ROUTERS = ["saleor.core.db_routers.PrimaryReplicaRouter"]
+
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
