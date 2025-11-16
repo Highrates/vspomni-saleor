@@ -1,30 +1,28 @@
 # ============================
 # RENDER-SAFE DATABASE CONFIG
 # ============================
-
 import os
 import dj_database_url
 
-# Берём URL из окружения корректно
 RAW_DB_URL = os.environ.get("DATABASE_URL", "").strip()
 RAW_DB_URL_REPLICA = os.environ.get("DATABASE_URL_REPLICA", "").strip()
 
-# Если в Render пришла пустая строка — нормализуем
 if not RAW_DB_URL:
     RAW_DB_URL = "postgres://saleor:saleor@localhost:5432/saleor"
 
 if not RAW_DB_URL_REPLICA:
     RAW_DB_URL_REPLICA = RAW_DB_URL
 
-# Теперь НИКОГДА не будет ""
+DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 0))
+
 DATABASES = {
     "default": dj_database_url.parse(
         RAW_DB_URL,
-        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", 0)),
+        conn_max_age=DB_CONN_MAX_AGE,
     ),
     "replica": dj_database_url.parse(
         RAW_DB_URL_REPLICA,
-        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", 0)),
+        conn_max_age=DB_CONN_MAX_AGE,
     ),
 }
 
@@ -135,24 +133,7 @@ INTERNAL_IPS = get_list(os.environ.get("INTERNAL_IPS", "127.0.0.1"))
 # For Django 4, the default value was changed to 0 as persistent DB connections
 # are not supported.
 DB_CONN_MAX_AGE = int(os.environ.get("DB_CONN_MAX_AGE", 0))
-# =============================
-# RENDER-SAFE DATABASE CONFIG
-# =============================
 
-# Saleor uses 2 DB connections: default & replica.
-# On Render we always use the same one.
-
-DATABASE_CONNECTION_DEFAULT_NAME = "default"
-DATABASE_CONNECTION_REPLICA_NAME = "replica"
-
-DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ["DATABASE_URL"], conn_max_age=DB_CONN_MAX_AGE
-    ),
-    "replica": dj_database_url.parse(
-        os.environ["DATABASE_URL_REPLICA"], conn_max_age=DB_CONN_MAX_AGE
-    ),
-}
 
 DATABASE_ROUTERS = ["saleor.core.db_routers.PrimaryReplicaRouter"]
 
