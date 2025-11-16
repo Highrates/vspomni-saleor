@@ -38,6 +38,19 @@ from .patch_local import patch_local
 
 django_stubs_ext.monkeypatch()
 
+# ============================================================
+# Render FIX – enforce DATABASE_URL even during Docker build
+# ============================================================
+import os
+
+if not os.environ.get("DATABASE_URL") or os.environ.get("DATABASE_URL") == "":
+    os.environ["DATABASE_URL"] = (
+        "postgres://saleor:saleor@localhost:5432/saleor"
+    )
+
+if not os.environ.get("DATABASE_URL_REPLICA") or os.environ.get("DATABASE_URL_REPLICA") == "":
+    os.environ["DATABASE_URL_REPLICA"] = os.environ["DATABASE_URL"]
+# ============================================================
 
 def get_list(text):
     return [item.strip() for item in text.split(",") if item]
