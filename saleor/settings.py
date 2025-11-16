@@ -111,38 +111,28 @@ DATABASE_CONNECTION_DEFAULT_NAME = "default"
 # TODO: For local envs will be activated in separate PR.
 # We need to update docs an saleor platform.
 # This variable should be set to `replica`
+DATABASE_CONNECTION_DEFAULT_NAME = "default"
 DATABASE_CONNECTION_REPLICA_NAME = "replica"
 
 if "DATABASE_URL_REPLICA" in os.environ:
     DATABASE_URL_REPLICA_ENV_NAME = "DATABASE_URL_REPLICA"
 else:
-    # If replica env is not set, then always try to use the
-    # default env first.
     DATABASE_URL_REPLICA_ENV_NAME = dj_database_url.DEFAULT_ENV
-# временный фикс — если Render не передаёт DATABASE_URL
-if not os.environ.get("DATABASE_URL"):
-    os.environ["DATABASE_URL"] = "postgres://saleor_db_7m5a_user:rcf19jEUVeWmia5daAJQmWmq8HyoFmTi@dpg-d4cu14pr0fns73ab7560-a:5432/saleor_db_7m5a"
 
 DATABASES = {
-#     DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.config(
-#         env=dj_database_url.DEFAULT_ENV,
-#         default="postgres://saleor:saleor@localhost:5432/saleor",
-#         conn_max_age=DB_CONN_MAX_AGE,
-#     ),
-     DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.parse(
-            "postgres://saleor_db_7m5a_user:rcf19jEUVeWmia5daAJQmWmq8HyoFmTi@dpg-d4cu14pr0fns73ab7560-a:5432/saleor_db_7m5a",
-            conn_max_age=DB_CONN_MAX_AGE,
-        ),
+    DATABASE_CONNECTION_DEFAULT_NAME: dj_database_url.config(
+        env=dj_database_url.DEFAULT_ENV,
+        default="postgres://saleor:saleor@localhost:5432/saleor",
+        conn_max_age=DB_CONN_MAX_AGE,
+    ),
     DATABASE_CONNECTION_REPLICA_NAME: dj_database_url.config(
         env=DATABASE_URL_REPLICA_ENV_NAME,
-        default="postgres://saleor:saleor@localhost:5432/saleor",
-        # TODO: We need to add read only user to saleor platform,
-        # and we need to update docs.
-        # default="postgres://saleor_read_only:saleor@localhost:5432/saleor",
+        default=os.environ["DATABASE_URL"],  # replica = default (Render fix)
         conn_max_age=DB_CONN_MAX_AGE,
         test_options={"MIRROR": DATABASE_CONNECTION_DEFAULT_NAME},
     ),
 }
+
 
 DATABASE_ROUTERS = ["saleor.core.db_routers.PrimaryReplicaRouter"]
 
