@@ -1,13 +1,32 @@
+# ============================
+# RENDER-SAFE DATABASE CONFIG
+# ============================
+
 import os
+import dj_database_url
 
-# ================
-# Render DB FIX — MUST BE FIRST
-# ================
-if not os.environ.get("DATABASE_URL") or os.environ["DATABASE_URL"].strip() == "":
-    os.environ["DATABASE_URL"] = "postgres://saleor:saleor@localhost:5432/saleor"
+# Берём URL из окружения корректно
+RAW_DB_URL = os.environ.get("DATABASE_URL", "").strip()
+RAW_DB_URL_REPLICA = os.environ.get("DATABASE_URL_REPLICA", "").strip()
 
-if not os.environ.get("DATABASE_URL_REPLICA") or os.environ["DATABASE_URL_REPLICA"].strip() == "":
-    os.environ["DATABASE_URL_REPLICA"] = os.environ["DATABASE_URL"]
+# Если в Render пришла пустая строка — нормализуем
+if not RAW_DB_URL:
+    RAW_DB_URL = "postgres://saleor:saleor@localhost:5432/saleor"
+
+if not RAW_DB_URL_REPLICA:
+    RAW_DB_URL_REPLICA = RAW_DB_URL
+
+# Теперь НИКОГДА не будет ""
+DATABASES = {
+    "default": dj_database_url.parse(
+        RAW_DB_URL,
+        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", 0)),
+    ),
+    "replica": dj_database_url.parse(
+        RAW_DB_URL_REPLICA,
+        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", 0)),
+    ),
+}
 
 import datetime
 import importlib.metadata
@@ -18,7 +37,6 @@ import warnings
 from typing import cast
 from urllib.parse import urlparse
 
-import dj_database_url
 import dj_email_url
 import django_cache_url
 import django_stubs_ext
