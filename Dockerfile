@@ -33,9 +33,7 @@ RUN apt-get update \
   libwebp7 \
   libpq5 \
   libmagic1 \
-  # Required by celery[sqs] which uses pycurl for AWS SQS support
   libcurl4 \
-  # Required to allows to identify file types when handling file uploads
   media-types \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
@@ -62,4 +60,7 @@ LABEL org.opencontainers.image.title="saleor/saleor" \
   org.opencontainers.image.authors="Saleor Commerce (https://saleor.io)" \
   org.opencontainers.image.licenses="BSD-3-Clause"
 
-CMD ["uvicorn", "saleor.asgi:application", "--host=0.0.0.0", "--port=8000", "--workers=2", "--lifespan=off", "--ws=none", "--no-server-header", "--no-access-log", "--timeout-keep-alive=35", "--timeout-graceful-shutdown=30", "--limit-max-requests=10000"]
+# ===========================
+# 👇 FIX: Run migrations first
+# ===========================
+CMD ["sh", "-c", "python3 manage.py migrate --noinput && uvicorn saleor.asgi:application --host=0.0.0.0 --port=8000 --workers=2 --lifespan=off --ws=none --no-server-header --no-access-log --timeout-keep-alive=35 --timeout-graceful-shutdown=30 --limit-max-requests=10000"]
