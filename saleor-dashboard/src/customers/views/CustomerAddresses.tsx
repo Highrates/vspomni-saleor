@@ -2,6 +2,7 @@
 import ActionDialog from "@dashboard/components/ActionDialog";
 import { WindowTitle } from "@dashboard/components/WindowTitle";
 import {
+  AddressInput,
   useCreateCustomerAddressMutation,
   useCustomerAddressesQuery,
   useRemoveCustomerAddressMutation,
@@ -14,6 +15,7 @@ import useShop from "@dashboard/hooks/useShop";
 import { commonMessages } from "@dashboard/intl";
 import createDialogActionHandlers from "@dashboard/utils/handlers/dialogActionHandlers";
 import { Box } from "@saleor/macaw-ui-next";
+import { useRef } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import CustomerAddressDialog from "../components/CustomerAddressDialog";
@@ -40,6 +42,9 @@ const CustomerAddresses = ({ id, params }: CustomerAddressesProps) => {
     CustomerAddressesUrlQueryParams
   >(navigate, params => customerAddressesUrl(id, params), params);
 
+  const lastCreateInputRef = useRef<AddressInput | null>(null);
+  const lastUpdateInputRef = useRef<AddressInput | null>(null);
+
   const [setCustomerDefaultAddress] = useSetCustomerDefaultAddressMutation({
     onCompleted: data => {
       if (data.addressSetDefault.errors.length === 0) {
@@ -56,6 +61,24 @@ const CustomerAddresses = ({ id, params }: CustomerAddressesProps) => {
     onCompleted: data => {
       if (data.addressCreate.errors.length === 0) {
         closeModal();
+        lastCreateInputRef.current = null;
+      } else {
+        // Check if there are validation errors (INVALID code) for postal code or other address fields
+        const hasValidationErrors = data.addressCreate.errors.some(
+          error => error.code === "INVALID" && (error.field === "postalCode" || error.field?.includes("Address")),
+        );
+        if (hasValidationErrors && lastCreateInputRef.current && !lastCreateInputRef.current.skipValidation) {
+          // Retry with skipValidation
+          createCustomerAddress({
+            variables: {
+              id,
+              input: {
+                ...lastCreateInputRef.current,
+                skipValidation: true,
+              },
+            },
+          });
+        }
       }
     },
   });
@@ -68,6 +91,24 @@ const CustomerAddresses = ({ id, params }: CustomerAddressesProps) => {
           status: "success",
           text: intl.formatMessage(commonMessages.savedChanges),
         });
+        lastUpdateInputRef.current = null;
+      } else {
+        // Check if there are validation errors (INVALID code) for postal code or other address fields
+        const hasValidationErrors = data.addressUpdate.errors.some(
+          error => error.code === "INVALID" && (error.field === "postalCode" || error.field?.includes("Address")),
+        );
+        if (hasValidationErrors && lastUpdateInputRef.current && !lastUpdateInputRef.current.skipValidation) {
+          // Retry with skipValidation
+          updateCustomerAddress({
+            variables: {
+              id: params.id,
+              input: {
+                ...lastUpdateInputRef.current,
+                skipValidation: true,
+              },
+            },
+          });
+        }
       }
     },
   });
@@ -124,14 +165,15 @@ const CustomerAddresses = ({ id, params }: CustomerAddressesProps) => {
         open={params.action === "add"}
         variant="create"
         onClose={closeModal}
-        onConfirm={input =>
+        onConfirm={input => {
+          lastCreateInputRef.current = input;
           createCustomerAddress({
             variables: {
               id,
               input,
             },
-          })
-        }
+          });
+        }}
       />
       <CustomerAddressDialog
         address={customerData?.data?.user.addresses.find(addr => addr.id === params.id)}
@@ -141,14 +183,15 @@ const CustomerAddresses = ({ id, params }: CustomerAddressesProps) => {
         open={params.action === "edit"}
         variant="edit"
         onClose={closeModal}
-        onConfirm={input =>
+        onConfirm={input => {
+          lastUpdateInputRef.current = input;
           updateCustomerAddress({
             variables: {
               id: params.id,
               input,
             },
-          })
-        }
+          });
+        }}
       />
       <ActionDialog
         open={params.action === "remove"}

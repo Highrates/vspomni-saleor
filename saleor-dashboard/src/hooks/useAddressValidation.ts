@@ -12,7 +12,7 @@ import { useState } from "react";
 
 interface UseAddressValidation<TInput, TOutput> {
   errors: AccountErrorFragment[];
-  submit: (data: TInput & AddressTypeInput) => TOutput | Promise<AccountErrorFragment[]>;
+  submit: (data: TInput & AddressTypeInput, skipValidation?: boolean) => TOutput | Promise<AccountErrorFragment[]>;
 }
 
 function useAddressValidation<TInput, TOutput>(
@@ -30,13 +30,13 @@ function useAddressValidation<TInput, TOutput>(
 
   return {
     errors: validationErrors,
-    submit: (data: TInput & AddressTypeInput) => {
+    submit: (data: TInput & AddressTypeInput, skipValidation = false) => {
       try {
         setValidationErrors(
           remove(countryRequiredError, validationErrors, (a, b) => a.field === b.field),
         );
 
-        return onSubmit(transformFormToAddressInput(data));
+        return onSubmit(transformFormToAddressInput(data, skipValidation));
       } catch {
         const errors = add(countryRequiredError, validationErrors);
 
