@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
@@ -32,7 +32,7 @@ services:
     container_name: saleor_mailpit
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8025:8025"  # Web UI (только localhost)
+      - "127.0.0.1:8025:8025" # Web UI (только localhost)
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
@@ -44,9 +44,23 @@ services:
     container_name: saleor_api
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8000:8000"  # API доступен только для nginx на localhost
+      - "127.0.0.1:8000:8000" # API доступен только для nginx на localhost
     entrypoint: ["/app/docker-entrypoint.sh"]
-    command: ["uvicorn", "saleor.asgi:application", "--host=0.0.0.0", "--port=8000", "--workers=2", "--lifespan=off", "--ws=none", "--no-server-header", "--no-access-log", "--timeout-keep-alive=35", "--timeout-graceful-shutdown=30", "--limit-max-requests=10000"]
+    command:
+      [
+        "uvicorn",
+        "saleor.asgi:application",
+        "--host=0.0.0.0",
+        "--port=8000",
+        "--workers=2",
+        "--lifespan=off",
+        "--ws=none",
+        "--no-server-header",
+        "--no-access-log",
+        "--timeout-keep-alive=35",
+        "--timeout-graceful-shutdown=30",
+        "--limit-max-requests=10000",
+      ]
     env_file:
       - .env
     environment:
@@ -71,7 +85,8 @@ services:
       dockerfile: Dockerfile
     container_name: saleor_celery_worker
     restart: unless-stopped
-    command: ["celery", "-A", "saleor", "worker", "--loglevel=info", "--concurrency=2"]
+    command:
+      ["celery", "-A", "saleor", "worker", "--loglevel=info", "--concurrency=2"]
     env_file:
       - .env
     environment:
@@ -94,15 +109,15 @@ services:
       context: ./saleor-dashboard
       dockerfile: Dockerfile
       args:
-        API_URL: ${API_URL:-https://miraflores-shop.com/graphql/}
+        API_URL: ${API_URL}
         APP_MOUNT_URI: /dashboard/
         STATIC_URL: /dashboard/
     container_name: saleor_dashboard
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:80"  # Dashboard доступен только для nginx на localhost
+      - "127.0.0.1:3030:80" # Dashboard доступен только для nginx на localhost
     environment:
-      API_URL: ${API_URL:-https://miraflores-shop.com/graphql/}
+      API_URL: ${API_URL}
       APP_MOUNT_URI: /dashboard/
       STATIC_URL: /dashboard/
     depends_on:

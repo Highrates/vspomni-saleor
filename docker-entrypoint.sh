@@ -38,10 +38,10 @@ echo -e "${YELLOW}Setting up default channel...${NC}"
 python manage.py create_channel || echo "Channel already exists or skipped"
 
 # Populate database with sample data (only in development)
-if [ "$DEBUG" = "True" ]; then
-  echo -e "${YELLOW}Populating database with sample data...${NC}"
-  python manage.py populatedb --createsuperuser || echo "Database already populated"
-fi
+# if [ "$DEBUG" = "True" ]; then
+#   echo -e "${YELLOW}Populating database with sample data...${NC}"
+#   python manage.py populatedb --createsuperuser || echo "Database already populated"
+# fi
 
 echo -e "${GREEN}Initialization complete!${NC}"
 echo -e "${GREEN}Starting Saleor API server...${NC}"
