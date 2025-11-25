@@ -2,12 +2,17 @@ import graphene
 
 from ...story import models
 from ..core.types import ModelObjectType, NonNullList
+from ..core.utils import from_global_id_or_error
 
 
-class StoryItem(graphene.ObjectType):
+class StoryImage(graphene.ObjectType):
     id = graphene.GlobalID(required=True)
-    image = graphene.String(required=True, description="Story item image URL")
+    image = graphene.String(required=True, description="Story image URL")
     order = graphene.Int(required=True)
+
+    @staticmethod
+    def resolve_id(root: models.StoryItem, _info):
+        return graphene.Node.to_global_id("StoryImage", root.pk)
 
 
 class Story(ModelObjectType[models.Story]):
@@ -18,7 +23,7 @@ class Story(ModelObjectType[models.Story]):
     order = graphene.Int(required=True)
     is_published = graphene.Boolean(required=True)
     published_at = graphene.DateTime()
-    items = NonNullList(StoryItem, required=True, description="Story items")
+    items = NonNullList(StoryImage, required=True, description="Story images")
 
     class Meta:
         model = models.Story
