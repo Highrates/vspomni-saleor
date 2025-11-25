@@ -29,6 +29,7 @@ import { TranslationsIcon } from "@dashboard/icons/Translations";
 import { commonMessages, sectionNames } from "@dashboard/intl";
 import { ripplePagesAreModels } from "@dashboard/modeling/ripples/pagesAreModels";
 import { articleListPath } from "@dashboard/articles/urls";
+import { storyListPath } from "@dashboard/stories/urls";
 import { pageListPath } from "@dashboard/modeling/urls";
 import { pageTypeListUrl } from "@dashboard/modelTypes/urls";
 import { orderDraftListUrl, orderListUrl } from "@dashboard/orders/urls";
@@ -264,6 +265,13 @@ export function useMenuStructure() {
           label: intl.formatMessage(sectionNames.articles),
           id: "articles",
           url: articleListPath,
+          permissions: [PermissionEnum.MANAGE_PAGES],
+          type: "item",
+        },
+        {
+          label: intl.formatMessage(sectionNames.stories),
+          id: "stories",
+          url: storyListPath,
           permissions: [PermissionEnum.MANAGE_PAGES],
           type: "item",
         },

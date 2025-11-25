@@ -63,6 +63,8 @@ import { useLocationState } from "./hooks/useLocationState";
 import { commonMessages } from "./intl";
 import ArticlesSection from "./articles";
 import { articleListPath } from "./articles/urls";
+import StoriesSection from "./stories";
+import { storyListPath } from "./stories/urls";
 import PageSection from "./modeling";
 import PageTypesSection from "./modelTypes";
 import { NotFound } from "./NotFound";
@@ -233,6 +235,11 @@ const Routes = () => {
                   permissions={[PermissionEnum.MANAGE_PAGES]}
                   path={articleListPath}
                   component={ArticlesSection}
+                />
+                <SectionRoute
+                  permissions={[PermissionEnum.MANAGE_PAGES]}
+                  path={storyListPath}
+                  component={StoriesSection}
                 />
                 <SectionRoute
                   permissions={[

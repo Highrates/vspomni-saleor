@@ -640,6 +640,11 @@ export const sectionNames = defineMessages({
     defaultMessage: "News and Articles",
     description: "articles section name",
   },
+  stories: {
+    id: "stories.title",
+    defaultMessage: "Stories",
+    description: "stories section name",
+  },
 });
 
 export const commonStatusMessages = defineMessages({
