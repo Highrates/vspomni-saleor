@@ -61,6 +61,8 @@ import { giftCardsSectionUrlName } from "./giftCards/urls";
 import { apolloClient, saleorClient } from "./graphql/client";
 import { useLocationState } from "./hooks/useLocationState";
 import { commonMessages } from "./intl";
+import ArticlesSection from "./articles";
+import { articleListPath } from "./articles/urls";
 import PageSection from "./modeling";
 import PageTypesSection from "./modelTypes";
 import { NotFound } from "./NotFound";
@@ -226,6 +228,11 @@ const Routes = () => {
                   permissions={[PermissionEnum.MANAGE_PAGES]}
                   path={pageListPath}
                   component={PageSection}
+                />
+                <SectionRoute
+                  permissions={[PermissionEnum.MANAGE_PAGES]}
+                  path={articleListPath}
+                  component={ArticlesSection}
                 />
                 <SectionRoute
                   permissions={[

@@ -28,6 +28,7 @@ import { ProductsIcon } from "@dashboard/icons/Products";
 import { TranslationsIcon } from "@dashboard/icons/Translations";
 import { commonMessages, sectionNames } from "@dashboard/intl";
 import { ripplePagesAreModels } from "@dashboard/modeling/ripples/pagesAreModels";
+import { articleListPath } from "@dashboard/articles/urls";
 import { pageListPath } from "@dashboard/modeling/urls";
 import { pageTypeListUrl } from "@dashboard/modelTypes/urls";
 import { orderDraftListUrl, orderListUrl } from "@dashboard/orders/urls";
@@ -256,6 +257,13 @@ export function useMenuStructure() {
           label: intl.formatMessage(sectionNames.models),
           id: "models",
           url: pageListPath,
+          permissions: [PermissionEnum.MANAGE_PAGES],
+          type: "item",
+        },
+        {
+          label: intl.formatMessage(sectionNames.articles),
+          id: "articles",
+          url: articleListPath,
           permissions: [PermissionEnum.MANAGE_PAGES],
           type: "item",
         },
