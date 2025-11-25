@@ -1,6 +1,7 @@
 import graphene
 
 from ...story import models
+from ..core.scalars import DateTime
 from ..core.types import ModelObjectType, NonNullList
 from ..core.utils import from_global_id_or_error
 
@@ -22,7 +23,7 @@ class Story(ModelObjectType[models.Story]):
     image = graphene.String(description="Preview image URL")
     order = graphene.Int(required=True)
     is_published = graphene.Boolean(required=True)
-    published_at = graphene.DateTime()
+    published_at = DateTime(description="The story publication date.")
     items = NonNullList(StoryImage, required=True, description="Story images")
 
     class Meta:
