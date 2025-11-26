@@ -211,52 +211,76 @@ class AccountRegister(DeprecatedModelMutation):
         in both cases.
         Return true when instance is saved. Return false otherwise.
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.warning(f"[EMAIL DEBUG] _save: Before save, instance.pk={instance.pk}, email={instance.email}")
         try:
             with transaction.atomic():
                 instance.save()
+            logger.warning(f"[EMAIL DEBUG] _save: After save, instance.pk={instance.pk}")
             models.User.objects.filter(email=instance.email).first()
             return True
-        except IntegrityError:
+        except IntegrityError as e:
+            logger.warning(f"[EMAIL DEBUG] _save: IntegrityError: {e}")
             try:
-                models.User.objects.get(email=instance.email)
+                existing_user = models.User.objects.get(email=instance.email)
+                logger.warning(f"[EMAIL DEBUG] _save: Found existing user, pk={existing_user.pk}")
+                # Update instance with existing user's pk
+                instance.pk = existing_user.pk
                 return False
             except models.User.DoesNotExist:
+                logger.warning(f"[EMAIL DEBUG] _save: User does not exist after IntegrityError")
                 pass
             raise
 
     @classmethod
     def save_and_create_task(cls, user_exists, instance, cleaned_input, context_data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         instance.set_password(cleaned_input["password"])
         instance.is_confirmed = False
 
         user_created = False
+        user_pk = None
+        
         if not user_exists:
+            logger.warning(f"[EMAIL DEBUG] account_register: Saving new user, email={instance.email}")
             user_created = cls._save(instance)
+            logger.warning(f"[EMAIL DEBUG] account_register: _save returned user_created={user_created}, instance.pk={instance.pk}")
+            
             # If _save returned False due to race condition, try to get the user
-            if not user_created:
+            if not user_created or not instance.pk:
                 try:
                     existing_user = models.User.objects.get(email=instance.email)
                     instance.pk = existing_user.pk
-                    # User exists, but we still need to send confirmation if it's a new registration
+                    user_pk = existing_user.pk
+                    logger.warning(f"[EMAIL DEBUG] account_register: Found existing user, pk={user_pk}")
                     user_created = True
                 except models.User.DoesNotExist:
+                    logger.warning(f"[EMAIL DEBUG] account_register: User not found after _save, instance.pk={instance.pk}")
                     pass
-
-        # Always use instance.pk if it's set, regardless of user_created flag
-        # This handles cases where instance was saved but _save returned False
-        user_pk = instance.pk if instance.pk else None
+            
+            # Use instance.pk if it was set by _save
+            if instance.pk and not user_pk:
+                user_pk = instance.pk
+                logger.warning(f"[EMAIL DEBUG] account_register: Using instance.pk={user_pk}")
+        else:
+            logger.warning(f"[EMAIL DEBUG] account_register: user_exists=True, skipping save")
         
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"[EMAIL DEBUG] account_register.save_and_create_task: user_exists={user_exists}, user_created={user_created}, instance.pk={instance.pk}, user_pk={user_pk}")
+        logger.warning(f"[EMAIL DEBUG] account_register.save_and_create_task: user_exists={user_exists}, user_created={user_created}, instance.pk={instance.pk}, user_pk={user_pk}, email={instance.email}")
         
         # moving logic to async task to prevent timing attacks
-        finish_creating_user.delay(
-            user_pk,
-            cleaned_input.get("redirect_url"),
-            cleaned_input.get("channel"),
-            context_data,
-        )
+        if user_pk:
+            finish_creating_user.delay(
+                user_pk,
+                cleaned_input.get("redirect_url"),
+                cleaned_input.get("channel"),
+                context_data,
+            )
+        else:
+            logger.error(f"[EMAIL DEBUG] account_register: Cannot send confirmation email - user_pk is None for email={instance.email}")
 
     @classmethod
     def _clean_email_errors(cls, errors):
