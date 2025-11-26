@@ -33,14 +33,38 @@ class Command(BaseCommand):
             email_config = {}
         else:
             email_config = dj_email_url.parse(email_url)
+            use_tls = email_config.get("EMAIL_USE_TLS", False)
+            use_ssl = email_config.get("EMAIL_USE_SSL", False)
+            port = email_config.get("EMAIL_PORT", "")
+            
+            # Предупреждение если TLS/SSL не установлен
+            if not use_tls and not use_ssl:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"⚠️  TLS/SSL not detected in USER_EMAIL_URL!"
+                    )
+                )
+                if port == 587:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"   Port {port} usually requires TLS. Use: ?tls=1 (not tls=True)"
+                        )
+                    )
+                elif port == 465:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"   Port {port} usually requires SSL. Use: ?ssl=1 (not ssl=True)"
+                        )
+                    )
+            
             email_config = {
                 "host": email_config.get("EMAIL_HOST", ""),
-                "port": email_config.get("EMAIL_PORT", ""),
+                "port": port,
                 "username": email_config.get("EMAIL_HOST_USER", ""),
                 "password": email_config.get("EMAIL_HOST_PASSWORD", ""),
                 "sender_address": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
-                "use_tls": email_config.get("EMAIL_USE_TLS", False),
-                "use_ssl": email_config.get("EMAIL_USE_SSL", False),
+                "use_tls": use_tls,
+                "use_ssl": use_ssl,
             }
 
         try:
