@@ -272,7 +272,15 @@ class AccountRegister(DeprecatedModelMutation):
                 user_pk = instance.pk
                 logger.warning(f"[EMAIL DEBUG] account_register: Using instance.pk={user_pk}")
         else:
-            logger.warning(f"[EMAIL DEBUG] account_register: user_exists=True, skipping save")
+            logger.warning(f"[EMAIL DEBUG] account_register: user_exists=True, loading existing user")
+            # If user exists, we need to load it to get the pk
+            try:
+                existing_user = models.User.objects.get(email=instance.email)
+                user_pk = existing_user.pk
+                instance.pk = existing_user.pk
+                logger.warning(f"[EMAIL DEBUG] account_register: Loaded existing user, pk={user_pk}")
+            except models.User.DoesNotExist:
+                logger.error(f"[EMAIL DEBUG] account_register: user_exists=True but user not found in DB for email={instance.email}")
         
         logger.warning(f"[EMAIL DEBUG] account_register.save_and_create_task: user_exists={user_exists}, user_created={user_created}, instance.pk={instance.pk}, user_pk={user_pk}, email={instance.email}")
         
@@ -284,6 +292,7 @@ class AccountRegister(DeprecatedModelMutation):
                 cleaned_input.get("channel"),
                 context_data,
             )
+            logger.warning(f"[EMAIL DEBUG] account_register: Called finish_creating_user.delay with user_pk={user_pk}")
         else:
             logger.error(f"[EMAIL DEBUG] account_register: Cannot send confirmation email - user_pk is None for email={instance.email}")
 
