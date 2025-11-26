@@ -192,8 +192,13 @@ class AccountRegister(DeprecatedModelMutation):
         )
 
         user_exists = cls.clean_instance(info, instance)
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"[EMAIL DEBUG] perform_mutation: user_exists={user_exists}, email={instance.email}, instance.pk={instance.pk}")
 
         context_data = RequestorAwareContext.create_context_data(info.context)
+        logger.warning(f"[EMAIL DEBUG] perform_mutation: context_data={context_data}, channel={cleaned_input.get('channel')}")
         cls.save_and_create_task(user_exists, instance, cleaned_input, context_data)
 
         # Sets updated_at, to always return the time when mutation was called
