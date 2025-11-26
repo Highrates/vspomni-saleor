@@ -135,16 +135,31 @@ class AuthSignupView(View):
 
             if requires_confirmation:
                 from ..account.tasks import finish_creating_user
+                from ..account.utils import RequestorAwareContext
                 from ..core.utils.url import prepare_url
                 from urllib.parse import urlencode
                 from ..core.tokens import token_generator
+                from ..channel.models import Channel
 
                 redirect_url = data.get('redirectUrl', 'https://vspomni.store')
                 token = token_generator.make_token(user)
                 params = urlencode({"email": user.email, "token": token})
                 confirm_url = prepare_url(params, redirect_url)
 
-                finish_creating_user.delay(user.id, confirm_url)
+                # Get default channel
+                channel = Channel.objects.filter(is_active=True).first()
+                channel_slug = channel.slug if channel else None
+
+                # Create context_data
+                context_data = RequestorAwareContext.create_context_data(
+                    RequestorAwareContext(
+                        allow_replica=True,
+                        user=user,
+                        app=None,
+                    )
+                )
+
+                finish_creating_user.delay(user.id, redirect_url, channel_slug, context_data)
 
             return JsonResponse({
                 'success': True,

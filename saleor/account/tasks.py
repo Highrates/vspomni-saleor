@@ -81,10 +81,14 @@ def trigger_send_password_reset_notification(
 @app.task()
 @allow_writer()
 def finish_creating_user(user_pk, redirect_url, channel_slug, context_data):
+    logger.warning(f"[EMAIL DEBUG] finish_creating_user STARTED: user_pk={user_pk}, channel_slug={channel_slug}")
+    
     if not user_pk:
+        logger.warning(f"[EMAIL DEBUG] finish_creating_user: user_pk is None, exiting")
         return
 
     user = User.objects.get(pk=user_pk)
+    logger.warning(f"[EMAIL DEBUG] finish_creating_user: user={user.email}")
     user.search_document = search.prepare_user_search_document_value(
         user, attach_addresses_data=False
     )
