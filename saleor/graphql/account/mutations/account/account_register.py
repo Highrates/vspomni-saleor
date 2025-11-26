@@ -232,10 +232,27 @@ class AccountRegister(DeprecatedModelMutation):
         user_created = False
         if not user_exists:
             user_created = cls._save(instance)
+            # If _save returned False due to race condition, try to get the user
+            if not user_created:
+                try:
+                    existing_user = models.User.objects.get(email=instance.email)
+                    instance.pk = existing_user.pk
+                    # User exists, but we still need to send confirmation if it's a new registration
+                    user_created = True
+                except models.User.DoesNotExist:
+                    pass
 
+        # Always use instance.pk if it's set, regardless of user_created flag
+        # This handles cases where instance was saved but _save returned False
+        user_pk = instance.pk if instance.pk else None
+        
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"[EMAIL DEBUG] account_register.save_and_create_task: user_exists={user_exists}, user_created={user_created}, instance.pk={instance.pk}, user_pk={user_pk}")
+        
         # moving logic to async task to prevent timing attacks
         finish_creating_user.delay(
-            instance.pk if user_created else None,
+            user_pk,
             cleaned_input.get("redirect_url"),
             cleaned_input.get("channel"),
             context_data,
