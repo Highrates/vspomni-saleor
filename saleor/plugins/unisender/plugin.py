@@ -418,27 +418,27 @@ class UnisenderEmailPlugin(BasePlugin):
         previous_value: None,
     ) -> None:
         """Handle notification events"""
-        logger.info(f"UnisenderEmailPlugin.notify called with event: {event}, active: {self.active}")
+        logger.warning(f"[EMAIL DEBUG] UnisenderEmailPlugin.notify called with event: {event}, active: {self.active}")
         
         if not self.active:
-            logger.warning(f"UnisenderEmailPlugin is not active, skipping event: {event}")
+            logger.warning(f"[EMAIL DEBUG] UnisenderEmailPlugin is not active, skipping event: {event}")
             return previous_value
         
         event_map = get_user_event_map()
         if event not in UserNotifyEvent.CHOICES:
-            logger.debug(f"Event {event} not in UserNotifyEvent.CHOICES, skipping")
+            logger.warning(f"[EMAIL DEBUG] Event {event} not in UserNotifyEvent.CHOICES, skipping. Available: {UserNotifyEvent.CHOICES}")
             return previous_value
 
         if event not in event_map:
-            logger.warning("Missing handler for event %s", event)
+            logger.warning(f"[EMAIL DEBUG] Missing handler for event {event}")
             return previous_value
 
-        logger.info(f"Processing event {event} with UnisenderEmailPlugin")
+        logger.warning(f"[EMAIL DEBUG] Processing event {event} with UnisenderEmailPlugin")
         event_func = event_map[event]
         config = asdict(self.config)
         self._add_missing_configuration(config)
         event_func(payload_func, config, self)
-        logger.info(f"Event {event} processed successfully")
+        logger.warning(f"[EMAIL DEBUG] Event {event} processed successfully")
         return previous_value
 
     @classmethod
