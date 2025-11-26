@@ -65,8 +65,11 @@ def send_email_via_unisender(
     if text_body:
         data["text_body"] = text_body
     
-    logger.info(f"Sending email via UniSender API to {recipient_email}")
-    logger.debug(f"UniSender API URL: {config.api_url}")
+    logger.warning(f"[EMAIL DEBUG] Sending email via UniSender API to {recipient_email}")
+    logger.warning(f"[EMAIL DEBUG] UniSender API URL: {config.api_url}")
+    logger.warning(f"[EMAIL DEBUG] API Key: {config.api_key[:10]}... (first 10 chars)")
+    logger.warning(f"[EMAIL DEBUG] Sender: {config.sender_address}")
+    logger.warning(f"[EMAIL DEBUG] Request data keys: {list(data.keys())}")
     
     try:
         response = requests.post(
@@ -74,6 +77,10 @@ def send_email_via_unisender(
             data=data,
             timeout=30,
         )
+        
+        logger.warning(f"[EMAIL DEBUG] Response status: {response.status_code}")
+        logger.warning(f"[EMAIL DEBUG] Response text: {response.text[:500]}")
+        
         response.raise_for_status()
         
         result = response.json()
