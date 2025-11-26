@@ -130,6 +130,9 @@ class AuthSignupView(View):
             user.set_password(password)
             user.save()
 
+            # Refresh user to ensure ID is set
+            user.refresh_from_db()
+
             site = get_site_promise(request).get()
             requires_confirmation = site.settings.enable_account_confirmation_by_email
 
@@ -142,10 +145,7 @@ class AuthSignupView(View):
                 from ..channel.models import Channel
 
                 redirect_url = data.get('redirectUrl', 'https://vspomni.store')
-                token = token_generator.make_token(user)
-                params = urlencode({"email": user.email, "token": token})
-                confirm_url = prepare_url(params, redirect_url)
-
+                
                 # Get default channel
                 channel = Channel.objects.filter(is_active=True).first()
                 channel_slug = channel.slug if channel else None
@@ -158,6 +158,13 @@ class AuthSignupView(View):
                         app=None,
                     )
                 )
+
+                # Verify user.id is set before calling task
+                if not user.id:
+                    return JsonResponse(
+                        {'error': 'Failed to create user'},
+                        status=500
+                    )
 
                 finish_creating_user.delay(user.id, redirect_url, channel_slug, context_data)
 
