@@ -1,3 +1,5 @@
+import logging
+
 from ...account import events as account_events
 from ...celeryconf import app
 from ...core.db.connection import allow_writer
@@ -7,20 +9,29 @@ from ...invoice import events as invoice_events
 from ...order import events as order_events
 from ..email_common import EmailConfig, send_email
 
+logger = logging.getLogger(__name__)
+
 
 @app.task(compression="zlib")
 def send_account_confirmation_email_task(
     recipient_email, payload, config, subject, template
 ):
-    email_config = EmailConfig(**config)
-
-    send_email(
-        config=email_config,
-        recipient_list=[recipient_email],
-        context=payload,
-        subject=subject,
-        template_str=template,
-    )
+    try:
+        email_config = EmailConfig(**config)
+        logger.info(f"Sending account confirmation email to {recipient_email}")
+        logger.debug(f"SMTP config: host={email_config.host}, port={email_config.port}, user={email_config.username}")
+        
+        send_email(
+            config=email_config,
+            recipient_list=[recipient_email],
+            context=payload,
+            subject=subject,
+            template_str=template,
+        )
+        logger.info(f"Account confirmation email sent successfully to {recipient_email}")
+    except Exception as e:
+        logger.error(f"Failed to send account confirmation email to {recipient_email}: {str(e)}", exc_info=True)
+        raise
 
 
 @app.task(compression="zlib")
