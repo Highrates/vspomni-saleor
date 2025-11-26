@@ -14,6 +14,7 @@ from .plugins.views import (
 )
 from .product.views import digital_product
 from .thumbnail.views import handle_thumbnail
+from .account.rest_views import AuthLoginView, AuthSignupView, AuthMeView
 
 urlpatterns = [
     re_path(
@@ -51,6 +52,9 @@ urlpatterns = [
         name="thumbnail",
     ),
     re_path(r"^\.well-known/jwks.json$", jwks, name="jwks"),
+    re_path(r"^auth/login/$", AuthLoginView.as_view(), name="auth-login"),
+    re_path(r"^auth/signup/$", AuthSignupView.as_view(), name="auth-signup"),
+    re_path(r"^auth/me/$", AuthMeView.as_view(), name="auth-me"),
 ]
 
 if settings.DEBUG:
