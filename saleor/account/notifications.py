@@ -66,6 +66,10 @@ def send_password_reset_notification(
 
 def send_account_confirmation(user, redirect_url, manager, channel_slug, token=None):
     """Trigger sending an account confirmation notification for the given user."""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"send_account_confirmation called: user={user.email}, channel_slug={channel_slug}")
 
     def _generate_payload():
         if not token:
@@ -86,11 +90,13 @@ def send_account_confirmation(user, redirect_url, manager, channel_slug, token=N
         return payload
 
     handler = NotifyHandler(_generate_payload)
+    logger.info(f"Calling manager.notify with event={NotifyEventType.ACCOUNT_CONFIRMATION}, channel_slug={channel_slug}")
     manager.notify(
         NotifyEventType.ACCOUNT_CONFIRMATION,
         payload_func=handler.payload,
         channel_slug=channel_slug,
     )
+    logger.info(f"manager.notify completed")
 
 
 def send_request_user_change_email_notification(

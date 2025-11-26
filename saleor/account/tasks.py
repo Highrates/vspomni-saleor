@@ -96,9 +96,12 @@ def finish_creating_user(user_pk, redirect_url, channel_slug, context_data):
     manager = get_plugin_manager_promise(context).get()
     site = get_site_promise(context).get()
 
+    logger.info(f"finish_creating_user: user={user.email}, enable_confirmation={site.settings.enable_account_confirmation_by_email}, channel_slug={channel_slug}")
+    
     if site.settings.enable_account_confirmation_by_email:
         # Notifications will be deprecated in the future
         token = token_generator.make_token(user)
+        logger.info(f"Calling send_account_confirmation for user {user.email}")
         notifications.send_account_confirmation(
             user=user,
             redirect_url=redirect_url,
@@ -106,6 +109,7 @@ def finish_creating_user(user_pk, redirect_url, channel_slug, context_data):
             manager=manager,
             token=token,
         )
+        logger.info(f"send_account_confirmation completed for user {user.email}")
 
         if redirect_url:
             redirect_url = _prepare_redirect_url(user, redirect_url, token)

@@ -2813,9 +2813,14 @@ class PluginsManager(PaymentInterface):
         channel_slug: str | None = None,
         plugin_id: str | None = None,
     ):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"PluginsManager.notify called: event={event}, channel_slug={channel_slug}, plugin_id={plugin_id}")
+        
         default_value = None
         if plugin_id:
             plugin = self.get_plugin(plugin_id, channel_slug=channel_slug)
+            logger.info(f"Calling notify on single plugin: {plugin_id}")
             return self.__run_method_on_single_plugin(
                 plugin=plugin,
                 method_name="notify",
@@ -2823,6 +2828,13 @@ class PluginsManager(PaymentInterface):
                 event=event,
                 payload_func=payload_func,
             )
+        
+        plugins = self.get_plugins(
+            channel_slug=channel_slug,
+            active_only=True,
+        )
+        logger.info(f"Found {len(plugins)} active plugins for channel_slug={channel_slug}: {[p.PLUGIN_ID for p in plugins]}")
+        
         return self.__run_method_on_plugins(
             "notify", default_value, event, payload_func, channel_slug=channel_slug
         )
