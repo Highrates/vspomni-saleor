@@ -58,30 +58,64 @@ class Command(BaseCommand):
             if config_name in email_config:
                 configuration_field["value"] = email_config[config_name]
 
-        plugin_configuration, created = PluginConfiguration.objects.get_or_create(
-            identifier=UserEmail.PLUGIN_ID,
-            defaults={"active": True, "configuration": configuration, "name": "User emails"},
-        )
-
-        if created:
+        from ....channel.models import Channel
+        
+        channels = Channel.objects.all()
+        
+        if not channels.exists():
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"✅ Created UserEmailPlugin configuration (ID: {UserEmail.PLUGIN_ID})"
-                )
+                self.style.WARNING("No channels found. Creating global plugin configuration.")
             )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"✅ UserEmailPlugin already exists (ID: {UserEmail.PLUGIN_ID})"
-                )
+            plugin_configuration, created = PluginConfiguration.objects.get_or_create(
+                identifier=UserEmail.PLUGIN_ID,
+                channel=None,
+                defaults={"active": True, "configuration": configuration, "name": "User emails"},
             )
-            
-            if not plugin_configuration.active:
-                plugin_configuration.active = True
-                plugin_configuration.save()
+            if created:
                 self.stdout.write(
-                    self.style.SUCCESS("✅ Activated UserEmailPlugin")
+                    self.style.SUCCESS(
+                        f"✅ Created UserEmailPlugin configuration (ID: {UserEmail.PLUGIN_ID})"
+                    )
                 )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"✅ UserEmailPlugin already exists (ID: {UserEmail.PLUGIN_ID})"
+                    )
+                )
+                if not plugin_configuration.active:
+                    plugin_configuration.active = True
+                    plugin_configuration.save()
+                    self.stdout.write(
+                        self.style.SUCCESS("✅ Activated UserEmailPlugin")
+                    )
+        else:
+            for channel in channels:
+                plugin_configuration, created = PluginConfiguration.objects.get_or_create(
+                    identifier=UserEmail.PLUGIN_ID,
+                    channel=channel,
+                    defaults={"active": True, "configuration": configuration, "name": "User emails"},
+                )
+                
+                if created:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"✅ Created UserEmailPlugin for channel: {channel.slug} (ID: {UserEmail.PLUGIN_ID})"
+                        )
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"✅ UserEmailPlugin already exists for channel: {channel.slug}"
+                        )
+                    )
+                    
+                    if not plugin_configuration.active:
+                        plugin_configuration.active = True
+                        plugin_configuration.save()
+                        self.stdout.write(
+                            self.style.SUCCESS(f"✅ Activated UserEmailPlugin for channel: {channel.slug}")
+                        )
 
         if email_config:
             self.stdout.write(
