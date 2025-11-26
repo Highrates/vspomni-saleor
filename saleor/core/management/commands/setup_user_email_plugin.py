@@ -83,12 +83,13 @@ class Command(BaseCommand):
                         f"✅ UserEmailPlugin already exists (ID: {UserEmail.PLUGIN_ID})"
                     )
                 )
-                if not plugin_configuration.active:
-                    plugin_configuration.active = True
-                    plugin_configuration.save()
-                    self.stdout.write(
-                        self.style.SUCCESS("✅ Activated UserEmailPlugin")
-                    )
+                # Обновить конфигурацию если она изменилась
+                plugin_configuration.configuration = configuration
+                plugin_configuration.active = True
+                plugin_configuration.save()
+                self.stdout.write(
+                    self.style.SUCCESS("✅ Updated and activated UserEmailPlugin")
+                )
         else:
             for channel in channels:
                 plugin_configuration, created = PluginConfiguration.objects.get_or_create(
@@ -110,12 +111,13 @@ class Command(BaseCommand):
                         )
                     )
                     
-                    if not plugin_configuration.active:
-                        plugin_configuration.active = True
-                        plugin_configuration.save()
-                        self.stdout.write(
-                            self.style.SUCCESS(f"✅ Activated UserEmailPlugin for channel: {channel.slug}")
-                        )
+                    # Обновить конфигурацию если она изменилась
+                    plugin_configuration.configuration = configuration
+                    plugin_configuration.active = True
+                    plugin_configuration.save()
+                    self.stdout.write(
+                        self.style.SUCCESS(f"✅ Updated and activated UserEmailPlugin for channel: {channel.slug}")
+                    )
 
         if email_config:
             self.stdout.write(
