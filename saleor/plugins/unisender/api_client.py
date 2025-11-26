@@ -81,15 +81,28 @@ def send_email_via_unisender(
         logger.warning(f"[EMAIL DEBUG] Response status: {response.status_code}")
         logger.warning(f"[EMAIL DEBUG] Response text: {response.text[:500]}")
         
-        response.raise_for_status()
+        # Try to parse JSON response even if status is not 200
+        try:
+            result = response.json()
+        except Exception:
+            result = {"error": response.text, "code": "unknown"}
         
-        result = response.json()
-        
-        # UniSender returns error in result.error field
-        if result.get("error"):
+        # Check for errors in response
+        if result.get("error") or result.get("code") == "invalid_api_key":
             error_msg = result.get("error", "Unknown error")
-            logger.error(f"UniSender API error: {error_msg}")
-            raise Exception(f"UniSender API error: {error_msg}")
+            error_code = result.get("code", "unknown")
+            logger.error(f"UniSender API error [{error_code}]: {error_msg}")
+            
+            if error_code == "invalid_api_key":
+                raise ValueError(
+                    f"Invalid UniSender API key. Please check your API key in Dashboard → Configuration → Plugins → UniSender Email (API). "
+                    f"Error: {error_msg}"
+                )
+            else:
+                raise Exception(f"UniSender API error [{error_code}]: {error_msg}")
+        
+        # Raise for status only if we haven't handled the error above
+        response.raise_for_status()
         
         # Check if result contains job_id (successful send)
         if "result" in result and result.get("result", {}).get("job_id"):
