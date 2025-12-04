@@ -7,7 +7,7 @@ from ..core.descriptions import (
     DEPRECATED_IN_3X_INPUT,
 )
 from ..core.doc_category import DOC_CATEGORY_DISCOUNTS
-from ..core.fields import FilterConnectionField, PermissionsField
+from ..core.fields import BaseField, FilterConnectionField, PermissionsField
 from ..core.filters import FilterInputObjectType
 from ..core.utils import from_global_id_or_error
 from ..translations.mutations import (
@@ -57,6 +57,15 @@ from .types import (
     VoucherCountableConnection,
 )
 from .types.promotions import PromotionCountableConnection
+
+
+class ValidatePromoCode(graphene.ObjectType):
+    code = graphene.String(required=True)
+    discount_value = graphene.Float()
+    discount_value_type = graphene.String()
+    currency = graphene.String()
+    is_valid = graphene.Boolean(required=True)
+    error_message = graphene.String()
 
 
 class VoucherFilterInput(FilterInputObjectType):
@@ -159,6 +168,17 @@ class DiscountQueries(graphene.ObjectType):
         permissions=[DiscountPermissions.MANAGE_DISCOUNTS],
         doc_category=DOC_CATEGORY_DISCOUNTS,
     )
+    validate_promo_code = BaseField(
+        ValidatePromoCode,
+        code=graphene.Argument(
+            graphene.String, description="Promo code to validate.", required=True
+        ),
+        channel=graphene.String(
+            description="Slug of a channel for which the data should be returned."
+        ),
+        description="Validate a promo code (voucher or sale).",
+        doc_category=DOC_CATEGORY_DISCOUNTS,
+    )
 
     @staticmethod
     def resolve_sale(_root, info, *, id, channel=None):
@@ -200,6 +220,81 @@ class DiscountQueries(graphene.ObjectType):
             qs, kwargs, allow_replica=info.context.allow_replica
         )
         return create_connection_slice(qs, info, kwargs, PromotionCountableConnection)
+
+    @staticmethod
+    def resolve_validate_promo_code(
+        _root, info: ResolveInfo, *, code: str, channel: str = None
+    ):
+        from ...discount.utils import get_voucher_for_checkout
+        from ...channel.models import Channel
+
+        if not channel:
+            channel = info.context.channel.slug
+
+        try:
+            channel_obj = Channel.objects.get(slug=channel)
+        except Channel.DoesNotExist:
+            return ValidatePromoCode(
+                code=code,
+                is_valid=False,
+                error_message="Channel not found",
+            )
+
+        voucher = get_voucher_for_checkout(
+            info.context,
+            channel_obj,
+            code,
+            with_lock=False,
+        )
+
+        if voucher:
+            channel_listing = voucher.channel_listings.filter(
+                channel=channel_obj
+            ).first()
+
+            if channel_listing:
+                discount_value = channel_listing.discount_value
+                discount_value_type = voucher.discount_value_type
+                currency = channel_listing.currency
+
+                return ValidatePromoCode(
+                    code=code,
+                    discount_value=float(discount_value),
+                    discount_value_type=discount_value_type,
+                    currency=currency,
+                    is_valid=True,
+                )
+
+        from ...discount import models as discount_models
+
+        sale = discount_models.Promotion.objects.filter(
+            name__iexact=code,
+            rules__reward_value_type__isnull=False,
+        ).first()
+
+        if sale:
+            rule = sale.rules.filter(
+                channels__slug=channel
+            ).first()
+
+            if rule:
+                discount_value = rule.reward_value
+                discount_value_type = rule.reward_value_type
+                currency = channel_obj.currency_code
+
+                return ValidatePromoCode(
+                    code=code,
+                    discount_value=float(discount_value),
+                    discount_value_type=discount_value_type,
+                    currency=currency,
+                    is_valid=True,
+                )
+
+        return ValidatePromoCode(
+            code=code,
+            is_valid=False,
+            error_message="Promo code not found",
+        )
 
 
 class DiscountMutations(graphene.ObjectType):
