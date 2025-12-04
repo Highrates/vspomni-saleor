@@ -225,8 +225,9 @@ class DiscountQueries(graphene.ObjectType):
     def resolve_validate_promo_code(
         _root, info: ResolveInfo, *, code: str, channel: str = None
     ):
-        from ...discount.utils import get_voucher_for_checkout
+        from ...discount.models import Voucher, VoucherCode
         from ...channel.models import Channel
+        from django.utils import timezone
 
         if not channel:
             channel = info.context.channel.slug
@@ -240,30 +241,31 @@ class DiscountQueries(graphene.ObjectType):
                 error_message="Channel not found",
             )
 
-        voucher = get_voucher_for_checkout(
-            info.context,
-            channel_obj,
-            code,
-            with_lock=False,
-        )
+        try:
+            voucher_code = VoucherCode.objects.get(code=code, is_active=True)
+            voucher = Voucher.objects.active_in_channel(
+                date=timezone.now(), channel_slug=channel
+            ).filter(id=voucher_code.voucher_id).first()
 
-        if voucher:
-            channel_listing = voucher.channel_listings.filter(
-                channel=channel_obj
-            ).first()
+            if voucher:
+                channel_listing = voucher.channel_listings.filter(
+                    channel=channel_obj
+                ).first()
 
-            if channel_listing:
-                discount_value = channel_listing.discount_value
-                discount_value_type = voucher.discount_value_type
-                currency = channel_listing.currency
+                if channel_listing:
+                    discount_value = channel_listing.discount_value
+                    discount_value_type = voucher.discount_value_type
+                    currency = channel_listing.currency
 
-                return ValidatePromoCode(
-                    code=code,
-                    discount_value=float(discount_value),
-                    discount_value_type=discount_value_type,
-                    currency=currency,
-                    is_valid=True,
-                )
+                    return ValidatePromoCode(
+                        code=code,
+                        discount_value=float(discount_value),
+                        discount_value_type=discount_value_type,
+                        currency=currency,
+                        is_valid=True,
+                    )
+        except VoucherCode.DoesNotExist:
+            pass
 
         from ...discount import models as discount_models
 
