@@ -41,26 +41,24 @@ services:
       dockerfile: Dockerfile
     container_name: saleor_api
     restart: unless-stopped
+
     ports:
-      - "127.0.0.1:8000:8000" # API доступен только для nginx на localhost
+      - "127.0.0.1:8000:8000"
+
     entrypoint: ["/app/docker-entrypoint.sh"]
+
     command:
       [
         "uvicorn",
         "saleor.asgi:application",
         "--host=0.0.0.0",
         "--port=8000",
-        "--workers=2",
-        "--lifespan=off",
-        "--ws=none",
-        "--no-server-header",
-        "--no-access-log",
-        "--timeout-keep-alive=35",
-        "--timeout-graceful-shutdown=30",
-        "--limit-max-requests=10000",
+        "--workers=2"
       ]
+
     env_file:
       - .env
+
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -68,14 +66,17 @@ services:
       DB_NAME: ${DB_NAME:-saleor}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+
     volumes:
       - static_files:/app/static
       - media_files:/app/media
+
 
   celery-worker:
     build:
