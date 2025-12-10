@@ -61,6 +61,12 @@ urlpatterns = [
         CreateCheckoutWithoutStockCheckView.as_view(),
         name="checkout-create-without-stock-check",
     ),
+    # Альтернативный паттерн без /api/ префикса для совместимости с продакшн конфигурацией
+    re_path(
+        r"^checkout/create-without-stock-check/$",
+        CreateCheckoutWithoutStockCheckView.as_view(),
+        name="checkout-create-without-stock-check-alt",
+    ),
 ]
 
 if settings.DEBUG:

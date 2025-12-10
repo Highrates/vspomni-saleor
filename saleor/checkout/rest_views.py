@@ -27,9 +27,23 @@ class CreateCheckoutWithoutStockCheckView(View):
     (e.g., warehouse not linked to channel shipping zone).
     """
     
+    def options(self, request):
+        """Handle CORS preflight requests"""
+        response = JsonResponse({})
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    
     def post(self, request):
+        logger.info(f'CreateCheckoutWithoutStockCheckView POST request received from {request.META.get("REMOTE_ADDR")}')
+        logger.info(f'Request path: {request.path}')
+        logger.info(f'Request method: {request.method}')
+        logger.info(f'Content-Type: {request.META.get("CONTENT_TYPE")}')
+        
         try:
             data = json.loads(request.body)
+            logger.info(f'Request data: channel={data.get("channel")}, lines_count={len(data.get("lines", []))}')
             
             # Получаем данные из запроса
             channel_slug = data.get('channel', 'vspomni-site')
