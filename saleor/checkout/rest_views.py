@@ -4,6 +4,7 @@ This bypasses the standard checkout creation flow to avoid stock availability is
 """
 import json
 import logging
+from decimal import Decimal
 
 import graphene
 from django.db import transaction
@@ -131,11 +132,10 @@ class CreateCheckoutWithoutStockCheckView(View):
                         status=400
                     )
             
-            logger.info('Starting checkout creation transaction')
+            logger.info(f'Starting checkout creation: {len(variant_db_ids)} variants')
             
             with transaction.atomic():
                 # Создаем checkout без проверки наличия
-                logger.info('Creating checkout object')
                 checkout = checkout_models.Checkout.objects.create(
                     channel=channel,
                     currency=channel.currency_code,
@@ -146,21 +146,13 @@ class CreateCheckoutWithoutStockCheckView(View):
                 # Создаем линии checkout напрямую, обходя проверку наличия
                 checkout_lines = []
                 
-                logger.info('Processing checkout lines')
                 for i, variant_db_id in enumerate(variant_db_ids):
                     variant = variant_map[variant_db_id]
                     variant_listing = variant_listings[variant_db_id]
                     
-                    logger.info(f'Processing line {i+1}/{len(variant_db_ids)}: variant_id={variant_db_id}')
-                    
-                    # Получаем цену варианта напрямую из listing (быстрее, чем через методы)
-                    try:
-                        variant_price_amount = variant_listing.price_amount
-                        variant_prior_price_amount = variant_listing.prior_price_amount
-                        logger.info(f'Got prices for variant {variant_db_id}: {variant_price_amount}')
-                    except Exception as e:
-                        logger.error(f'Error getting price for variant {variant_db_id}', exc_info=e)
-                        raise
+                    # Получаем цену варианта напрямую из listing
+                    variant_price_amount = variant_listing.price_amount or Decimal('0')
+                    variant_prior_price_amount = variant_listing.prior_price_amount
                     
                     # Создаем линию checkout
                     checkout_line = checkout_models.CheckoutLine(
@@ -174,16 +166,8 @@ class CreateCheckoutWithoutStockCheckView(View):
                     checkout_lines.append(checkout_line)
                 
                 # Массово создаем линии
-                logger.info(f'Bulk creating {len(checkout_lines)} checkout lines')
                 checkout_models.CheckoutLine.objects.bulk_create(checkout_lines)
-                logger.info('Checkout lines created successfully')
-                
-                # Сбрасываем кэш цен (цены пересчитаются автоматически при следующем запросе)
-                logger.info('Resetting price expiration cache')
-                checkout.price_expiration = None
-                # Используем update_fields чтобы избежать лишних операций
-                checkout.save(update_fields=['price_expiration'])
-                logger.info('Checkout saved successfully')
+                logger.info(f'Created {len(checkout_lines)} checkout lines')
             
             logger.info(f'Checkout creation completed: {checkout.token}')
             
