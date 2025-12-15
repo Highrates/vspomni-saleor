@@ -214,37 +214,63 @@ class SendRegistrationEmailView(View):
     """Custom endpoint to send a simple registration email from Saleor."""
 
     def post(self, request):
-      from django.core.mail import send_mail
+        from django.core.mail import get_connection, send_mail
 
-      try:
-          data = json.loads(request.body)
-          email = data.get("email")
-          first_name = data.get("firstName") or ""
+        try:
+            data = json.loads(request.body)
+            email = data.get("email")
+            first_name = data.get("firstName") or ""
 
-          if not email:
-              return JsonResponse(
-                  {"error": "Email is required"},
-                  status=400,
-              )
+            if not email:
+                return JsonResponse(
+                    {"error": "email is required"},
+                    status=400,
+                )
 
-          subject = "Подтверждение регистрации в VSPOMNI"
-          message = (
-              f"Здравствуйте, {first_name or 'друг'}!\n\n"
-              "Спасибо за регистрацию на vspomni.store.\n\n"
-              "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
-          )
+            subject = "Подтверждение регистрации в VSPOMNI"
+            message = (
+                f"Здравствуйте, {first_name or 'друг'}!\n\n"
+                "Спасибо за регистрацию на vspomni.store.\n\n"
+                "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
+            )
 
-          send_mail(
-              subject,
-              message,
-              settings.DEFAULT_FROM_EMAIL,
-              [email],
-              fail_silently=False,
-          )
+            # IMPORTANT: protect from hanging SMTP connections (common on servers)
+            connection = get_connection(
+                timeout=10,  # seconds
+            )
+            sent = send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+                connection=connection,
+            )
 
-          return JsonResponse({"success": True})
-      except json.JSONDecodeError:
-          return JsonResponse({"error": "Invalid JSON"}, status=400)
-      except Exception as e:
-          return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "sent": sent,
+                    "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
+                    "email_host": getattr(settings, "EMAIL_HOST", ""),
+                    "email_port": getattr(settings, "EMAIL_PORT", ""),
+                    "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
+                    "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
+                }
+            )
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "error": str(e),
+                    "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
+                    "email_host": getattr(settings, "EMAIL_HOST", ""),
+                    "email_port": getattr(settings, "EMAIL_PORT", ""),
+                    "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
+                    "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
+                },
+                status=500,
+            )
 
