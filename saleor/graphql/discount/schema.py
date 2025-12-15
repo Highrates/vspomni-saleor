@@ -1,6 +1,10 @@
 import graphene
 
 from ...permission.enums import DiscountPermissions
+from ...channel.models import Channel
+from ...discount import RewardValueType
+from ...discount.utils.promotion import get_variants_to_promotion_rules_map
+from ...product.models import ProductVariant
 from ..core import ResolveInfo
 from ..core.connection import create_connection_slice, filter_connection_queryset
 from ..core.descriptions import (
@@ -78,6 +82,17 @@ class SaleFilterInput(FilterInputObjectType):
     class Meta:
         doc_category = DOC_CATEGORY_DISCOUNTS
         filterset_class = SaleFilter
+
+
+class CatalogDiscount(graphene.ObjectType):
+    """Active catalog discount for a single product variant."""
+
+    variant_id = graphene.NonNull(
+        graphene.ID, description="ProductVariant ID (GraphQL global ID)."
+    )
+    discount_percent = graphene.NonNull(
+        graphene.Float, description="Catalog discount percentage for this variant."
+    )
 
 
 class DiscountQueries(graphene.ObjectType):
@@ -177,6 +192,22 @@ class DiscountQueries(graphene.ObjectType):
             description="Slug of a channel for which the data should be returned."
         ),
         description="Validate a promo code (voucher or sale).",
+        doc_category=DOC_CATEGORY_DISCOUNTS,
+    )
+
+    # Public endpoint: active catalog (promotion) discounts for variants
+    catalog_discounts = BaseField(
+        graphene.List(graphene.NonNull(CatalogDiscount)),
+        variant_ids=graphene.Argument(
+            graphene.List(graphene.NonNull(graphene.ID)),
+            required=True,
+            description="List of ProductVariant IDs (GraphQL global IDs).",
+        ),
+        channel=graphene.Argument(
+            graphene.NonNull(graphene.String),
+            description="Channel slug for which discounts should be resolved.",
+        ),
+        description="Return active catalog (promotion) discounts for given product variants.",
         doc_category=DOC_CATEGORY_DISCOUNTS,
     )
 
@@ -297,6 +328,59 @@ class DiscountQueries(graphene.ObjectType):
             is_valid=False,
             error_message="Promo code not found",
         )
+
+    @staticmethod
+    def resolve_catalog_discounts(
+        _root, info: ResolveInfo, *, variant_ids, channel, **_kwargs
+    ):
+        # Map global IDs -> DB ids
+        id_map: dict[int, str] = {}
+        db_ids: list[int] = []
+        for gid in variant_ids:
+            _type, db_id = from_global_id_or_error(gid, "ProductVariant")
+            db_int = int(db_id)
+            db_ids.append(db_int)
+            id_map[db_int] = gid
+
+        if not db_ids:
+            return []
+
+        channel_obj = Channel.objects.filter(slug=channel).first()
+        if not channel_obj:
+            return []
+
+        variant_qs = ProductVariant.objects.filter(id__in=db_ids)
+        rules_map = get_variants_to_promotion_rules_map(variant_qs)
+
+        results: list[CatalogDiscount] = []
+
+        for variant_id, rules_info in rules_map.items():
+            best_percent: float = 0.0
+
+            for rule_info in rules_info:
+                rule = rule_info.rule
+
+                # rule must be active in this channel
+                if channel_obj.id not in rule_info.channel_ids:
+                    continue
+
+                if (
+                    rule.reward_value_type == RewardValueType.PERCENTAGE
+                    and rule.reward_value is not None
+                ):
+                    value = float(rule.reward_value)
+                    if value > best_percent:
+                        best_percent = value
+
+            if best_percent > 0 and variant_id in id_map:
+                results.append(
+                    CatalogDiscount(
+                        variant_id=id_map[variant_id],
+                        discount_percent=best_percent,
+                    )
+                )
+
+        return results
 
 
 class DiscountMutations(graphene.ObjectType):
