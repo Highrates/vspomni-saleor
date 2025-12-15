@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from ..graphql.account.mutations.authentication.utils import _get_new_csrf_token
 from ..graphql.account.mutations.authentication.create_token import update_user_last_login_if_required
 from ..graphql.site.dataloaders import get_site_promise
+from django.conf import settings
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -206,4 +207,44 @@ class AuthMeView(View):
             'isActive': user.is_active,
             'isConfirmed': user.is_confirmed,
         })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SendRegistrationEmailView(View):
+    """Custom endpoint to send a simple registration email from Saleor."""
+
+    def post(self, request):
+      from django.core.mail import send_mail
+
+      try:
+          data = json.loads(request.body)
+          email = data.get("email")
+          first_name = data.get("firstName") or ""
+
+          if not email:
+              return JsonResponse(
+                  {"error": "Email is required"},
+                  status=400,
+              )
+
+          subject = "Подтверждение регистрации в VSPOMNI"
+          message = (
+              f"Здравствуйте, {first_name or 'друг'}!\n\n"
+              "Спасибо за регистрацию на vspomni.store.\n\n"
+              "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
+          )
+
+          send_mail(
+              subject,
+              message,
+              settings.DEFAULT_FROM_EMAIL,
+              [email],
+              fail_silently=False,
+          )
+
+          return JsonResponse({"success": True})
+      except json.JSONDecodeError:
+          return JsonResponse({"error": "Invalid JSON"}, status=400)
+      except Exception as e:
+          return JsonResponse({"error": str(e)}, status=500)
 

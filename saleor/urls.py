@@ -14,7 +14,12 @@ from .plugins.views import (
 )
 from .product.views import digital_product
 from .thumbnail.views import handle_thumbnail
-from .account.rest_views import AuthLoginView, AuthSignupView, AuthMeView
+from .account.rest_views import (
+    AuthLoginView,
+    AuthSignupView,
+    AuthMeView,
+    SendRegistrationEmailView,
+)
 from .checkout.rest_views import CreateCheckoutWithoutStockCheckView
 
 urlpatterns = [
@@ -56,6 +61,11 @@ urlpatterns = [
     re_path(r"^auth/login/$", AuthLoginView.as_view(), name="auth-login"),
     re_path(r"^auth/signup/$", AuthSignupView.as_view(), name="auth-signup"),
     re_path(r"^auth/me/$", AuthMeView.as_view(), name="auth-me"),
+    re_path(
+        r"^auth/send-registration-email/$",
+        SendRegistrationEmailView.as_view(),
+        name="auth-send-registration-email",
+    ),
     re_path(
         r"^api/checkout/create-without-stock-check/$",
         CreateCheckoutWithoutStockCheckView.as_view(),
