@@ -30,511 +30,542 @@ def _generate_verification_code() -> str:
 
 @method_decorator(csrf_exempt, name="dispatch")
 class AuthLoginView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
+  def post(self, request):
+    try:
+      data = json.loads(request.body)
+      email = data.get('email')
+      password = data.get('password')
 
-            if not email or not password:
-                return JsonResponse(
-                    {'error': 'Email and password are required'},
-                    status=400
-                )
+      if not email or not password:
+        return JsonResponse(
+          {'error': 'Email and password are required'},
+          status=400
+        )
 
-            user = authenticate_with_throttling(request, email, password)
-            if not user:
-                return JsonResponse(
-                    {'error': 'Неверный email или пароль'},
-                    status=401
-                )
+      user = authenticate_with_throttling(request, email, password)
+      if not user:
+        return JsonResponse(
+          {'error': 'Неверный email или пароль'},
+          status=401
+        )
 
-            site_settings = get_site_promise(request).get().settings
-            if (
-                not user.is_confirmed
-                and not site_settings.allow_login_without_confirmation
-                and site_settings.enable_account_confirmation_by_email
-            ):
-                return JsonResponse(
-                    {'error': 'Аккаунт требует подтверждения по email'},
-                    status=403
-                )
+      from ..graphql.account.mutations.authentication.utils import _get_new_csrf_token
+      csrf_token = _get_new_csrf_token()
+      access_token = create_access_token(user)
+      refresh_token = create_refresh_token(
+        user,
+        additional_payload={"csrfToken": csrf_token},
+      )
 
-            if not user.is_active:
-                return JsonResponse(
-                    {'error': 'Аккаунт неактивен'},
-                    status=403
-                )
+      update_user_last_login_if_required(user)
 
-            csrf_token = _get_new_csrf_token()
-            access_token = create_access_token(user)
-            refresh_token = create_refresh_token(
-                user,
-                additional_payload={"csrfToken": csrf_token}
-            )
-
-            update_user_last_login_if_required(user)
-
-            return JsonResponse({
-                'token': access_token,
-                'refreshToken': refresh_token,
-                'csrfToken': csrf_token,
-                'user': {
-                    'id': str(user.id),
-                    'email': user.email,
-                    'firstName': user.first_name,
-                    'lastName': user.last_name,
-                    'isActive': user.is_active,
-                    'isConfirmed': user.is_confirmed,
-                }
-            })
-
-        except json.JSONDecodeError:
-            return JsonResponse(
-                {'error': 'Неверный формат JSON'},
-                status=400
-            )
-        except Exception as e:
-            return JsonResponse(
-                {'error': f'Ошибка сервера: {str(e)}'},
-                status=500
-            )
+      return JsonResponse({
+        'token': access_token,
+        'refreshToken': refresh_token,
+        'csrfToken': csrf_token,
+        'user': {
+          'id': str(user.id),
+          'email': user.email,
+          'firstName': user.first_name,
+          'lastName': user.last_name,
+        }
+      })
+    except json.JSONDecodeError:
+      return JsonResponse(
+        {'error': 'Неверный формат JSON'},
+        status=400
+      )
+    except Exception as e:
+      return JsonResponse(
+        {'error': f'Ошибка сервера: {str(e)}'},
+        status=500
+      )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AuthSignupView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            email = data.get('email')
-            password = data.get('password')
-            firstName = data.get('firstName')
-            lastName = data.get('lastName')
+  def post(self, request):
+    try:
+      data = json.loads(request.body)
+      email = data.get('email')
+      password = data.get('password')
+      firstName = data.get('firstName')
+      lastName = data.get('lastName')
 
-            if not email or not password:
-                return JsonResponse(
-                    {'error': 'Email and password are required'},
-                    status=400
-                )
+      if not email or not password:
+        return JsonResponse(
+          {'error': 'Email and password are required'},
+          status=400
+        )
 
-            if User.objects.filter(email=email).exists():
-                return JsonResponse(
-                    {'error': 'Пользователь с таким email уже существует'},
-                    status=400
-                )
+      if User.objects.filter(email=email).exists():
+        return JsonResponse(
+          {'error': 'Пользователь с таким email уже существует'},
+          status=400
+        )
 
-            from django.contrib.auth.password_validation import validate_password
-            from django.core.exceptions import ValidationError as DjangoValidationError
+      from django.contrib.auth.password_validation import validate_password
+      from django.core.exceptions import ValidationError as DjangoValidationError
 
-            user = User(email=email.lower())
-            if firstName:
-                user.first_name = firstName
-            if lastName:
-                user.last_name = lastName
+      user = User(email=email.lower())
+      if firstName:
+        user.first_name = firstName
+      if lastName:
+        user.last_name = lastName
 
-            try:
-                validate_password(password, user)
-            except DjangoValidationError as e:
-                return JsonResponse(
-                    {'error': '; '.join(e.messages)},
-                    status=400
-                )
+      try:
+        validate_password(password, user)
+      except DjangoValidationError as e:
+        return JsonResponse(
+          {'error': '; '.join(e.messages)},
+          status=400
+        )
 
-            user.set_password(password)
-            user.save()
+      user.set_password(password)
+      user.save()
 
-            # Refresh user to ensure ID is set
-            user.refresh_from_db()
+      # Refresh user to ensure ID is set
+      user.refresh_from_db()
 
-            site = get_site_promise(request).get()
-            requires_confirmation = site.settings.enable_account_confirmation_by_email
+      site = get_site_promise(request).get()
+      requires_confirmation = site.settings.enable_account_confirmation_by_email
 
-            if requires_confirmation:
-                from ..account.tasks import finish_creating_user
-                from ..account.utils import RequestorAwareContext
-                from ..core.utils.url import prepare_url
-                from urllib.parse import urlencode
-                from ..core.tokens import token_generator
-                from ..channel.models import Channel
+      if requires_confirmation:
+        from ..account.tasks import finish_creating_user
+        from ..account.utils import RequestorAwareContext
+        from ..core.utils.url import prepare_url
+        from urllib.parse import urlencode
+        from ..core.tokens import token_generator
+        from ..channel.models import Channel
 
-                redirect_url = data.get('redirectUrl', 'https://vspomni.store')
-                
-                # Get default channel
-                channel = Channel.objects.filter(is_active=True).first()
-                channel_slug = channel.slug if channel else None
+        redirect_url = data.get('redirectUrl', 'https://vspomni.store')
+        
+        # Get default channel
+        channel = Channel.objects.filter(is_active=True).first()
+        channel_slug = channel.slug if channel else None
 
-                # Create context_data
-                context_data = RequestorAwareContext.create_context_data(
-                    RequestorAwareContext(
-                        allow_replica=True,
-                        user=user,
-                        app=None,
-                    )
-                )
+        # Create context_data
+        context_data = RequestorAwareContext.create_context_data(
+          RequestorAwareContext(
+            allow_replica=True,
+            user=user,
+            app=None,
+          )
+        )
 
-                # Verify user.id is set before calling task
-                if not user.id:
-                    return JsonResponse(
-                        {'error': 'Не удалось создать пользователя'},
-                        status=500
-                    )
+        # Verify user.id is set before calling task
+        if not user.id:
+          return JsonResponse(
+            {'error': 'Не удалось создать пользователя'},
+            status=500
+          )
 
-                finish_creating_user.delay(user.id, redirect_url, channel_slug, context_data)
+        finish_creating_user.delay(user.id, redirect_url, channel_slug, context_data)
 
-            return JsonResponse({
-                'success': True,
-                'requiresConfirmation': requires_confirmation,
-                'message': 'Registration successful. Please check your email for confirmation.' if requires_confirmation else 'Registration successful.'
-            })
+      return JsonResponse({
+        'success': True,
+        'requiresConfirmation': requires_confirmation,
+        'message': 'Registration successful. Please check your email for confirmation.' if requires_confirmation else 'Registration successful.'
+      })
 
-        except json.JSONDecodeError:
-            return JsonResponse(
-                {'error': 'Неверный формат JSON'},
-                status=400
-            )
-        except Exception as e:
-            return JsonResponse(
-                {'error': f'Ошибка сервера: {str(e)}'},
-                status=500
-            )
+    except json.JSONDecodeError:
+      return JsonResponse(
+        {'error': 'Неверный формат JSON'},
+        status=400
+      )
+    except Exception as e:
+      return JsonResponse(
+        {'error': f'Ошибка сервера: {str(e)}'},
+        status=500
+      )
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AuthMeView(View):
-    def get(self, request):
-        from ..core.auth_backend import load_user_from_request
+  def get(self, request):
+    from ..core.auth_backend import load_user_from_request
 
-        user = load_user_from_request(request)
-        if not user:
-            return JsonResponse(
-                {'error': 'Не авторизован'},
-                status=401
-            )
+    user = load_user_from_request(request)
+    if not user:
+      return JsonResponse(
+        {'error': 'Не авторизован'},
+        status=401
+      )
 
-        return JsonResponse({
-            'id': str(user.id),
-            'email': user.email,
-            'firstName': user.first_name,
-            'lastName': user.last_name,
-            'isActive': user.is_active,
-            'isConfirmed': user.is_confirmed,
-        })
+    return JsonResponse({
+      'id': str(user.id),
+      'email': user.email,
+      'firstName': user.first_name,
+      'lastName': user.last_name,
+      'isActive': user.is_active,
+      'isConfirmed': user.is_confirmed,
+    })
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SendRegistrationEmailView(View):
-    """Deprecated: оставлен для совместимости. Используй RequestEmailCodeView."""
+  """Deprecated: оставлен для совместимости. Используй RequestEmailCodeView."""
 
-    def post(self, request):
-        from django.core.mail import get_connection, send_mail
+  def post(self, request):
+    from django.core.mail import get_connection, send_mail
 
-        try:
-            data = json.loads(request.body)
-            email = data.get("email")
-            first_name = data.get("firstName") or ""
+    try:
+      data = json.loads(request.body)
+      email = data.get("email")
+      first_name = data.get("firstName") or ""
 
-            if not email:
-                return JsonResponse(
-                    {"error": "Email обязателен для заполнения"},
-                    status=400,
-                )
+      if not email:
+        return JsonResponse(
+          {"error": "Email обязателен для заполнения"},
+          status=400,
+        )
 
-            subject = "Подтверждение регистрации в VSPOMNI"
-            message = (
-                f"Здравствуйте, {first_name or 'друг'}!\n\n"
-                "Спасибо за регистрацию на vspomni.store.\n\n"
-                "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
-            )
+      subject = "Подтверждение регистрации в VSPOMNI"
+      message = (
+        f"Здравствуйте, {first_name or 'друг'}!\n\n"
+        "Спасибо за регистрацию на vspomni.store.\n\n"
+        "Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо."
+      )
 
-            # IMPORTANT: protect from hanging SMTP connections (common on servers)
-            connection = get_connection(
-                timeout=10,  # seconds
-            )
-            sent = send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-                connection=connection,
-            )
+      # IMPORTANT: protect from hanging SMTP connections (common on servers)
+      connection = get_connection(
+        timeout=10,  # seconds
+      )
+      sent = send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=False,
+        connection=connection,
+      )
 
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "sent": sent,
-                    "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
-                    "email_host": getattr(settings, "EMAIL_HOST", ""),
-                    "email_port": getattr(settings, "EMAIL_PORT", ""),
-                    "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
-                    "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
-                }
-            )
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse(
-                {
-                    "ok": False,
-                    "error": str(e),
-                    "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
-                    "email_host": getattr(settings, "EMAIL_HOST", ""),
-                    "email_port": getattr(settings, "EMAIL_PORT", ""),
-                    "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
-                    "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
-                },
-                status=500,
-            )
+      return JsonResponse(
+        {
+          "ok": True,
+          "sent": sent,
+          "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
+          "email_host": getattr(settings, "EMAIL_HOST", ""),
+          "email_port": getattr(settings, "EMAIL_PORT", ""),
+          "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
+          "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
+        }
+      )
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse(
+        {
+          "ok": False,
+          "error": str(e),
+          "email_backend": getattr(settings, "EMAIL_BACKEND", ""),
+          "email_host": getattr(settings, "EMAIL_HOST", ""),
+          "email_port": getattr(settings, "EMAIL_PORT", ""),
+          "email_use_tls": getattr(settings, "EMAIL_USE_TLS", False),
+          "default_from_email": getattr(settings, "DEFAULT_FROM_EMAIL", ""),
+        },
+        status=500,
+      )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RequestEmailCodeView(View):
-    """Отправить одноразовый код подтверждения email."""
+  """Отправить одноразовый код подтверждения email."""
 
-    def post(self, request):
-        from django.core.mail import get_connection, send_mail
+  def post(self, request):
+    from django.core.mail import get_connection, send_mail
 
-        try:
-            data = json.loads(request.body)
-            email = (data.get("email") or "").strip().lower()
-            first_name = (data.get("firstName") or "").strip()
+    try:
+      data = json.loads(request.body)
+      email = (data.get("email") or "").strip().lower()
+      first_name = (data.get("firstName") or "").strip()
 
-            if not email:
-                return JsonResponse({"error": "email is required"}, status=400)
+      if not email:
+        return JsonResponse({"error": "email is required"}, status=400)
 
-            # Генерируем новый код и инвалидируем старые активные
-            code = _generate_verification_code()
-            phone = (data.get("phone") or "").strip()
-            EmailVerificationCode.objects.filter(
-                email=email, is_used=False
-            ).delete()
-            EmailVerificationCode.objects.create(email=email, code=code, phone=phone)
+      # Генерируем новый код и инвалидируем старые активные
+      code = _generate_verification_code()
+      phone = (data.get("phone") or "").strip()
+      EmailVerificationCode.objects.filter(
+        email=email, is_used=False
+      ).delete()
+      EmailVerificationCode.objects.create(email=email, code=code, phone=phone)
 
-            subject = "Код подтверждения регистрации в VSPOMNI"
-            message = (
-                f"Здравствуйте, {first_name or 'друг'}!\n\n"
-                f"Ваш код подтверждения: {code}\n"
-                f"Он действует {OTP_EXPIRATION_MINUTES} минут.\n\n"
-                "Если вы не регистрировались на vspomni.store, просто проигнорируйте это письмо."
-            )
+      subject = "Код подтверждения регистрации в VSPOMNI"
+      message = (
+        f"Здравствуйте, {first_name or 'друг'}!\n\n"
+        f"Ваш код подтверждения: {code}\n"
+        f"Он действует {OTP_EXPIRATION_MINUTES} минут.\n\n"
+        "Если вы не регистрировались на vspomni.store, просто проигнорируйте это письмо."
+      )
 
-            connection = get_connection(timeout=10)
-            sent = send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-                connection=connection,
-            )
+      connection = get_connection(timeout=10)
+      sent = send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=False,
+        connection=connection,
+      )
 
-            return JsonResponse({"ok": True, "sent": sent})
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      return JsonResponse({"ok": True, "sent": sent})
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class VerifyEmailCodeView(View):
-    """Проверка кода подтверждения и автоматический логин пользователя."""
+  """Проверка кода подтверждения и автоматический логин пользователя."""
 
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            email = (data.get("email") or "").strip().lower()
-            code = (data.get("code") or "").strip()
+  def post(self, request):
+    try:
+      data = json.loads(request.body)
+      email = (data.get("email") or "").strip().lower()
+      code = (data.get("code") or "").strip()
 
-            if not email or not code:
-                return JsonResponse(
-                    {"error": "email and code are required"}, status=400
-                )
+      if not email or not code:
+        return JsonResponse(
+          {"error": "email and code are required"}, status=400
+        )
 
-            now = timezone.now()
-            valid_from = now - timedelta(minutes=OTP_EXPIRATION_MINUTES)
+      now = timezone.now()
+      valid_from = now - timedelta(minutes=OTP_EXPIRATION_MINUTES)
 
-            ver = (
-                EmailVerificationCode.objects.filter(
-                    email=email,
-                    code=code,
-                    is_used=False,
-                    created_at__gte=valid_from,
-                )
-                .order_by("-created_at")
-                .first()
-            )
+      ver = (
+        EmailVerificationCode.objects.filter(
+          email=email,
+          code=code,
+          is_used=False,
+          created_at__gte=valid_from,
+        )
+        .order_by("-created_at")
+        .first()
+      )
 
-            if not ver:
-                return JsonResponse(
-                    {"ok": False, "error": "Неверный или просроченный код"},
-                    status=400,
-                )
+      if not ver:
+        return JsonResponse(
+          {"ok": False, "error": "Неверный или просроченный код"},
+          status=400,
+        )
 
-            ver.is_used = True
-            ver.save(update_fields=["is_used"])
+      ver.is_used = True
+      ver.save(update_fields=["is_used"])
 
-            user = User.objects.filter(email=email).first()
-            if not user:
-                return JsonResponse(
-                    {"ok": False, "error": "Пользователь с таким email не найден"},
-                    status=400,
-                )
+      user = User.objects.filter(email=email).first()
+      if not user:
+        return JsonResponse(
+          {"ok": False, "error": "Пользователь с таким email не найден"},
+          status=400,
+        )
 
-            # Подтверждаем и активируем пользователя
-            user.is_confirmed = True
-            user.is_active = True
-            user.save(update_fields=["is_confirmed", "is_active"])
+      # Подтверждаем и активируем пользователя
+      user.is_confirmed = True
+      user.is_active = True
+      user.save(update_fields=["is_confirmed", "is_active"])
 
-            # Автоматический логин: создаём токены как в AuthLoginView
-            csrf_token = _get_new_csrf_token()
-            access_token = create_access_token(user)
-            refresh_token = create_refresh_token(
-                user,
-                additional_payload={"csrfToken": csrf_token},
-            )
+      # Автоматический логин: создаём токены как в AuthLoginView
+      csrf_token = _get_new_csrf_token()
+      access_token = create_access_token(user)
+      refresh_token = create_refresh_token(
+        user,
+        additional_payload={"csrfToken": csrf_token},
+      )
 
-            update_user_last_login_if_required(user)
+      update_user_last_login_if_required(user)
 
-            return JsonResponse(
-                {
-                    "ok": True,
-                    "token": access_token,
-                    "refreshToken": refresh_token,
-                    "csrfToken": csrf_token,
-                    "user": {
-                        "id": str(user.id),
-                        "email": user.email,
-                        "firstName": user.first_name,
-                        "lastName": user.last_name,
-                        "isActive": user.is_active,
-                        "isConfirmed": user.is_confirmed,
-                    },
-                }
-            )
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      return JsonResponse(
+        {
+          "ok": True,
+          "token": access_token,
+          "refreshToken": refresh_token,
+          "csrfToken": csrf_token,
+          "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "firstName": user.first_name,
+            "lastName": user.last_name,
+            "isActive": user.is_active,
+            "isConfirmed": user.is_confirmed,
+          },
+        }
+      )
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ForgotPasswordView(View):
-    """Запрос на сброс пароля."""
+  """Запрос на сброс пароля."""
 
-    def post(self, request):
-        from django.core.mail import get_connection, send_mail
+  def post(self, request):
+    from django.core.mail import get_connection, send_mail
 
-        try:
-            data = json.loads(request.body)
-            email = (data.get("email") or "").strip().lower()
+    try:
+      data = json.loads(request.body)
+      email = (data.get("email") or "").strip().lower()
 
-            if not email:
-                return JsonResponse(
-                    {"ok": False, "error": "email is required"}, status=400
-                )
+      if not email:
+        return JsonResponse(
+          {"ok": False, "error": "email is required"}, status=400
+        )
 
-            # Проверяем, существует ли пользователь с таким email
-            user = User.objects.filter(email=email).first()
-            if not user:
-                return JsonResponse(
-                    {"ok": False, "error": "Пользователь с таким email не найден"},
-                    status=400,
-                )
+      user = User.objects.filter(email=email).first()
+      if not user:
+        # Не раскрываем, существует ли пользователь
+        return JsonResponse({"ok": True, "sent": True})
 
-            # Генерируем токен для сброса пароля
-            from ..core.tokens import token_generator
-            token = token_generator.make_token(user)
+      # Генерируем токен для сброса пароля
+      from ..core.tokens import token_generator
+      token = token_generator.make_token(user)
 
-            # Отправляем письмо с инструкциями
-            subject = "Сброс пароля в VSPOMNI"
-            reset_url = f"{settings.FRONTEND_URL}/login?token={token}&email={email}"
-            message = (
-                f"Здравствуйте, {user.first_name or 'друг'}!\n\n"
-                f"Вы запросили сброс пароля на vspomni.store.\n\n"
-                f"Для сброса пароля перейдите по ссылке:\n{reset_url}\n\n"
-                "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
-            )
+      # Отправляем письмо с инструкциями
+      subject = "Сброс пароля в VSPOMNI"
+      reset_url = f"{settings.FRONTEND_URL}/login?token={token}&email={email}"
+      message = (
+        f"Здравствуйте, {user.first_name or 'друг'}!\n\n"
+        f"Вы запросили сброс пароля на vspomni.store.\n\n"
+        f"Для сброса пароля перейдите по ссылке:\n{reset_url}\n\n"
+        "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
+      )
 
-            connection = get_connection(timeout=10)
-            sent = send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-                connection=connection,
-            )
+      connection = get_connection(timeout=10)
+      sent = send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=False,
+        connection=connection,
+      )
 
-            return JsonResponse({"ok": True, "sent": sent})
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      return JsonResponse({"ok": True, "sent": sent})
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ResetPasswordView(View):
-    """Сброс пароля по токену."""
+  """Сброс пароля по токену."""
 
-    def post(self, request):
-        from django.contrib.auth.password_validation import validate_password
-        from django.core.exceptions import ValidationError as DjangoValidationError
-        from ..core.tokens import token_generator
+  def post(self, request):
+    from django.contrib.auth.password_validation import validate_password
+    from django.core.exceptions import ValidationError as DjangoValidationError
+    from ..core.tokens import token_generator
 
-        try:
-            data = json.loads(request.body)
-            email = (data.get("email") or "").strip().lower()
-            token = (data.get("token") or "").strip()
-            new_password = data.get("newPassword")
+    try:
+      data = json.loads(request.body)
+      email = (data.get("email") or "").strip().lower()
+      token = (data.get("token") or "").strip()
+      new_password = data.get("newPassword")
 
-            if not email or not token or not new_password:
-                return JsonResponse(
-                    {"ok": False, "error": "Email, токен и новый пароль обязательны для заполнения"},
-                    status=400,
-                )
+      if not email or not token or not new_password:
+        return JsonResponse(
+          {"ok": False, "error": "Email, токен и новый пароль обязательны для заполнения"},
+          status=400,
+        )
 
-            user = User.objects.filter(email=email).first()
-            if not user:
-                return JsonResponse(
-                    {"ok": False, "error": "Пользователь с таким email не найден"},
-                    status=400,
-                )
+      user = User.objects.filter(email=email).first()
+      if not user:
+        return JsonResponse(
+          {"ok": False, "error": "Пользователь с таким email не найден"},
+          status=400,
+        )
 
-            # Проверяем токен
-            if not token_generator.check_token(user, token):
-                return JsonResponse(
-                    {"ok": False, "error": "Неверный или просроченный токен"},
-                    status=400,
-                )
+      # Проверяем токен
+      if not token_generator.check_token(user, token):
+        return JsonResponse(
+          {"ok": False, "error": "Неверный или просроченный токен"},
+          status=400,
+        )
 
-            # Валидируем новый пароль
-            try:
-                validate_password(new_password, user)
-            except DjangoValidationError as e:
-                error_messages = "; ".join(e.messages)
-                return JsonResponse(
-                    {"ok": False, "error": error_messages}, status=400
-                )
+      # Валидируем новый пароль
+      try:
+        validate_password(new_password, user)
+      except DjangoValidationError as e:
+        error_messages = "; ".join(e.messages)
+        return JsonResponse(
+          {"ok": False, "error": error_messages}, status=400
+        )
 
-            # Устанавливаем новый пароль
-            user.set_password(new_password)
-            user.save(update_fields=["password"])
+      # Устанавливаем новый пароль
+      user.set_password(new_password)
+      user.save(update_fields=["password"])
 
-            return JsonResponse({"ok": True})
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
-        except Exception as e:
-            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      return JsonResponse({"ok": True})
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ChangePasswordView(View):
-    """Смена пароля пользователя."""
+  """Смена пароля пользователя."""
 
-    def post(self, request):
+  def post(self, request):
+    from ..core.auth_backend import load_user_from_request
+    from django.contrib.auth.password_validation import validate_password
+    from django.core.exceptions import ValidationError as DjangoValidationError
+
+    try:
+      user = load_user_from_request(request)
+      if not user:
+        return JsonResponse(
+          {"ok": False, "error": "Не авторизован"}, status=401
+        )
+
+      data = json.loads(request.body)
+      old_password = data.get("oldPassword")
+      new_password = data.get("newPassword")
+
+      if not old_password or not new_password:
+        return JsonResponse(
+          {"ok": False, "error": "Старый и новый пароль обязательны для заполнения"},
+          status=400,
+        )
+
+      # Проверяем старый пароль
+      if not user.check_password(old_password):
+        return JsonResponse(
+          {"ok": False, "error": "Неверный старый пароль"},
+          status=400,
+        )
+
+      # Валидируем новый пароль
+      try:
+        validate_password(new_password, user)
+      except DjangoValidationError as e:
+        error_messages = "; ".join(e.messages)
+        return JsonResponse(
+          {"ok": False, "error": error_messages}, status=400
+        )
+
+      # Устанавливаем новый пароль
+      user.set_password(new_password)
+      user.save(update_fields=["password"])
+
+      return JsonResponse({"ok": True})
+    except json.JSONDecodeError:
+      return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+    except Exception as e:
+      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GetOrdersView(View):
+    """Получить оформленные заказы пользователя (исключая DRAFT)."""
+
+    def get(self, request):
         from ..core.auth_backend import load_user_from_request
-        from django.contrib.auth.password_validation import validate_password
-        from django.core.exceptions import ValidationError as DjangoValidationError
+        from ..order.models import Order
+        from ..order import OrderStatus
 
         try:
             user = load_user_from_request(request)
@@ -543,38 +574,72 @@ class ChangePasswordView(View):
                     {"ok": False, "error": "Не авторизован"}, status=401
                 )
 
-            data = json.loads(request.body)
-            old_password = data.get("oldPassword")
-            new_password = data.get("newPassword")
+            # Получаем только оформленные заказы (исключаем DRAFT и UNCONFIRMED)
+            orders = Order.objects.filter(
+                user=user
+            ).exclude(
+                status__in=[OrderStatus.DRAFT, OrderStatus.UNCONFIRMED]
+            ).order_by('-created')[:20]
 
-            if not old_password or not new_password:
-                return JsonResponse(
-                    {"ok": False, "error": "Текущий пароль и новый пароль обязательны для заполнения"},
-                    status=400,
-                )
+            orders_data = []
+            for order in orders:
+                lines_data = []
+                for line in order.lines.all():
+                    thumbnail_url = None
+                    if line.variant and line.variant.product and line.variant.product.thumbnail:
+                        thumbnail_url = line.variant.product.thumbnail.url
+                    
+                    lines_data.append({
+                        "id": str(line.id),
+                        "productName": line.product_name,
+                        "variantName": line.variant_name or "100 мл",
+                        "quantity": line.quantity,
+                        "unitPrice": {
+                            "gross": {
+                                "amount": int(line.unit_price_gross_amount * 100),
+                                "currency": order.currency,
+                            }
+                        },
+                        "undiscountedUnitPrice": {
+                            "gross": {
+                                "amount": int(line.undiscounted_unit_price_gross_amount * 100),
+                                "currency": order.currency,
+                            }
+                        },
+                        "thumbnail": {
+                            "url": thumbnail_url,
+                            "alt": line.product_name,
+                        },
+                    })
 
-            # Проверяем старый пароль
-            if not user.check_password(old_password):
-                return JsonResponse(
-                    {"ok": False, "error": "Неверный текущий пароль"}, status=400
-                )
+                # Переводим статус на русский
+                status_text = "В процессе"
+                if order.status == OrderStatus.FULFILLED:
+                    status_text = "Доставлено"
+                elif order.status == OrderStatus.CANCELED:
+                    status_text = "Отменено"
+                elif order.status == OrderStatus.PARTIALLY_FULFILLED:
+                    status_text = "Частично выполнен"
+                elif order.status == OrderStatus.UNFULFILLED:
+                    status_text = "В процессе"
 
-            # Валидируем новый пароль
-            try:
-                validate_password(new_password, user)
-            except DjangoValidationError as e:
-                error_messages = "; ".join(e.messages)
-                return JsonResponse(
-                    {"ok": False, "error": error_messages}, status=400
-                )
+                orders_data.append({
+                    "id": str(order.id),
+                    "number": order.number or str(order.id),
+                    "created": order.created.isoformat(),
+                    "status": order.status,
+                    "statusDisplay": status_text,
+                    "total": {
+                        "gross": {
+                            "amount": int(order.total_gross_amount * 100),
+                            "currency": order.currency,
+                        }
+                    },
+                    "lines": lines_data,
+                })
 
-            # Устанавливаем новый пароль
-            user.set_password(new_password)
-            user.save(update_fields=["password"])
-
-            return JsonResponse({"ok": True})
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
+            return JsonResponse({"ok": True, "orders": orders_data})
         except Exception as e:
-            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
-
+            return JsonResponse(
+                {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
+            )
