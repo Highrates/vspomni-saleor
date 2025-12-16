@@ -340,8 +340,6 @@ class VerifyEmailCodeView(View):
     """Проверка кода подтверждения и автоматический логин пользователя."""
 
     def post(self, request):
-        from ..account.models import Address
-
         try:
             data = json.loads(request.body)
             email = (data.get("email") or "").strip().lower()
@@ -386,25 +384,6 @@ class VerifyEmailCodeView(View):
             user.is_confirmed = True
             user.is_active = True
             user.save(update_fields=["is_confirmed", "is_active"])
-
-            # Создаём адрес с телефоном, если телефон был указан при регистрации
-            # Получаем телефон из кода подтверждения или из запроса
-            phone = data.get("phone", "").strip()
-            if not phone and ver:
-                phone = ver.phone or ""
-            
-            if phone and not user.addresses.exists():
-                # Создаём минимальный адрес с телефоном
-                address = Address.objects.create(
-                    first_name=user.first_name or "",
-                    last_name=user.last_name or "",
-                    phone=phone,
-                    country="RU",  # Default country
-                )
-                user.addresses.add(address)
-                user.default_shipping_address = address
-                user.default_billing_address = address
-                user.save(update_fields=["default_shipping_address", "default_billing_address"])
 
             # Автоматический логин: создаём токены как в AuthLoginView
             csrf_token = _get_new_csrf_token()
@@ -468,7 +447,7 @@ class ForgotPasswordView(View):
 
             # Отправляем письмо с инструкциями
             subject = "Сброс пароля в VSPOMNI"
-            reset_url = f"{settings.FRONTEND_URL or 'https://vspomni.store'}/login?token={token}&email={email}"
+            reset_url = f"{settings.FRONTEND_URL}/login?token={token}&email={email}"
             message = (
                 f"Здравствуйте, {user.first_name or 'друг'}!\n\n"
                 f"Вы запросили сброс пароля на vspomni.store.\n\n"

@@ -202,6 +202,11 @@ if PUBLIC_URL:
 if ENABLE_SSL:
     SECURE_SSL_REDIRECT = not DEBUG
 
+# Frontend URL for password reset and other frontend links
+FRONTEND_URL: str | None = get_url_from_env("FRONTEND_URL", schemes=["http", "https"])
+if not FRONTEND_URL:
+    FRONTEND_URL = "https://vspomni.store"
+
 DEFAULT_FROM_EMAIL: str = os.environ.get(
     "DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "noreply@example.com"
 )
