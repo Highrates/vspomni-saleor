@@ -280,7 +280,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
             checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
             
             # Временно обновляем stock для всех вариантов в checkout, чтобы обойти проверку наличия
-            # Сохраняем оригинальные значения для восстановления
+            # Обновляем quantity (общее количество) чтобы было достаточно для checkout
             stock_updates = []
             for line in checkout_lines:
                 variant = line.variant
@@ -288,12 +288,20 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     # Получаем все stock записи для варианта
                     stocks = Stock.objects.filter(product_variant=variant)
                     for stock in stocks:
-                        original_quantity = stock.quantity_allocated
-                        # Временно увеличиваем allocated quantity, чтобы обойти проверку
-                        stock.quantity_allocated = max(stock.quantity_allocated, line.quantity)
-                        stock.save(update_fields=['quantity_allocated'])
-                        stock_updates.append((stock, original_quantity))
-                        logger.info(f'Temporarily updated stock for variant {variant.id}: allocated={stock.quantity_allocated}')
+                        # Сохраняем оригинальные значения
+                        original_quantity = stock.quantity
+                        original_allocated = stock.quantity_allocated
+                        
+                        # Временно увеличиваем quantity чтобы было достаточно для checkout
+                        # Нужно чтобы quantity >= quantity_allocated + line.quantity
+                        required_quantity = max(
+                            stock.quantity,
+                            (stock.quantity_allocated or 0) + line.quantity
+                        )
+                        stock.quantity = required_quantity
+                        stock.save(update_fields=['quantity'])
+                        stock_updates.append((stock, original_quantity, original_allocated))
+                        logger.info(f'Temporarily updated stock for variant {variant.id}: quantity={stock.quantity}, allocated={stock.quantity_allocated}, required={required_quantity}')
             
             try:
                 # Создаём order
