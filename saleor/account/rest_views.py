@@ -1,22 +1,34 @@
 import json
+from datetime import timedelta
+from random import randint
+
+from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
+from ..account.error_codes import AccountErrorCode
+from ..account.models import EmailVerificationCode, User
 from ..account.throttling import authenticate_with_throttling
 from ..core.jwt import create_access_token, create_refresh_token
-from ..account.models import User
-from ..account.error_codes import AccountErrorCode
-from django.core.exceptions import ValidationError
+from ..graphql.account.mutations.authentication.create_token import (
+    update_user_last_login_if_required,
+)
 from ..graphql.account.mutations.authentication.utils import _get_new_csrf_token
-from ..graphql.account.mutations.authentication.create_token import update_user_last_login_if_required
 from ..graphql.site.dataloaders import get_site_promise
-from django.conf import settings
 
 
-@method_decorator(csrf_exempt, name='dispatch')
+OTP_EXPIRATION_MINUTES = 10
+
+
+def _generate_verification_code() -> str:
+  # 6-значный числовой код, с ведущими нулями
+  return f"{randint(0, 999999):06d}"
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class AuthLoginView(View):
     def post(self, request):
         try:
@@ -211,7 +223,7 @@ class AuthMeView(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SendRegistrationEmailView(View):
-    """Custom endpoint to send a simple registration email from Saleor."""
+    """Deprecated: оставлен для совместимости. Используй RequestEmailCodeView."""
 
     def post(self, request):
         from django.core.mail import get_connection, send_mail
@@ -273,4 +285,133 @@ class SendRegistrationEmailView(View):
                 },
                 status=500,
             )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class RequestEmailCodeView(View):
+    """Отправить одноразовый код подтверждения email."""
+
+    def post(self, request):
+        from django.core.mail import get_connection, send_mail
+
+        try:
+            data = json.loads(request.body)
+            email = (data.get("email") or "").strip().lower()
+            first_name = (data.get("firstName") or "").strip()
+
+            if not email:
+                return JsonResponse({"error": "email is required"}, status=400)
+
+            # Генерируем новый код и инвалидируем старые активные
+            code = _generate_verification_code()
+            EmailVerificationCode.objects.filter(
+                email=email, is_used=False
+            ).delete()
+            EmailVerificationCode.objects.create(email=email, code=code)
+
+            subject = "Код подтверждения регистрации в VSPOMNI"
+            message = (
+                f"Здравствуйте, {first_name or 'друг'}!\n\n"
+                f"Ваш код подтверждения: {code}\n"
+                f"Он действует {OTP_EXPIRATION_MINUTES} минут.\n\n"
+                "Если вы не регистрировались на vspomni.store, просто проигнорируйте это письмо."
+            )
+
+            connection = get_connection(timeout=10)
+            sent = send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+                connection=connection,
+            )
+
+            return JsonResponse({"ok": True, "sent": sent})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class VerifyEmailCodeView(View):
+    """Проверка кода подтверждения и автоматический логин пользователя."""
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            email = (data.get("email") or "").strip().lower()
+            code = (data.get("code") or "").strip()
+
+            if not email or not code:
+                return JsonResponse(
+                    {"error": "email and code are required"}, status=400
+                )
+
+            now = timezone.now()
+            valid_from = now - timedelta(minutes=OTP_EXPIRATION_MINUTES)
+
+            ver = (
+                EmailVerificationCode.objects.filter(
+                    email=email,
+                    code=code,
+                    is_used=False,
+                    created_at__gte=valid_from,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+
+            if not ver:
+                return JsonResponse(
+                    {"ok": False, "error": "Неверный или просроченный код"},
+                    status=400,
+                )
+
+            ver.is_used = True
+            ver.save(update_fields=["is_used"])
+
+            user = User.objects.filter(email=email).first()
+            if not user:
+                return JsonResponse(
+                    {"ok": False, "error": "Пользователь с таким email не найден"},
+                    status=400,
+                )
+
+            # Подтверждаем и активируем пользователя
+            user.is_confirmed = True
+            user.is_active = True
+            user.save(update_fields=["is_confirmed", "is_active"])
+
+            # Автоматический логин: создаём токены как в AuthLoginView
+            csrf_token = _get_new_csrf_token()
+            access_token = create_access_token(user)
+            refresh_token = create_refresh_token(
+                user,
+                additional_payload={"csrfToken": csrf_token},
+            )
+
+            update_user_last_login_if_required(user)
+
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "token": access_token,
+                    "refreshToken": refresh_token,
+                    "csrfToken": csrf_token,
+                    "user": {
+                        "id": str(user.id),
+                        "email": user.email,
+                        "firstName": user.first_name,
+                        "lastName": user.last_name,
+                        "isActive": user.is_active,
+                        "isConfirmed": user.is_confirmed,
+                    },
+                }
+            )
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=500)
 

@@ -19,6 +19,8 @@ from .account.rest_views import (
     AuthSignupView,
     AuthMeView,
     SendRegistrationEmailView,
+    RequestEmailCodeView,
+    VerifyEmailCodeView,
 )
 from .checkout.rest_views import CreateCheckoutWithoutStockCheckView
 
@@ -65,6 +67,16 @@ urlpatterns = [
         r"^auth/send-registration-email/$",
         SendRegistrationEmailView.as_view(),
         name="auth-send-registration-email",
+    ),
+    re_path(
+        r"^auth/request-email-code/$",
+        RequestEmailCodeView.as_view(),
+        name="auth-request-email-code",
+    ),
+    re_path(
+        r"^auth/verify-email-code/$",
+        VerifyEmailCodeView.as_view(),
+        name="auth-verify-email-code",
     ),
     re_path(
         r"^api/checkout/create-without-stock-check/$",
