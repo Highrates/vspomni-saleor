@@ -563,6 +563,9 @@ class GetOrdersView(View):
     """Получить оформленные заказы пользователя (исключая DRAFT)."""
 
     def get(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info('GetOrdersView: Request received')
         from ..core.auth_backend import load_user_from_request
         from ..order.models import Order
         from ..order import OrderStatus
@@ -579,7 +582,7 @@ class GetOrdersView(View):
                 user=user
             ).exclude(
                 status__in=[OrderStatus.DRAFT, OrderStatus.UNCONFIRMED]
-            ).order_by('-created')[:20]
+            ).order_by('-created_at')[:20]
 
             orders_data = []
             for order in orders:
@@ -626,7 +629,7 @@ class GetOrdersView(View):
                 orders_data.append({
                     "id": str(order.id),
                     "number": order.number or str(order.id),
-                    "created": order.created.isoformat(),
+                    "created": order.created_at.isoformat(),
                     "status": order.status,
                     "statusDisplay": status_text,
                     "total": {
@@ -638,8 +641,10 @@ class GetOrdersView(View):
                     "lines": lines_data,
                 })
 
+            logger.info(f'GetOrdersView: Returning {len(orders_data)} orders')
             return JsonResponse({"ok": True, "orders": orders_data})
         except Exception as e:
+            logger.error(f'GetOrdersView: Error - {str(e)}', exc_info=True)
             return JsonResponse(
                 {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
             )
