@@ -302,14 +302,23 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 
                 try:
                     # Создаём order
+                    # Используем email из checkout, если user не установлен
+                    user = checkout.user
+                    if not user and checkout.email:
+                        # Пытаемся найти пользователя по email
+                        from ..account.utils import retrieve_user_by_email
+                        try:
+                            user = retrieve_user_by_email(checkout.email)
+                        except Exception:
+                            user = None
+                    
                     order, action_required, payment_data = complete_checkout(
                         manager=manager,
                         checkout_info=checkout_info,
                         lines=checkout_lines,
                         payment_data={},
                         store_source=False,
-                        user=checkout.user or None,
-                        user_email=checkout.email or '',
+                        user=user,
                         app=None,
                         site_settings=None,
                         redirect_url=None,
