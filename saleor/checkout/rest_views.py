@@ -276,53 +276,21 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 checkout_lines, _ = fetch_checkout_lines(checkout)
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
-                # Временно обновляем stock для всех вариантов в checkout, чтобы обойти проверку наличия
-                # Проверка наличия использует stock.for_channel_and_country(), поэтому нужно обновить stock для правильного channel
-                # available_quantity = quantity - quantity_allocated, поэтому нужно quantity >= quantity_allocated + line.quantity
-                stock_updates = []
-                channel = checkout.channel
-                country_code = checkout.country.code if checkout.country else 'RU'
-                
+                # ВРЕМЕННО отключаем track_inventory для всех вариантов в checkout, чтобы обойти проверку наличия
+                # Это радикальное решение, которое гарантированно обходит проверку stock
+                # Проверка наличия пропускается если variant.track_inventory = False
+                variant_track_inventory_states = {}
                 for line in checkout_lines:
                     variant = line.variant
                     if variant and variant.track_inventory:
-                        # Получаем stock для channel и country (как в проверке наличия)
-                        from ..warehouse.models import Stock
-                        stocks = Stock.objects.select_for_update().for_channel_and_country(
-                            channel.slug, country_code, include_cc_warehouses=True
-                        ).filter(product_variant=variant)
-                        
-                        if not stocks.exists():
-                            # Если нет stock для channel, получаем все stock для варианта
-                            logger.warning(f'No stock found for variant {variant.id} in channel {channel.slug}, country {country_code}, trying all warehouses')
-                            stocks = Stock.objects.select_for_update().filter(product_variant=variant)
-                        
-                        for stock in stocks:
-                            # Сохраняем оригинальные значения
-                            original_quantity = stock.quantity
-                            original_allocated = stock.quantity_allocated or 0
-                            
-                            # Вычисляем необходимое quantity
-                            # available_quantity = quantity - quantity_allocated
-                            # Нужно: available_quantity >= line.quantity
-                            # То есть: quantity - quantity_allocated >= line.quantity
-                            # Или: quantity >= quantity_allocated + line.quantity
-                            # Добавляем запас 10 единиц на случай резерваций или других allocations
-                            required_quantity = original_allocated + line.quantity + 10
-                            
-                            # Увеличиваем quantity если нужно
-                            if stock.quantity < required_quantity:
-                                stock.quantity = required_quantity
-                                stock.save(update_fields=['quantity'])
-                                # Обновляем из БД чтобы убедиться, что изменения видны
-                                stock.refresh_from_db()
-                                stock_updates.append((stock, original_quantity, original_allocated))
-                                logger.info(f'Updated stock for variant {variant.id} (warehouse {stock.warehouse_id}): quantity={stock.quantity} (was {original_quantity}), allocated={stock.quantity_allocated}, required={required_quantity}, available={stock.quantity - (stock.quantity_allocated or 0)}')
-                            else:
-                                logger.info(f'Stock for variant {variant.id} (warehouse {stock.warehouse_id}) already sufficient: quantity={stock.quantity}, allocated={stock.quantity_allocated}, available={stock.quantity - (stock.quantity_allocated or 0)}, required={line.quantity}')
-                
-                # Обновляем checkout_info после обновления stock, чтобы изменения были видны
-                checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+                        variant_track_inventory_states[variant.id] = True
+                        # Обновляем в БД напрямую для гарантии
+                        from ..product.models import ProductVariant
+                        ProductVariant.objects.filter(id=variant.id).update(track_inventory=False)
+                        # Обновляем объект в памяти
+                        variant.track_inventory = False
+                        variant.refresh_from_db()
+                        logger.info(f'Temporarily disabled track_inventory for variant {variant.id} (product: {variant.product.name if variant.product else "N/A"})')
                 
                 try:
                     # Создаём order
@@ -336,26 +304,38 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         except Exception:
                             user = None
                     
-                    order, action_required, payment_data = complete_checkout(
+                    # Используем create_order_from_checkout напрямую, обходя complete_checkout
+                    from ..checkout.complete_checkout import create_order_from_checkout
+                    
+                    order = create_order_from_checkout(
+                        checkout_pk=checkout.pk,
                         manager=manager,
-                        checkout_info=checkout_info,
-                        lines=checkout_lines,
-                        payment_data={},
-                        store_source=False,
                         user=user,
                         app=None,
-                        site_settings=None,
-                        redirect_url=None,
                         metadata_list=None,
                         private_metadata_list=None,
+                        delete_checkout=False,
+                        is_automatic_completion=True,
                     )
-                except InsufficientStock as e:
-                    # Если всё ещё ошибка наличия, логируем и возвращаем ошибку
-                    logger.error(f'Insufficient stock error even after stock update: {e}', exc_info=True)
-                    return JsonResponse(
-                        {'error': f'Insufficient stock: {str(e)}'}, 
-                        status=400
-                    )
+                    
+                    logger.info(f'Order created successfully: {order.id}, number: {order.number}')
+                    
+                except Exception as e:
+                    logger.error(f'Error creating order: {e}', exc_info=True)
+                    raise
+                finally:
+                    # Восстанавливаем track_inventory для всех вариантов
+                    for line in checkout_lines:
+                        variant = line.variant
+                        if variant and variant.id in variant_track_inventory_states:
+                            original_value = variant_track_inventory_states[variant.id]
+                            # Восстанавливаем в БД
+                            from ..product.models import ProductVariant
+                            ProductVariant.objects.filter(id=variant.id).update(track_inventory=original_value)
+                            # Обновляем объект в памяти
+                            variant.track_inventory = original_value
+                            variant.refresh_from_db()
+                            logger.info(f'Restored track_inventory={original_value} for variant {variant.id}')
                 
                 logger.info(f'Order created from checkout {checkout_token}: {order.number if order else "None"}')
                 
