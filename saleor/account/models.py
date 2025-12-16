@@ -258,11 +258,6 @@ class User(
         super().__init__(*args, **kwargs)
         self._effective_permissions = None
 
-    def __str__(self):
-        # Override the default __str__ of AbstractUser that returns username, which may
-        # lead to leaking sensitive data in logs.
-        return str(self.uuid)
-
     @property
     def effective_permissions(self) -> models.QuerySet[Permission]:
         if self._effective_permissions is None:
@@ -344,6 +339,24 @@ class User(
             or not site_settings.enable_account_confirmation_by_email
             or self.is_confirmed
         )
+
+class EmailVerificationCode(models.Model):
+    """Код подтверждения email для двухэтапной регистрации."""
+
+    email = models.EmailField(db_index=True)
+    code = models.CharField(max_length=6, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["email", "created_at"]),
+        ]
+        verbose_name = "Email verification code"
+        verbose_name_plural = "Email verification codes"
+
+    def __str__(self) -> str:
+        return f"{self.email} - {self.code} ({'used' if self.is_used else 'active'})"
 
 
 class CustomerNote(models.Model):
