@@ -312,12 +312,54 @@ class ValidateVoucherView(View):
             checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
 
             # Пытаемся применить ваучер
+            # Сначала проверяем, существует ли код ваучера
+            from ..discount.models import VoucherCode, Voucher
+            from django.utils import timezone
+            
+            # Пробуем найти код ваучера (с учетом и без учета регистра)
+            voucher_code_obj = None
+            codes_to_try = [
+                promo_code,
+                promo_code.upper(),
+                promo_code.lower(),
+                promo_code.strip(),
+            ]
+            
+            for code_variant in codes_to_try:
+                voucher_code_obj = VoucherCode.objects.filter(
+                    code=code_variant,
+                    is_active=True
+                ).first()
+                if voucher_code_obj:
+                    # Если нашли код, используем его для применения
+                    promo_code = voucher_code_obj.code
+                    break
+            
+            if not voucher_code_obj:
+                checkout.delete()
+                return JsonResponse(
+                    {"ok": False, "error": f"Ваучер с кодом '{promo_code}' не найден"},
+                    status=400,
+                )
+            
+            # Проверяем, что ваучер активен в канале
+            voucher = voucher_code_obj.voucher
+            if not Voucher.objects.active_in_channel(
+                date=timezone.now(),
+                channel_slug=channel_slug
+            ).filter(id=voucher.id).exists():
+                checkout.delete()
+                return JsonResponse(
+                    {"ok": False, "error": "Ваучер не активен в данном канале или истек"},
+                    status=400,
+                )
+            
             try:
                 add_promo_code_to_checkout(
                     manager,
                     checkout_info,
                     checkout_lines,
-                    promo_code,
+                    promo_code,  # Используем найденный код
                 )
                 checkout.refresh_from_db()
 
@@ -326,8 +368,7 @@ class ValidateVoucherView(View):
                 subtotal = float(checkout.subtotal.gross.amount)
                 
                 # Получаем информацию о ваучере для определения типа скидки
-                from ..discount.models import VoucherCode, Voucher
-                voucher_code_obj = VoucherCode.objects.filter(code=promo_code, is_active=True).first()
+                # voucher_code_obj уже найден выше
                 discount_type = "FIXED"
                 discount_percent = 0
                 
