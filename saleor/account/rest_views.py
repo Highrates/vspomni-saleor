@@ -304,10 +304,11 @@ class RequestEmailCodeView(View):
 
             # Генерируем новый код и инвалидируем старые активные
             code = _generate_verification_code()
+            phone = (data.get("phone") or "").strip()
             EmailVerificationCode.objects.filter(
                 email=email, is_used=False
             ).delete()
-            EmailVerificationCode.objects.create(email=email, code=code)
+            EmailVerificationCode.objects.create(email=email, code=code, phone=phone)
 
             subject = "Код подтверждения регистрации в VSPOMNI"
             message = (
@@ -339,6 +340,8 @@ class VerifyEmailCodeView(View):
     """Проверка кода подтверждения и автоматический логин пользователя."""
 
     def post(self, request):
+        from ..account.models import Address
+
         try:
             data = json.loads(request.body)
             email = (data.get("email") or "").strip().lower()
@@ -383,6 +386,25 @@ class VerifyEmailCodeView(View):
             user.is_confirmed = True
             user.is_active = True
             user.save(update_fields=["is_confirmed", "is_active"])
+
+            # Создаём адрес с телефоном, если телефон был указан при регистрации
+            # Получаем телефон из кода подтверждения или из запроса
+            phone = data.get("phone", "").strip()
+            if not phone and ver:
+                phone = ver.phone or ""
+            
+            if phone and not user.addresses.exists():
+                # Создаём минимальный адрес с телефоном
+                address = Address.objects.create(
+                    first_name=user.first_name or "",
+                    last_name=user.last_name or "",
+                    phone=phone,
+                    country="RU",  # Default country
+                )
+                user.addresses.add(address)
+                user.default_shipping_address = address
+                user.default_billing_address = address
+                user.save(update_fields=["default_shipping_address", "default_billing_address"])
 
             # Автоматический логин: создаём токены как в AuthLoginView
             csrf_token = _get_new_csrf_token()

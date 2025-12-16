@@ -347,6 +347,7 @@ class EmailVerificationCode(models.Model):
     code = models.CharField(max_length=6, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
+    phone = models.CharField(max_length=20, blank=True, default="")
 
     class Meta:
         indexes = [
