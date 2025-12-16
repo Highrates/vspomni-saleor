@@ -415,3 +415,55 @@ class VerifyEmailCodeView(View):
         except Exception as e:
             return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ChangePasswordView(View):
+    """Смена пароля пользователя."""
+
+    def post(self, request):
+        from ..core.auth_backend import load_user_from_request
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            user = load_user_from_request(request)
+            if not user:
+                return JsonResponse(
+                    {"ok": False, "error": "Unauthorized"}, status=401
+                )
+
+            data = json.loads(request.body)
+            old_password = data.get("oldPassword")
+            new_password = data.get("newPassword")
+
+            if not old_password or not new_password:
+                return JsonResponse(
+                    {"ok": False, "error": "oldPassword and newPassword are required"},
+                    status=400,
+                )
+
+            # Проверяем старый пароль
+            if not user.check_password(old_password):
+                return JsonResponse(
+                    {"ok": False, "error": "Неверный текущий пароль"}, status=400
+                )
+
+            # Валидируем новый пароль
+            try:
+                validate_password(new_password, user)
+            except DjangoValidationError as e:
+                error_messages = "; ".join(e.messages)
+                return JsonResponse(
+                    {"ok": False, "error": error_messages}, status=400
+                )
+
+            # Устанавливаем новый пароль
+            user.set_password(new_password)
+            user.save(update_fields=["password"])
+
+            return JsonResponse({"ok": True})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
