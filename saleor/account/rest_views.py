@@ -573,9 +573,18 @@ class GetOrdersView(View):
         try:
             user = load_user_from_request(request)
             if not user:
+                logger.warning('GetOrdersView: User not authenticated')
                 return JsonResponse(
                     {"ok": False, "error": "Не авторизован"}, status=401
                 )
+
+            logger.info(f'GetOrdersView: Fetching orders for user {user.email} (id: {user.id})')
+
+            # Проверяем все заказы пользователя (для отладки)
+            all_orders = Order.objects.filter(user=user)
+            logger.info(f'GetOrdersView: Total orders for user (all statuses): {all_orders.count()}')
+            for order in all_orders[:5]:  # Показываем первые 5 для отладки
+                logger.info(f'GetOrdersView: Order {order.id} - status: {order.status}, number: {order.number}, created_at: {order.created_at}')
 
             # Получаем только оформленные заказы (исключаем DRAFT и UNCONFIRMED)
             orders = Order.objects.filter(
@@ -583,6 +592,8 @@ class GetOrdersView(View):
             ).exclude(
                 status__in=[OrderStatus.DRAFT, OrderStatus.UNCONFIRMED]
             ).order_by('-created_at')[:20]
+            
+            logger.info(f'GetOrdersView: Found {orders.count()} confirmed orders for user {user.email}')
 
             orders_data = []
             for order in orders:
