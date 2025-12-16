@@ -240,107 +240,105 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     status=400
                 )
             
-            # Получаем checkout
-            try:
-                checkout = checkout_models.Checkout.objects.select_for_update().get(token=checkout_token)
-            except checkout_models.Checkout.DoesNotExist:
-                return JsonResponse(
-                    {'error': 'Checkout not found'}, 
-                    status=404
-                )
-            
-            # Проверяем, что checkout ещё не завершён
-            if checkout.completed_at:
-                # Если уже завершён, возвращаем существующий order
-                from ..order.models import Order
-                order = Order.objects.filter(checkout_token=checkout_token).first()
-                if order:
-                    return JsonResponse({
-                        'success': True,
-                        'order': {
-                            'id': str(order.id),
-                            'number': order.number or str(order.id),
-                            'status': order.status,
-                        }
-                    })
-                else:
+            # Обёртываем всё в транзакцию для использования select_for_update
+            with transaction.atomic():
+                # Получаем checkout с блокировкой
+                try:
+                    checkout = checkout_models.Checkout.objects.select_for_update().get(token=checkout_token)
+                except checkout_models.Checkout.DoesNotExist:
                     return JsonResponse(
-                        {'error': 'Checkout already completed but order not found'}, 
+                        {'error': 'Checkout not found'}, 
+                        status=404
+                    )
+                
+                # Проверяем, что checkout ещё не завершён
+                if checkout.completed_at:
+                    # Если уже завершён, возвращаем существующий order
+                    from ..order.models import Order
+                    order = Order.objects.filter(checkout_token=checkout_token).first()
+                    if order:
+                        return JsonResponse({
+                            'success': True,
+                            'order': {
+                                'id': str(order.id),
+                                'number': order.number or str(order.id),
+                                'status': order.status,
+                            }
+                        })
+                    else:
+                        return JsonResponse(
+                            {'error': 'Checkout already completed but order not found'}, 
+                            status=400
+                        )
+                
+                # Импортируем необходимые функции для создания order
+                from ..checkout.complete_checkout import complete_checkout
+                from ..plugins.manager import get_plugins_manager
+                from ..core.exceptions import InsufficientStock
+                from ..warehouse.models import Stock
+                
+                manager = get_plugins_manager(allow_replica=False)
+                checkout_lines, _ = fetch_checkout_lines(checkout)
+                checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+                
+                # Временно обновляем stock для всех вариантов в checkout, чтобы обойти проверку наличия
+                # Обновляем quantity (общее количество) чтобы было достаточно для checkout
+                stock_updates = []
+                for line in checkout_lines:
+                    variant = line.variant
+                    if variant and variant.track_inventory:
+                        # Получаем все stock записи для варианта
+                        stocks = Stock.objects.filter(product_variant=variant)
+                        for stock in stocks:
+                            # Сохраняем оригинальные значения
+                            original_quantity = stock.quantity
+                            original_allocated = stock.quantity_allocated
+                            
+                            # Временно увеличиваем quantity чтобы было достаточно для checkout
+                            # Нужно чтобы quantity >= quantity_allocated + line.quantity
+                            required_quantity = max(
+                                stock.quantity,
+                                (stock.quantity_allocated or 0) + line.quantity
+                            )
+                            stock.quantity = required_quantity
+                            stock.save(update_fields=['quantity'])
+                            stock_updates.append((stock, original_quantity, original_allocated))
+                            logger.info(f'Temporarily updated stock for variant {variant.id}: quantity={stock.quantity}, allocated={stock.quantity_allocated}, required={required_quantity}')
+                
+                try:
+                    # Создаём order
+                    order, action_required, payment_data = complete_checkout(
+                        manager=manager,
+                        checkout_info=checkout_info,
+                        lines=checkout_lines,
+                        payment_data={},
+                        store_source=False,
+                        user=checkout.user or None,
+                        user_email=checkout.email or '',
+                        app=None,
+                        site_settings=None,
+                        redirect_url=None,
+                        metadata_list=None,
+                        private_metadata_list=None,
+                    )
+                except InsufficientStock as e:
+                    # Если всё ещё ошибка наличия, логируем и возвращаем ошибку
+                    logger.error(f'Insufficient stock error even after stock update: {e}', exc_info=True)
+                    return JsonResponse(
+                        {'error': f'Insufficient stock: {str(e)}'}, 
                         status=400
                     )
-            
-            # Импортируем необходимые функции для создания order
-            from ..checkout.complete_checkout import complete_checkout
-            from ..plugins.manager import get_plugins_manager
-            from ..core.exceptions import InsufficientStock
-            from ..warehouse.models import Stock
-            
-            manager = get_plugins_manager(allow_replica=False)
-            checkout_lines, _ = fetch_checkout_lines(checkout)
-            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
-            
-            # Временно обновляем stock для всех вариантов в checkout, чтобы обойти проверку наличия
-            # Обновляем quantity (общее количество) чтобы было достаточно для checkout
-            stock_updates = []
-            for line in checkout_lines:
-                variant = line.variant
-                if variant and variant.track_inventory:
-                    # Получаем все stock записи для варианта
-                    stocks = Stock.objects.filter(product_variant=variant)
-                    for stock in stocks:
-                        # Сохраняем оригинальные значения
-                        original_quantity = stock.quantity
-                        original_allocated = stock.quantity_allocated
-                        
-                        # Временно увеличиваем quantity чтобы было достаточно для checkout
-                        # Нужно чтобы quantity >= quantity_allocated + line.quantity
-                        required_quantity = max(
-                            stock.quantity,
-                            (stock.quantity_allocated or 0) + line.quantity
-                        )
-                        stock.quantity = required_quantity
-                        stock.save(update_fields=['quantity'])
-                        stock_updates.append((stock, original_quantity, original_allocated))
-                        logger.info(f'Temporarily updated stock for variant {variant.id}: quantity={stock.quantity}, allocated={stock.quantity_allocated}, required={required_quantity}')
-            
-            try:
-                # Создаём order
-                order, action_required, payment_data = complete_checkout(
-                    manager=manager,
-                    checkout_info=checkout_info,
-                    lines=checkout_lines,
-                    payment_data={},
-                    store_source=False,
-                    user=checkout.user or None,
-                    user_email=checkout.email or '',
-                    app=None,
-                    site_settings=None,
-                    redirect_url=None,
-                    metadata_list=None,
-                    private_metadata_list=None,
-                )
-            except InsufficientStock as e:
-                # Если всё ещё ошибка наличия, логируем и возвращаем ошибку
-                logger.error(f'Insufficient stock error even after stock update: {e}', exc_info=True)
-                return JsonResponse(
-                    {'error': f'Insufficient stock: {str(e)}'}, 
-                    status=400
-                )
-            finally:
-                # Восстанавливаем оригинальные значения stock (хотя они уже должны быть обновлены при создании order)
-                # Это на случай, если order не был создан
-                pass  # Stock уже обновлён при создании order, не нужно восстанавливать
-            
-            logger.info(f'Order created from checkout {checkout_token}: {order.number if order else "None"}')
-            
-            return JsonResponse({
-                'success': True,
-                'order': {
-                    'id': str(order.id),
-                    'number': order.number or str(order.id),
-                    'status': order.status,
-                }
-            })
+                
+                logger.info(f'Order created from checkout {checkout_token}: {order.number if order else "None"}')
+                
+                return JsonResponse({
+                    'success': True,
+                    'order': {
+                        'id': str(order.id),
+                        'number': order.number or str(order.id),
+                        'status': order.status,
+                    }
+                })
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
