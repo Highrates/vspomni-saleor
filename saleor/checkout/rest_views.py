@@ -239,8 +239,6 @@ class ValidateVoucherView(View):
             )
 
             # Получаем channel listings для цен
-            from ..product.models import ProductVariantChannelListing
-            
             # Добавляем товары в checkout
             lines = []
             variant_db_ids = []
@@ -262,10 +260,10 @@ class ValidateVoucherView(View):
                     continue
             
             # Получаем варианты и их channel listings
-            variants = ProductVariant.objects.filter(id__in=variant_db_ids).select_related('product')
+            variants = product_models.ProductVariant.objects.filter(id__in=variant_db_ids).select_related('product')
             variant_listings = {
                 listing.variant_id: listing
-                for listing in ProductVariantChannelListing.objects.filter(
+                for listing in product_models.ProductVariantChannelListing.objects.filter(
                     channel_id=channel.id,
                     variant_id__in=variant_db_ids
                 )
