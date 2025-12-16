@@ -144,14 +144,26 @@ class CreateCheckoutWithoutStockCheckView(View):
             
             logger.info(f'Starting checkout creation: {len(variant_db_ids)} variants')
             
+            # Пытаемся найти пользователя по email для связывания checkout
+            user = None
+            if email:
+                from ..account.models import User
+                try:
+                    user = User.objects.filter(email=email.lower()).first()
+                    if user:
+                        logger.info(f'Found user for checkout: {user.email}')
+                except Exception as e:
+                    logger.warning(f'Error finding user by email: {e}')
+            
             with transaction.atomic():
                 # Создаем checkout без проверки наличия
                 checkout = checkout_models.Checkout.objects.create(
                     channel=channel,
                     currency=channel.currency_code,
                     email=email,
+                    user=user,  # Связываем с пользователем если найден
                 )
-                logger.info(f'Checkout created: {checkout.token}')
+                logger.info(f'Checkout created: {checkout.token}, user: {user.email if user else "None"}')
                 
                 # Создаем линии checkout напрямую, обходя проверку наличия
                 checkout_lines = []
