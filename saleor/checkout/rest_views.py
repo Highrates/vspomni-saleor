@@ -293,7 +293,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         logger.info(f'Temporarily disabled track_inventory for variant {variant.id} (product: {variant.product.name if variant.product else "N/A"})')
                 
                 try:
-                    # Создаём order
+                    # Создаём order напрямую, обходя все проверки
                     # Используем email из checkout, если user не установлен
                     user = checkout.user
                     if not user and checkout.email:
@@ -304,11 +304,12 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         except Exception:
                             user = None
                     
-                    # Используем create_order_from_checkout напрямую, обходя complete_checkout
+                    # Используем create_order_from_checkout с правильными параметрами
+                    # Передаём checkout_info, а не checkout
                     from ..checkout.complete_checkout import create_order_from_checkout
                     
                     order = create_order_from_checkout(
-                        checkout_pk=checkout.pk,
+                        checkout_info=checkout_info,
                         manager=manager,
                         user=user,
                         app=None,
