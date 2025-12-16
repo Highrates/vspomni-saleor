@@ -7,9 +7,10 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from ..checkout.utils import (
     add_promo_code_to_checkout,
+)
+from ..checkout.fetch import (
     fetch_checkout_info,
     fetch_checkout_lines,
-    invalidate_checkout_prices,
 )
 from ..plugins.manager import get_plugins_manager
 from ..core.exceptions import PermissionDenied
