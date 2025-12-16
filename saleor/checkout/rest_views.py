@@ -277,28 +277,52 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
                 # Временно обновляем stock для всех вариантов в checkout, чтобы обойти проверку наличия
-                # Обновляем quantity (общее количество) чтобы было достаточно для checkout
+                # Проверка наличия использует stock.for_channel_and_country(), поэтому нужно обновить stock для правильного channel
+                # available_quantity = quantity - quantity_allocated, поэтому нужно quantity >= quantity_allocated + line.quantity
                 stock_updates = []
+                channel = checkout.channel
+                country_code = checkout.country.code if checkout.country else 'RU'
+                
                 for line in checkout_lines:
                     variant = line.variant
                     if variant and variant.track_inventory:
-                        # Получаем все stock записи для варианта
-                        stocks = Stock.objects.filter(product_variant=variant)
+                        # Получаем stock для channel и country (как в проверке наличия)
+                        from ..warehouse.models import Stock
+                        stocks = Stock.objects.select_for_update().for_channel_and_country(
+                            channel.slug, country_code, include_cc_warehouses=True
+                        ).filter(product_variant=variant)
+                        
+                        if not stocks.exists():
+                            # Если нет stock для channel, получаем все stock для варианта
+                            logger.warning(f'No stock found for variant {variant.id} in channel {channel.slug}, country {country_code}, trying all warehouses')
+                            stocks = Stock.objects.select_for_update().filter(product_variant=variant)
+                        
                         for stock in stocks:
                             # Сохраняем оригинальные значения
                             original_quantity = stock.quantity
-                            original_allocated = stock.quantity_allocated
+                            original_allocated = stock.quantity_allocated or 0
                             
-                            # Временно увеличиваем quantity чтобы было достаточно для checkout
-                            # Нужно чтобы quantity >= quantity_allocated + line.quantity
-                            required_quantity = max(
-                                stock.quantity,
-                                (stock.quantity_allocated or 0) + line.quantity
-                            )
-                            stock.quantity = required_quantity
-                            stock.save(update_fields=['quantity'])
-                            stock_updates.append((stock, original_quantity, original_allocated))
-                            logger.info(f'Temporarily updated stock for variant {variant.id}: quantity={stock.quantity}, allocated={stock.quantity_allocated}, required={required_quantity}')
+                            # Вычисляем необходимое quantity
+                            # available_quantity = quantity - quantity_allocated
+                            # Нужно: available_quantity >= line.quantity
+                            # То есть: quantity - quantity_allocated >= line.quantity
+                            # Или: quantity >= quantity_allocated + line.quantity
+                            # Добавляем запас 10 единиц на случай резерваций или других allocations
+                            required_quantity = original_allocated + line.quantity + 10
+                            
+                            # Увеличиваем quantity если нужно
+                            if stock.quantity < required_quantity:
+                                stock.quantity = required_quantity
+                                stock.save(update_fields=['quantity'])
+                                # Обновляем из БД чтобы убедиться, что изменения видны
+                                stock.refresh_from_db()
+                                stock_updates.append((stock, original_quantity, original_allocated))
+                                logger.info(f'Updated stock for variant {variant.id} (warehouse {stock.warehouse_id}): quantity={stock.quantity} (was {original_quantity}), allocated={stock.quantity_allocated}, required={required_quantity}, available={stock.quantity - (stock.quantity_allocated or 0)}')
+                            else:
+                                logger.info(f'Stock for variant {variant.id} (warehouse {stock.warehouse_id}) already sufficient: quantity={stock.quantity}, allocated={stock.quantity_allocated}, available={stock.quantity - (stock.quantity_allocated or 0)}, required={line.quantity}')
+                
+                # Обновляем checkout_info после обновления stock, чтобы изменения были видны
+                checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
                 try:
                     # Создаём order
