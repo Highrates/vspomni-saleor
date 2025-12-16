@@ -45,7 +45,7 @@ class AuthLoginView(View):
             user = authenticate_with_throttling(request, email, password)
             if not user:
                 return JsonResponse(
-                    {'error': 'Invalid credentials'},
+                    {'error': 'Неверный email или пароль'},
                     status=401
                 )
 
@@ -56,13 +56,13 @@ class AuthLoginView(View):
                 and site_settings.enable_account_confirmation_by_email
             ):
                 return JsonResponse(
-                    {'error': 'Account needs to be confirmed via email'},
+                    {'error': 'Аккаунт требует подтверждения по email'},
                     status=403
                 )
 
             if not user.is_active:
                 return JsonResponse(
-                    {'error': 'Account inactive'},
+                    {'error': 'Аккаунт неактивен'},
                     status=403
                 )
 
@@ -91,12 +91,12 @@ class AuthLoginView(View):
 
         except json.JSONDecodeError:
             return JsonResponse(
-                {'error': 'Invalid JSON'},
+                {'error': 'Неверный формат JSON'},
                 status=400
             )
         except Exception as e:
             return JsonResponse(
-                {'error': str(e)},
+                {'error': f'Ошибка сервера: {str(e)}'},
                 status=500
             )
 
@@ -119,7 +119,7 @@ class AuthSignupView(View):
 
             if User.objects.filter(email=email).exists():
                 return JsonResponse(
-                    {'error': 'User with this email already exists'},
+                    {'error': 'Пользователь с таким email уже существует'},
                     status=400
                 )
 
@@ -175,7 +175,7 @@ class AuthSignupView(View):
                 # Verify user.id is set before calling task
                 if not user.id:
                     return JsonResponse(
-                        {'error': 'Failed to create user'},
+                        {'error': 'Не удалось создать пользователя'},
                         status=500
                     )
 
@@ -189,12 +189,12 @@ class AuthSignupView(View):
 
         except json.JSONDecodeError:
             return JsonResponse(
-                {'error': 'Invalid JSON'},
+                {'error': 'Неверный формат JSON'},
                 status=400
             )
         except Exception as e:
             return JsonResponse(
-                {'error': str(e)},
+                {'error': f'Ошибка сервера: {str(e)}'},
                 status=500
             )
 
@@ -207,7 +207,7 @@ class AuthMeView(View):
         user = load_user_from_request(request)
         if not user:
             return JsonResponse(
-                {'error': 'Unauthorized'},
+                {'error': 'Не авторизован'},
                 status=401
             )
 
@@ -235,7 +235,7 @@ class SendRegistrationEmailView(View):
 
             if not email:
                 return JsonResponse(
-                    {"error": "email is required"},
+                    {"error": "Email обязателен для заполнения"},
                     status=400,
                 )
 
@@ -330,9 +330,9 @@ class RequestEmailCodeView(View):
 
             return JsonResponse({"ok": True, "sent": sent})
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -433,9 +433,9 @@ class VerifyEmailCodeView(View):
                 }
             )
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -488,9 +488,9 @@ class ForgotPasswordView(View):
 
             return JsonResponse({"ok": True, "sent": sent})
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -510,7 +510,7 @@ class ResetPasswordView(View):
 
             if not email or not token or not new_password:
                 return JsonResponse(
-                    {"ok": False, "error": "email, token and newPassword are required"},
+                    {"ok": False, "error": "Email, токен и новый пароль обязательны для заполнения"},
                     status=400,
                 )
 
@@ -543,9 +543,9 @@ class ResetPasswordView(View):
 
             return JsonResponse({"ok": True})
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -561,7 +561,7 @@ class ChangePasswordView(View):
             user = load_user_from_request(request)
             if not user:
                 return JsonResponse(
-                    {"ok": False, "error": "Unauthorized"}, status=401
+                    {"ok": False, "error": "Не авторизован"}, status=401
                 )
 
             data = json.loads(request.body)
@@ -570,7 +570,7 @@ class ChangePasswordView(View):
 
             if not old_password or not new_password:
                 return JsonResponse(
-                    {"ok": False, "error": "oldPassword and newPassword are required"},
+                    {"ok": False, "error": "Текущий пароль и новый пароль обязательны для заполнения"},
                     status=400,
                 )
 
@@ -595,7 +595,7 @@ class ChangePasswordView(View):
 
             return JsonResponse({"ok": True})
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            return JsonResponse({"error": "Неверный формат JSON"}, status=400)
         except Exception as e:
-            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+            return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
 
