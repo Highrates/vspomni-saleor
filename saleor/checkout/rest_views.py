@@ -242,6 +242,21 @@ class CompleteCheckoutWithoutStockCheckView(View):
             
             # Обёртываем всё в транзакцию для использования select_for_update
             with transaction.atomic():
+                # Сначала проверяем, не был ли checkout уже завершён (есть ли order с таким checkout_token)
+                from ..order.models import Order
+                existing_order = Order.objects.filter(checkout_token=checkout_token).first()
+                if existing_order:
+                    # Если order уже существует, возвращаем его
+                    logger.info(f'Checkout {checkout_token} already completed, returning existing order {existing_order.id}')
+                    return JsonResponse({
+                        'success': True,
+                        'order': {
+                            'id': str(existing_order.id),
+                            'number': existing_order.number or str(existing_order.id),
+                            'status': existing_order.status,
+                        }
+                    })
+                
                 # Получаем checkout с блокировкой
                 try:
                     checkout = checkout_models.Checkout.objects.select_for_update().get(token=checkout_token)
@@ -250,26 +265,6 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         {'error': 'Checkout not found'}, 
                         status=404
                     )
-                
-                # Проверяем, что checkout ещё не завершён
-                if checkout.completed_at:
-                    # Если уже завершён, возвращаем существующий order
-                    from ..order.models import Order
-                    order = Order.objects.filter(checkout_token=checkout_token).first()
-                    if order:
-                        return JsonResponse({
-                            'success': True,
-                            'order': {
-                                'id': str(order.id),
-                                'number': order.number or str(order.id),
-                                'status': order.status,
-                            }
-                        })
-                    else:
-                        return JsonResponse(
-                            {'error': 'Checkout already completed but order not found'}, 
-                            status=400
-                        )
                 
                 # Импортируем необходимые функции для создания order
                 from ..checkout.complete_checkout import complete_checkout
