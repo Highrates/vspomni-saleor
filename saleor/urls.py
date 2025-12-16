@@ -26,7 +26,11 @@ from .account.rest_views import (
     ChangePasswordView,
     GetOrdersView,
 )
-from .checkout.rest_views import CreateCheckoutWithoutStockCheckView, ValidateVoucherView
+from .checkout.rest_views import (
+    CreateCheckoutWithoutStockCheckView,
+    CompleteCheckoutWithoutStockCheckView,
+    ValidateVoucherView,
+)
 
 urlpatterns = [
     re_path(
@@ -112,6 +116,17 @@ urlpatterns = [
         r"^checkout/create-without-stock-check/$",
         CreateCheckoutWithoutStockCheckView.as_view(),
         name="checkout-create-without-stock-check-alt",
+    ),
+    re_path(
+        r"^api/checkout/complete-without-stock-check/$",
+        CompleteCheckoutWithoutStockCheckView.as_view(),
+        name="checkout-complete-without-stock-check",
+    ),
+    # Альтернативный паттерн без /api/ префикса для совместимости с продакшн конфигурацией
+    re_path(
+        r"^checkout/complete-without-stock-check/$",
+        CompleteCheckoutWithoutStockCheckView.as_view(),
+        name="checkout-complete-without-stock-check-alt",
     ),
     re_path(
         r"^voucher/validate/$",
