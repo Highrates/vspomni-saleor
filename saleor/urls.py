@@ -25,7 +25,7 @@ from .account.rest_views import (
     ResetPasswordView,
     ChangePasswordView,
 )
-from .checkout.rest_views import CreateCheckoutWithoutStockCheckView
+from .checkout.rest_views import CreateCheckoutWithoutStockCheckView, ValidateVoucherView
 
 urlpatterns = [
     re_path(
@@ -106,6 +106,11 @@ urlpatterns = [
         r"^checkout/create-without-stock-check/$",
         CreateCheckoutWithoutStockCheckView.as_view(),
         name="checkout-create-without-stock-check-alt",
+    ),
+    re_path(
+        r"^voucher/validate/$",
+        ValidateVoucherView.as_view(),
+        name="voucher-validate",
     ),
 ]
 
