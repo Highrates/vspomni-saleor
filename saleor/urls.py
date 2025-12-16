@@ -21,6 +21,8 @@ from .account.rest_views import (
     SendRegistrationEmailView,
     RequestEmailCodeView,
     VerifyEmailCodeView,
+    ForgotPasswordView,
+    ResetPasswordView,
     ChangePasswordView,
 )
 from .checkout.rest_views import CreateCheckoutWithoutStockCheckView
@@ -83,6 +85,16 @@ urlpatterns = [
         r"^auth/change-password/$",
         ChangePasswordView.as_view(),
         name="auth-change-password",
+    ),
+    re_path(
+        r"^auth/forgot-password/$",
+        ForgotPasswordView.as_view(),
+        name="auth-forgot-password",
+    ),
+    re_path(
+        r"^auth/reset-password/$",
+        ResetPasswordView.as_view(),
+        name="auth-reset-password",
     ),
     re_path(
         r"^api/checkout/create-without-stock-check/$",

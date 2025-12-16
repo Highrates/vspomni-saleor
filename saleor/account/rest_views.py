@@ -439,6 +439,116 @@ class VerifyEmailCodeView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+class ForgotPasswordView(View):
+    """Запрос на сброс пароля."""
+
+    def post(self, request):
+        from django.core.mail import get_connection, send_mail
+
+        try:
+            data = json.loads(request.body)
+            email = (data.get("email") or "").strip().lower()
+
+            if not email:
+                return JsonResponse(
+                    {"ok": False, "error": "email is required"}, status=400
+                )
+
+            # Проверяем, существует ли пользователь с таким email
+            user = User.objects.filter(email=email).first()
+            if not user:
+                return JsonResponse(
+                    {"ok": False, "error": "Пользователь с таким email не найден"},
+                    status=400,
+                )
+
+            # Генерируем токен для сброса пароля
+            from ..core.tokens import token_generator
+            token = token_generator.make_token(user)
+
+            # Отправляем письмо с инструкциями
+            subject = "Сброс пароля в VSPOMNI"
+            reset_url = f"{settings.FRONTEND_URL or 'https://vspomni.store'}/login?token={token}&email={email}"
+            message = (
+                f"Здравствуйте, {user.first_name or 'друг'}!\n\n"
+                f"Вы запросили сброс пароля на vspomni.store.\n\n"
+                f"Для сброса пароля перейдите по ссылке:\n{reset_url}\n\n"
+                "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
+            )
+
+            connection = get_connection(timeout=10)
+            sent = send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+                connection=connection,
+            )
+
+            return JsonResponse({"ok": True, "sent": sent})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ResetPasswordView(View):
+    """Сброс пароля по токену."""
+
+    def post(self, request):
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from ..core.tokens import token_generator
+
+        try:
+            data = json.loads(request.body)
+            email = (data.get("email") or "").strip().lower()
+            token = (data.get("token") or "").strip()
+            new_password = data.get("newPassword")
+
+            if not email or not token or not new_password:
+                return JsonResponse(
+                    {"ok": False, "error": "email, token and newPassword are required"},
+                    status=400,
+                )
+
+            user = User.objects.filter(email=email).first()
+            if not user:
+                return JsonResponse(
+                    {"ok": False, "error": "Пользователь с таким email не найден"},
+                    status=400,
+                )
+
+            # Проверяем токен
+            if not token_generator.check_token(user, token):
+                return JsonResponse(
+                    {"ok": False, "error": "Неверный или просроченный токен"},
+                    status=400,
+                )
+
+            # Валидируем новый пароль
+            try:
+                validate_password(new_password, user)
+            except DjangoValidationError as e:
+                error_messages = "; ".join(e.messages)
+                return JsonResponse(
+                    {"ok": False, "error": error_messages}, status=400
+                )
+
+            # Устанавливаем новый пароль
+            user.set_password(new_password)
+            user.save(update_fields=["password"])
+
+            return JsonResponse({"ok": True})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class ChangePasswordView(View):
     """Смена пароля пользователя."""
 
