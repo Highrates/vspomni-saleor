@@ -111,6 +111,7 @@ services:
         API_URL: ${API_URL}
         APP_MOUNT_URI: /dashboard/
         STATIC_URL: /dashboard/
+        SKIP_SOURCEMAPS: "true"
     container_name: saleor_dashboard
     restart: unless-stopped
     ports:
