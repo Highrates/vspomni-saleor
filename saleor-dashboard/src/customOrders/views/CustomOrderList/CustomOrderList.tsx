@@ -1,10 +1,11 @@
 // @ts-strict-ignore
+import { DashboardCard } from "@dashboard/components/Card";
 import { useOrderListQuery } from "@dashboard/graphql";
 import { useListSettings } from "@dashboard/hooks/useListSettings";
 import useNavigator from "@dashboard/hooks/useNavigator";
 import { ListViews } from "@dashboard/types";
 import { mapEdgesToItems } from "@dashboard/utils/maps";
-import { Box, Button, Card, Text } from "@saleor/macaw-ui-next";
+import { Box, Button, Text } from "@saleor/macaw-ui-next";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { customOrderUrl } from "../../urls";
@@ -46,42 +47,45 @@ const CustomOrderList = () => {
           <FormattedMessage defaultMessage="Загрузка..." id="loading" />
         </Text>
       ) : customOrders.length === 0 ? (
-        <Card padding={6}>
-          <Text>
-            <FormattedMessage defaultMessage="Нет заказов" id="noOrders" />
-          </Text>
-        </Card>
+        <DashboardCard>
+          <DashboardCard.Content>
+            <Text>
+              <FormattedMessage defaultMessage="Нет заказов" id="noOrders" />
+            </Text>
+          </DashboardCard.Content>
+        </DashboardCard>
       ) : (
         <Box display="grid" gap={2}>
           {customOrders.map(order => (
-            <Card
+            <DashboardCard
               key={order.id}
-              padding={4}
               onClick={() => navigate(customOrderUrl(order.id))}
               style={{ cursor: "pointer" }}
             >
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Box>
-                  <Text size={5} fontWeight="bold">
-                    Заказ #{order.number}
-                  </Text>
-                  <Text size={3} color="default2">
-                    {order.created && new Date(order.created).toLocaleDateString("ru-RU")}
-                  </Text>
-                  <Text size={3} color="default2">
-                    {order.customer?.email || "Без клиента"}
-                  </Text>
+              <DashboardCard.Content>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box>
+                    <Text size={5} fontWeight="bold">
+                      Заказ #{order.number}
+                    </Text>
+                    <Text size={3} color="default2">
+                      {order.created && new Date(order.created).toLocaleDateString("ru-RU")}
+                    </Text>
+                    <Text size={3} color="default2">
+                      {order.customer?.email || "Без клиента"}
+                    </Text>
+                  </Box>
+                  <Box textAlign="right">
+                    <Text size={5} fontWeight="bold">
+                      {order.total?.gross?.amount} {order.total?.gross?.currency}
+                    </Text>
+                    <Text size={3} color="default2">
+                      Статус: {order.status}
+                    </Text>
+                  </Box>
                 </Box>
-                <Box textAlign="right">
-                  <Text size={5} fontWeight="bold">
-                    {order.total?.gross?.amount} {order.total?.gross?.currency}
-                  </Text>
-                  <Text size={3} color="default2">
-                    Статус: {order.status}
-                  </Text>
-                </Box>
-              </Box>
-            </Card>
+              </DashboardCard.Content>
+            </DashboardCard>
           ))}
         </Box>
       )}

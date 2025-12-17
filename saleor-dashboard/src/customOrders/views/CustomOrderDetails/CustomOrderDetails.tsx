@@ -1,11 +1,12 @@
 // @ts-strict-ignore
+import { DashboardCard } from "@dashboard/components/Card";
 import {
   useOrderDetailsWithMetadataQuery,
   useOrderFulfillmentApproveMutation,
 } from "@dashboard/graphql";
 import useNavigator from "@dashboard/hooks/useNavigator";
 import useNotifier from "@dashboard/hooks/useNotifier";
-import { Box, Button, Card, Text } from "@saleor/macaw-ui-next";
+import { Box, Button, Text } from "@saleor/macaw-ui-next";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { customOrderListUrl } from "../../urls";
@@ -120,72 +121,78 @@ const CustomOrderDetails = ({ id }: CustomOrderDetailsProps) => {
       </Box>
 
       <Box display="grid" gap={4}>
-        <Card padding={4}>
-          <Text size={5} fontWeight="bold" marginBottom={2}>
-            <FormattedMessage defaultMessage="Информация о заказе" id="orderInfo" />
-          </Text>
-          <Box display="grid" gap={2}>
-            <Box display="flex" justifyContent="space-between">
-              <Text size={4}>Клиент:</Text>
-              <Text size={4} fontWeight="bold">
-                {order.userEmail || "Без клиента"}
-              </Text>
+        <DashboardCard>
+          <DashboardCard.Content>
+            <Text size={5} fontWeight="bold" marginBottom={2}>
+              <FormattedMessage defaultMessage="Информация о заказе" id="orderInfo" />
+            </Text>
+            <Box display="grid" gap={2}>
+              <Box display="flex" justifyContent="space-between">
+                <Text size={4}>Клиент:</Text>
+                <Text size={4} fontWeight="bold">
+                  {order.userEmail || "Без клиента"}
+                </Text>
+              </Box>
+              <Box display="flex" justifyContent="space-between">
+                <Text size={4}>Статус:</Text>
+                <Text size={4} fontWeight="bold">
+                  {order.status}
+                </Text>
+              </Box>
+              <Box display="flex" justifyContent="space-between">
+                <Text size={4}>Сумма:</Text>
+                <Text size={4} fontWeight="bold">
+                  {order.total?.gross?.amount} {order.total?.gross?.currency}
+                </Text>
+              </Box>
             </Box>
-            <Box display="flex" justifyContent="space-between">
-              <Text size={4}>Статус:</Text>
-              <Text size={4} fontWeight="bold">
-                {order.status}
-              </Text>
-            </Box>
-            <Box display="flex" justifyContent="space-between">
-              <Text size={4}>Сумма:</Text>
-              <Text size={4} fontWeight="bold">
-                {order.total?.gross?.amount} {order.total?.gross?.currency}
-              </Text>
-            </Box>
-          </Box>
-        </Card>
+          </DashboardCard.Content>
+        </DashboardCard>
 
-        <Card padding={4}>
-          <Text size={5} fontWeight="bold" marginBottom={2}>
-            <FormattedMessage defaultMessage="Товары" id="products" />
-          </Text>
-          {order.lines?.map(line => (
-            <Box key={line.id} display="flex" justifyContent="space-between" paddingY={2}>
-              <Text size={4}>
-                {line.productName} x{line.quantity}
-              </Text>
-              <Text size={4} fontWeight="bold">
-                {line.totalPrice?.gross?.amount} {line.totalPrice?.gross?.currency}
-              </Text>
-            </Box>
-          ))}
-        </Card>
+        <DashboardCard>
+          <DashboardCard.Content>
+            <Text size={5} fontWeight="bold" marginBottom={2}>
+              <FormattedMessage defaultMessage="Товары" id="products" />
+            </Text>
+            {order.lines?.map(line => (
+              <Box key={line.id} display="flex" justifyContent="space-between" paddingY={2}>
+                <Text size={4}>
+                  {line.productName} x{line.quantity}
+                </Text>
+                <Text size={4} fontWeight="bold">
+                  {line.totalPrice?.gross?.amount} {line.totalPrice?.gross?.currency}
+                </Text>
+              </Box>
+            ))}
+          </DashboardCard.Content>
+        </DashboardCard>
 
-        <Card padding={4}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Box>
-              <Text size={5} fontWeight="bold" marginBottom={1}>
-                <FormattedMessage defaultMessage="Статус доставки" id="deliveryStatus" />
-              </Text>
-              <Text size={4} color="default2">
-                {order.fulfillments?.length > 0
-                  ? order.fulfillments[0].status
-                  : "Не доставлено"}
-              </Text>
+        <DashboardCard>
+          <DashboardCard.Content>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box>
+                <Text size={5} fontWeight="bold" marginBottom={1}>
+                  <FormattedMessage defaultMessage="Статус доставки" id="deliveryStatus" />
+                </Text>
+                <Text size={4} color="default2">
+                  {order.fulfillments?.length > 0
+                    ? order.fulfillments[0].status
+                    : "Не доставлено"}
+                </Text>
+              </Box>
+              <Button
+                onClick={handleMarkAsDelivered}
+                disabled={
+                  updating ||
+                  order.fulfillments?.every(f => f.status === "FULFILLED" || f.status === "CANCELED")
+                }
+                variant="primary"
+              >
+                <FormattedMessage defaultMessage="Отметить как доставлено" id="markAsDelivered" />
+              </Button>
             </Box>
-            <Button
-              onClick={handleMarkAsDelivered}
-              disabled={
-                updating ||
-                order.fulfillments?.every(f => f.status === "FULFILLED" || f.status === "CANCELED")
-              }
-              variant="primary"
-            >
-              <FormattedMessage defaultMessage="Отметить как доставлено" id="markAsDelivered" />
-            </Button>
-          </Box>
-        </Card>
+          </DashboardCard.Content>
+        </DashboardCard>
       </Box>
     </Box>
   );
