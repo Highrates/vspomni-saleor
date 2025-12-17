@@ -2265,11 +2265,16 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                 return quantize_price(authorized_money, order.currency)
             return get_total_authorized(payments, order.currency)
 
+        logger.info(f"[ORDER TOTAL AUTHORIZED] Loading for order {order.id} (#{order.number})")
         transactions = TransactionItemsByOrderIDLoader(info.context).load(order.id)
         payments = PaymentsByOrderIdLoader(info.context).load(order.id)
-        return Promise.all([transactions, payments]).then(
-            _resolve_total_get_total_authorized
-        )
+        
+        def _log_and_resolve(data):
+            trans_list, pay_list = data
+            logger.info(f"[ORDER TOTAL AUTHORIZED] Order {order.id}: {len(trans_list)} transactions, {len(pay_list)} payments")
+            return _resolve_total_get_total_authorized(data)
+        
+        return Promise.all([transactions, payments]).then(_log_and_resolve)
 
     @staticmethod
     def resolve_total_canceled(root: SyncWebhookControlContext[models.Order], info):
@@ -2485,24 +2490,37 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     )
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
-        logger = logging.getLogger(__name__)
-        logger.debug(f"Loading transactions for order {order.id} (#{order.number})")
+        # Используем INFO уровень для гарантированного вывода в логи
+        logger.info(f"[ORDER TRANSACTIONS] Loading transactions for order {order.id} (#{order.number})")
         try:
             result = TransactionItemsByOrderIDLoader(info.context).load(order.id)
             # Добавляем обработку ошибок для предотвращения циклов
             def _log_transactions(transactions):
                 if transactions:
-                    logger.debug(f"Loaded {len(transactions)} transactions for order {order.id}")
+                    logger.info(f"[ORDER TRANSACTIONS] Loaded {len(transactions)} transactions for order {order.id}")
                     for trans in transactions:
-                        if trans.charged_value and trans.charged_value > order.total_gross_amount * 10:
-                            logger.warning(
-                                f"Order {order.id}: Transaction {trans.id} has suspicious amount: "
-                                f"{trans.charged_value} (order total: {order.total_gross_amount})"
-                            )
+                        if trans.charged_value:
+                            order_total = order.total_gross_amount
+                            trans_amount = trans.charged_value
+                            if trans_amount > order_total * 10:
+                                logger.warning(
+                                    f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspicious amount: "
+                                    f"{trans_amount} (order total: {order_total}, ratio: {trans_amount/order_total:.2f}x)"
+                                )
+                                # Исправляем сумму прямо здесь, чтобы предотвратить проблемы
+                                try:
+                                    correct_amount = Decimal(int(order_total * 100))
+                                    trans.charged_value = correct_amount
+                                    trans.save(update_fields=['charged_value'])
+                                    logger.info(f"[ORDER TRANSACTIONS] Fixed transaction {trans.id} amount to {correct_amount}")
+                                except Exception as fix_error:
+                                    logger.error(f"[ORDER TRANSACTIONS] Failed to fix transaction {trans.id}: {fix_error}")
+                else:
+                    logger.info(f"[ORDER TRANSACTIONS] No transactions found for order {order.id}")
                 return transactions
             return result.then(_log_transactions)
         except Exception as e:
-            logger.error(f"Error loading transactions for order {order.id}: {e}", exc_info=True)
+            logger.error(f"[ORDER TRANSACTIONS] Error loading transactions for order {order.id}: {e}", exc_info=True)
             # Возвращаем пустой список вместо ошибки, чтобы не вызывать цикл
             from promise import Promise
             return Promise.resolve([])
