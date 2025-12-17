@@ -2,6 +2,8 @@ import logging
 from decimal import Decimal
 from uuid import UUID
 from threading import local
+from time import time
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +12,11 @@ import prices
 
 # Thread-local storage for request-level caching
 _thread_local = local()
+
+# Global cache for rate limiting (simple in-memory cache with TTL)
+# This prevents the same order from being queried too frequently
+_order_query_cache = defaultdict(dict)
+_cache_ttl = 1.0  # 1 second TTL for order queries
 from django.core.exceptions import ValidationError
 from graphene import relay
 from promise import Promise
@@ -2261,8 +2268,18 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     def resolve_total_authorized(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
         
-        # Use request-level cache to prevent repeated calculations within the same request
+        # Rate limiting: prevent too frequent queries for the same order
         cache_key = f"total_authorized_{order.id}"
+        current_time = time()
+        
+        # Check global cache first (rate limiting)
+        if cache_key in _order_query_cache:
+            cached = _order_query_cache[cache_key]
+            if current_time - cached.get('timestamp', 0) < _cache_ttl:
+                # Return cached value if still valid
+                return Promise.resolve(cached['value'])
+        
+        # Use request-level cache to prevent repeated calculations within the same request
         if not hasattr(_thread_local, 'cache'):
             _thread_local.cache = {}
         
@@ -2288,6 +2305,13 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                 'value': result,
                 'order_updated_at': order.updated_at.isoformat()
             }
+            
+            # Cache in global cache for rate limiting
+            _order_query_cache[cache_key] = {
+                'value': result,
+                'timestamp': current_time
+            }
+            
             return result
 
         # Removed excessive debug logging to prevent performance issues during polling
@@ -2512,8 +2536,18 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
         
-        # Use request-level cache to prevent repeated loading within the same request
+        # Rate limiting: prevent too frequent queries for the same order
         cache_key = f"transactions_{order.id}"
+        current_time = time()
+        
+        # Check global cache first (rate limiting)
+        if cache_key in _order_query_cache:
+            cached = _order_query_cache[cache_key]
+            if current_time - cached.get('timestamp', 0) < _cache_ttl:
+                # Return cached value if still valid
+                return Promise.resolve(cached['value'])
+        
+        # Use request-level cache to prevent repeated loading within the same request
         if not hasattr(_thread_local, 'cache'):
             _thread_local.cache = {}
         
@@ -2559,6 +2593,13 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                     'value': transactions,
                     'order_updated_at': order.updated_at.isoformat()
                 }
+                
+                # Cache in global cache for rate limiting
+                _order_query_cache[cache_key] = {
+                    'value': transactions,
+                    'timestamp': current_time
+                }
+                
                 return transactions
             return result.then(_log_and_cache_transactions)
         except Exception as e:
