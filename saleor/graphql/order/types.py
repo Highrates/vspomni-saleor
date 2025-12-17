@@ -1,11 +1,15 @@
 import logging
 from decimal import Decimal
 from uuid import UUID
+from threading import local
 
 logger = logging.getLogger(__name__)
 
 import graphene
 import prices
+
+# Thread-local storage for request-level caching
+_thread_local = local()
 from django.core.exceptions import ValidationError
 from graphene import relay
 from promise import Promise
@@ -2253,8 +2257,21 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
         return Promise.all([lines, manager]).then(_resolve_undiscounted_total)
 
     @staticmethod
+    @prevent_sync_event_circular_query
     def resolve_total_authorized(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
+        
+        # Use request-level cache to prevent repeated calculations within the same request
+        cache_key = f"total_authorized_{order.id}"
+        if not hasattr(_thread_local, 'cache'):
+            _thread_local.cache = {}
+        
+        # Check if we already computed this in the current request
+        if cache_key in _thread_local.cache:
+            cached_result = _thread_local.cache[cache_key]
+            # Verify the order hasn't changed (simple check)
+            if cached_result.get('order_updated_at') == order.updated_at.isoformat():
+                return Promise.resolve(cached_result['value'])
 
         def _resolve_total_get_total_authorized(data):
             transactions, payments = data
@@ -2262,19 +2279,22 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                 authorized_money = prices.Money(Decimal(0), order.currency)
                 for transaction in transactions:
                     authorized_money += transaction.amount_authorized
-                return quantize_price(authorized_money, order.currency)
-            return get_total_authorized(payments, order.currency)
+                result = quantize_price(authorized_money, order.currency)
+            else:
+                result = get_total_authorized(payments, order.currency)
+            
+            # Cache the result for this request
+            _thread_local.cache[cache_key] = {
+                'value': result,
+                'order_updated_at': order.updated_at.isoformat()
+            }
+            return result
 
-        logger.debug(f"[ORDER TOTAL AUTHORIZED] Loading for order {order.id} (#{order.number})")
+        # Removed excessive debug logging to prevent performance issues during polling
         transactions = TransactionItemsByOrderIDLoader(info.context).load(order.id)
         payments = PaymentsByOrderIdLoader(info.context).load(order.id)
         
-        def _log_and_resolve(data):
-            trans_list, pay_list = data
-            logger.debug(f"[ORDER TOTAL AUTHORIZED] Order {order.id}: {len(trans_list)} transactions, {len(pay_list)} payments")
-            return _resolve_total_get_total_authorized(data)
-        
-        return Promise.all([transactions, payments]).then(_log_and_resolve)
+        return Promise.all([transactions, payments]).then(_resolve_total_get_total_authorized)
 
     @staticmethod
     def resolve_total_canceled(root: SyncWebhookControlContext[models.Order], info):
@@ -2488,22 +2508,34 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     @one_of_permissions_required(
         [OrderPermissions.MANAGE_ORDERS, PaymentPermissions.HANDLE_PAYMENTS]
     )
+    @prevent_sync_event_circular_query
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
-        # Используем DEBUG уровень, чтобы не засорять логи при нормальной работе
-        # INFO будет только при проблемах
-        logger.debug(f"[ORDER TRANSACTIONS] Loading transactions for order {order.id} (#{order.number})")
+        
+        # Use request-level cache to prevent repeated loading within the same request
+        cache_key = f"transactions_{order.id}"
+        if not hasattr(_thread_local, 'cache'):
+            _thread_local.cache = {}
+        
+        # Check if we already loaded this in the current request
+        if cache_key in _thread_local.cache:
+            cached_result = _thread_local.cache[cache_key]
+            # Verify the order hasn't changed
+            if cached_result.get('order_updated_at') == order.updated_at.isoformat():
+                return Promise.resolve(cached_result['value'])
+        
+        # Removed excessive debug logging to prevent performance issues during polling
+        # Only log warnings for actual problems, not on every request
         try:
             result = TransactionItemsByOrderIDLoader(info.context).load(order.id)
             # Добавляем обработку ошибок для предотвращения циклов
-            def _log_transactions(transactions):
+            def _log_and_cache_transactions(transactions):
                 # Убираем автоматическое исправление transaction из resolver,
                 # так как это может вызывать бесконечные циклы - каждое обновление
                 # может вызывать новый запрос от админки
                 # Исправление transaction должно делаться отдельным скриптом или задачей
                 if transactions:
-                    logger.debug(f"[ORDER TRANSACTIONS] Loaded {len(transactions)} transactions for order {order.id}")
-                    # Только логируем, не исправляем
+                    # Only log warnings for suspicious amounts, not debug on every request
                     for trans in transactions:
                         if trans.charged_value:
                             order_total_cents = Decimal(int(order.total_gross_amount * 100))
@@ -2521,10 +2553,14 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                                     f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspiciously small amount: "
                                     f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x)"
                                 )
-                else:
-                    logger.debug(f"[ORDER TRANSACTIONS] No transactions found for order {order.id}")
+                
+                # Cache the result for this request
+                _thread_local.cache[cache_key] = {
+                    'value': transactions,
+                    'order_updated_at': order.updated_at.isoformat()
+                }
                 return transactions
-            return result.then(_log_transactions)
+            return result.then(_log_and_cache_transactions)
         except Exception as e:
             logger.error(f"[ORDER TRANSACTIONS] Error loading transactions for order {order.id}: {e}", exc_info=True)
             # Возвращаем пустой список вместо ошибки, чтобы не вызывать цикл
