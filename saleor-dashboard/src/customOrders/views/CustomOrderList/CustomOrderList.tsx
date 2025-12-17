@@ -1,25 +1,21 @@
 // @ts-strict-ignore
 import { DashboardCard } from "@dashboard/components/Card";
 import { useOrderListQuery } from "@dashboard/graphql";
-import { useListSettings } from "@dashboard/hooks/useListSettings";
 import useNavigator from "@dashboard/hooks/useNavigator";
-import { ListViews } from "@dashboard/types";
 import { mapEdgesToItems } from "@dashboard/utils/maps";
-import { Box, Button, Text } from "@saleor/macaw-ui-next";
-import { FormattedMessage, useIntl } from "react-intl";
+import { Box, Text } from "@saleor/macaw-ui-next";
+import { FormattedMessage } from "react-intl";
 
 import { customOrderUrl } from "../../urls";
 
 const CustomOrderList = () => {
   const navigate = useNavigator();
-  const intl = useIntl();
-  const { settings } = useListSettings(ListViews.ORDER_LIST);
 
   // Загружаем все заказы, фильтруем только те, что созданы через кастомный эндпоинт
   // Можно фильтровать по метаданным или другому признаку
   const { data, loading } = useOrderListQuery({
     variables: {
-      first: settings.rowNumber,
+      first: 20, // Простое ограничение, можно увеличить
       after: null,
     },
   });
