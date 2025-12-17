@@ -282,6 +282,28 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 manager = get_plugins_manager(allow_replica=False)
                 checkout_lines, _ = fetch_checkout_lines(checkout)
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+
+                # ВАЖНО: для кастомного завершения checkout мы намеренно убираем ваучер/скидки,
+                # чтобы обойти ограничения типа "Cannot add more than 1 times this item".
+                # Скидка уже была учтена при внешнем платеже (YooKassa), поэтому здесь
+                # приоритет – успешное создание заказа, даже если в Saleor он будет без ваучера.
+                if checkout.voucher_code or checkout.discount_amount:
+                    logger.info(
+                        "Removing voucher/discount from checkout %s before completion. "
+                        "voucher_code=%s, discount_amount=%s",
+                        checkout_token,
+                        checkout.voucher_code,
+                        checkout.discount_amount,
+                    )
+                    checkout.voucher_code = None
+                    checkout.discount_amount = Decimal("0")
+                    checkout.discount_name = ""
+                    checkout.save(
+                        update_fields=["voucher_code", "discount_amount", "discount_name"]
+                    )
+                    # Переинициализируем данные после изменения
+                    checkout_lines, _ = fetch_checkout_lines(checkout)
+                    checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
                 # Убеждаемся, что shipping address установлен, если его нет
                 # Это может предотвратить бесконечные циклы в админке
