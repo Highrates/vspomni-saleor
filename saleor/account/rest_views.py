@@ -583,14 +583,25 @@ class GetOrdersView(View):
             # Проверяем все заказы пользователя (для отладки)
             all_orders = Order.objects.filter(user=user)
             logger.info(f'GetOrdersView: Total orders for user (all statuses): {all_orders.count()}')
-            for order in all_orders[:5]:  # Показываем первые 5 для отладки
-                logger.info(f'GetOrdersView: Order {order.id} - status: {order.status}, number: {order.number}, created_at: {order.created_at}')
+            for order in all_orders[:10]:  # Показываем первые 10 для отладки
+                logger.info(f'GetOrdersView: Order {order.id} - status: {order.status}, number: {order.number}, created_at: {order.created_at}, user_id: {order.user_id if order.user else None}')
+            
+            # Также проверяем заказы по email (на случай если user не установлен)
+            if user.email:
+                orders_by_email = Order.objects.filter(user_email=user.email).exclude(user=user)
+                logger.info(f'GetOrdersView: Found {orders_by_email.count()} orders by email {user.email} without user link')
+                if orders_by_email.exists():
+                    # Обновляем заказы, связывая их с пользователем
+                    orders_by_email.update(user=user)
+                    logger.info(f'GetOrdersView: Linked {orders_by_email.count()} orders to user {user.id}')
 
-            # Получаем только оформленные заказы (исключаем DRAFT и UNCONFIRMED)
+            # Получаем все заказы кроме DRAFT (включаем UNCONFIRMED и UNFULFILLED)
+            # UNCONFIRMED - заказ создан, но ещё не подтверждён
+            # UNFULFILLED - заказ подтверждён, но ещё не выполнен
             orders = Order.objects.filter(
                 user=user
             ).exclude(
-                status__in=[OrderStatus.DRAFT, OrderStatus.UNCONFIRMED]
+                status=OrderStatus.DRAFT
             ).order_by('-created_at')[:20]
             
             logger.info(f'GetOrdersView: Found {orders.count()} confirmed orders for user {user.email}')
@@ -600,8 +611,16 @@ class GetOrdersView(View):
                 lines_data = []
                 for line in order.lines.all():
                     thumbnail_url = None
-                    if line.variant and line.variant.product and line.variant.product.thumbnail:
-                        thumbnail_url = line.variant.product.thumbnail.url
+                    try:
+                        if line.variant and line.variant.product:
+                            product = line.variant.product
+                            # Получаем первое изображение продукта из media
+                            product_media = product.media.filter(type='IMAGE').first()
+                            if product_media and product_media.image:
+                                thumbnail_url = product_media.image.url
+                    except Exception as e:
+                        logger.warning(f'Error getting thumbnail for product {line.product_name}: {e}')
+                        thumbnail_url = None
                     
                     lines_data.append({
                         "id": str(line.id),
