@@ -246,8 +246,15 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 from ..order.models import Order
                 existing_order = Order.objects.filter(checkout_token=checkout_token).first()
                 if existing_order:
-                    # Если order уже существует, возвращаем его
+                    # Если order уже существует, удаляем checkout если он ещё существует, и возвращаем order
                     logger.info(f'Checkout {checkout_token} already completed, returning existing order {existing_order.id}')
+                    # Удаляем checkout чтобы избежать повторных попыток автоматического завершения
+                    try:
+                        checkout.delete()
+                        logger.info(f'Deleted checkout {checkout_token} after finding existing order')
+                    except Exception as e:
+                        logger.warning(f'Failed to delete checkout {checkout_token}: {e}')
+                    
                     return JsonResponse({
                         'success': True,
                         'order': {
@@ -275,6 +282,16 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 manager = get_plugins_manager(allow_replica=False)
                 checkout_lines, _ = fetch_checkout_lines(checkout)
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+                
+                # Убеждаемся, что shipping address установлен, если его нет
+                # Это может предотвратить бесконечные циклы в админке
+                if not checkout.shipping_address and checkout.billing_address:
+                    # Используем billing address как shipping address если shipping не установлен
+                    checkout.shipping_address = checkout.billing_address
+                    checkout.save(update_fields=['shipping_address'])
+                    logger.info(f'Set shipping address from billing address for checkout {checkout_token}')
+                    # Обновляем checkout_info после изменения
+                    checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
                 # ВРЕМЕННО отключаем track_inventory для всех вариантов в checkout, чтобы обойти проверку наличия
                 # Это радикальное решение, которое гарантированно обходит проверку stock
@@ -320,6 +337,17 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     )
                     
                     logger.info(f'Order created successfully: {order.id}, number: {order.number}')
+                    
+                    # Убеждаемся, что checkout удалён после создания order
+                    # Это критично для предотвращения бесконечных циклов
+                    try:
+                        checkout.refresh_from_db()
+                        if checkout.pk:  # Если checkout ещё существует
+                            logger.warning(f'Checkout {checkout_token} still exists after order creation, deleting it')
+                            checkout.delete()
+                            logger.info(f'Deleted checkout {checkout_token} after order creation')
+                    except Exception as delete_error:
+                        logger.warning(f'Failed to delete checkout {checkout_token}: {delete_error}')
                     
                 except Exception as e:
                     logger.error(f'Error creating order: {e}', exc_info=True)
