@@ -33,6 +33,7 @@ import { storyListPath } from "@dashboard/stories/urls";
 import { pageListPath } from "@dashboard/modeling/urls";
 import { pageTypeListUrl } from "@dashboard/modelTypes/urls";
 import { orderDraftListUrl, orderListUrl } from "@dashboard/orders/urls";
+import { customOrderListUrl } from "@dashboard/customOrders/urls";
 import { productListUrl } from "@dashboard/products/urls";
 import { productReviewListUrl, productReviewPublishedUrl } from "@dashboard/productReviews/urls";
 import { Ripple } from "@dashboard/ripples/components/Ripple";
@@ -198,6 +199,16 @@ export function useMenuStructure() {
           permissions: [PermissionEnum.MANAGE_ORDERS],
           id: "order-drafts",
           url: orderDraftListUrl(),
+          type: "item",
+        },
+        {
+          label: intl.formatMessage({
+            defaultMessage: "Кастомные заказы",
+            id: "customOrders.menu",
+          }),
+          permissions: [PermissionEnum.MANAGE_ORDERS],
+          id: "custom-orders",
+          url: customOrderListUrl(),
           type: "item",
         },
         ...mapToExtensionsItems(extensions.NAVIGATION_ORDERS, appExtensionsHeaderItem),

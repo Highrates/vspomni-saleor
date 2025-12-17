@@ -69,6 +69,7 @@ import PageSection from "./modeling";
 import PageTypesSection from "./modelTypes";
 import { NotFound } from "./NotFound";
 import OrdersSection from "./orders";
+import CustomOrdersSection from "./customOrders";
 import PermissionGroupSection from "./permissionGroups";
 import ProductSection from "./products";
 import ProductReviewSection from "./productReviews";
@@ -254,6 +255,11 @@ const Routes = () => {
                   permissions={[PermissionEnum.MANAGE_ORDERS]}
                   path="/orders"
                   component={OrdersSection}
+                />
+                <SectionRoute
+                  permissions={[PermissionEnum.MANAGE_ORDERS]}
+                  path="/custom-orders"
+                  component={CustomOrdersSection}
                 />
                 <SectionRoute
                   permissions={[PermissionEnum.MANAGE_PRODUCTS]}
