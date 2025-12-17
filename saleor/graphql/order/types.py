@@ -2500,21 +2500,38 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                     logger.info(f"[ORDER TRANSACTIONS] Loaded {len(transactions)} transactions for order {order.id}")
                     for trans in transactions:
                         if trans.charged_value:
-                            order_total = order.total_gross_amount
-                            trans_amount = trans.charged_value
-                            if trans_amount > order_total * 10:
+                            # order.total_gross_amount в рублях, trans.charged_value в копейках
+                            # Преобразуем order total в копейки для сравнения
+                            order_total_cents = Decimal(int(order.total_gross_amount * 100))
+                            trans_amount_cents = trans.charged_value
+                            
+                            # Проверяем, не слишком ли большая сумма (больше чем в 10 раз)
+                            # Также проверяем, что сумма не слишком маленькая (меньше чем 0.1 от суммы заказа)
+                            ratio = trans_amount_cents / order_total_cents if order_total_cents > 0 else 0
+                            
+                            if trans_amount_cents > order_total_cents * 10:
                                 logger.warning(
                                     f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspicious amount: "
-                                    f"{trans_amount} (order total: {order_total}, ratio: {trans_amount/order_total:.2f}x)"
+                                    f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x)"
                                 )
-                                # Исправляем сумму прямо здесь, чтобы предотвратить проблемы
-                                try:
-                                    correct_amount = Decimal(int(order_total * 100))
-                                    trans.charged_value = correct_amount
-                                    trans.save(update_fields=['charged_value'])
-                                    logger.info(f"[ORDER TRANSACTIONS] Fixed transaction {trans.id} amount to {correct_amount}")
-                                except Exception as fix_error:
-                                    logger.error(f"[ORDER TRANSACTIONS] Failed to fix transaction {trans.id}: {fix_error}")
+                                # Исправляем сумму на правильную (в копейках)
+                                # Но только если она действительно неправильная (не равна уже правильной сумме)
+                                if trans_amount_cents != order_total_cents:
+                                    try:
+                                        trans.charged_value = order_total_cents
+                                        trans.save(update_fields=['charged_value'])
+                                        logger.info(f"[ORDER TRANSACTIONS] Fixed transaction {trans.id} amount from {trans_amount_cents} to {order_total_cents} cents")
+                                    except Exception as fix_error:
+                                        logger.error(f"[ORDER TRANSACTIONS] Failed to fix transaction {trans.id}: {fix_error}")
+                                else:
+                                    logger.debug(f"[ORDER TRANSACTIONS] Transaction {trans.id} already has correct amount: {order_total_cents} cents")
+                            elif ratio < 0.1:
+                                logger.warning(
+                                    f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspiciously small amount: "
+                                    f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x)"
+                                )
+                            else:
+                                logger.debug(f"[ORDER TRANSACTIONS] Transaction {trans.id} amount OK: {trans_amount_cents} cents (order: {order_total_cents} cents, ratio: {ratio:.2f}x)")
                 else:
                     logger.info(f"[ORDER TRANSACTIONS] No transactions found for order {order.id}")
                 return transactions
