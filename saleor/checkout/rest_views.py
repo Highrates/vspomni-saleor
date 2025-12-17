@@ -315,6 +315,9 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     # Обновляем checkout_info после изменения
                     checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                 
+                # Импортируем helper для выборочного отключения quantity-лимитов
+                from ..warehouse.availability import set_disable_quantity_limits
+
                 # ВРЕМЕННО отключаем track_inventory для всех вариантов в checkout, чтобы обойти проверку наличия
                 # Это радикальное решение, которое гарантированно обходит проверку stock
                 # Проверка наличия пропускается если variant.track_inventory = False
@@ -331,6 +334,9 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         variant.refresh_from_db()
                         logger.info(f'Temporarily disabled track_inventory for variant {variant.id} (product: {variant.product.name if variant.product else "N/A"})')
                 
+                # Дополнительно отключаем глобальные quantity-лимиты только на время создания order
+                set_disable_quantity_limits(True)
+
                 try:
                     # Создаём order напрямую, обходя все проверки
                     # Используем email из checkout, если user не установлен
@@ -364,7 +370,6 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     # Это критично для предотвращения бесконечных циклов в админке
                     try:
                         from ..payment.models import TransactionItem
-                        from decimal import Decimal
                         
                         # Обновляем все transaction для checkout, связывая их с order
                         checkout_transactions = TransactionItem.objects.filter(checkout_id=checkout.pk)
@@ -452,6 +457,12 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         # Для всех остальных ошибок пробрасываем как есть
                         raise
                 finally:
+                    # Возвращаем поведение quantity-лимитов к стандартному
+                    try:
+                        set_disable_quantity_limits(False)
+                    except Exception:
+                        pass
+
                     # Восстанавливаем track_inventory для всех вариантов
                     for line in checkout_lines:
                         variant = line.variant

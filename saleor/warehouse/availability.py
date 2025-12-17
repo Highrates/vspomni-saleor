@@ -1,4 +1,5 @@
 from collections import defaultdict
+from threading import local
 from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
@@ -38,6 +39,20 @@ class VariantsChannelAvailbilityInfo(NamedTuple):
     variants_global_allocations: dict[int, int]
     all_variants_channel_listings: QuerySet[ProductVariantChannelListing]
     variant_channels: dict[int, list[ProductVariantChannelListing]]
+
+
+# Thread-local флаг для выборочного отключения quantity-лимитов
+_thread_local = local()
+
+
+def set_disable_quantity_limits(flag: bool) -> None:
+    """Включить/выключить проверку quantity-лимитов в текущем потоке.
+
+    Используется кастомным REST-эндпоинтом завершения checkout, чтобы
+    обойти ограничение "Cannot add more than N times this item" только
+    в этом специфическом флоу, не затрагивая остальной код.
+    """
+    _thread_local.disable_quantity_limits = flag
 
 
 def _get_available_quantity(
@@ -213,6 +228,11 @@ def _split_lines_for_trackable_and_preorder(
 def _check_quantity_limits(
     variant: "ProductVariant", quantity: int, global_quantity_limit: int | None
 ) -> NoReturn | None:
+    # Если в текущем потоке явно отключили лимиты по количеству,
+    # не выполняем проверку и всегда пропускаем.
+    if getattr(_thread_local, "disable_quantity_limits", False):
+        return None
+
     quantity_limit = variant.quantity_limit_per_customer or global_quantity_limit
 
     if quantity_limit is not None and quantity > quantity_limit:
