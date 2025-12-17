@@ -2272,13 +2272,6 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
         cache_key = f"total_authorized_{order.id}"
         current_time = time()
         
-        # Check global cache first (rate limiting)
-        if cache_key in _order_query_cache:
-            cached = _order_query_cache[cache_key]
-            if current_time - cached.get('timestamp', 0) < _cache_ttl:
-                # Return cached value if still valid
-                return Promise.resolve(cached['value'])
-        
         # Use request-level cache to prevent repeated calculations within the same request
         if not hasattr(_thread_local, 'cache'):
             _thread_local.cache = {}
@@ -2289,6 +2282,14 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
             # Verify the order hasn't changed (simple check)
             if cached_result.get('order_updated_at') == order.updated_at.isoformat():
                 return Promise.resolve(cached_result['value'])
+        
+        # Rate limiting: prevent too frequent queries for the same order
+        # Check global cache (rate limiting) - but only if we don't have request cache
+        if cache_key in _order_query_cache:
+            cached = _order_query_cache[cache_key]
+            if current_time - cached.get('timestamp', 0) < _cache_ttl:
+                # Return cached value if still valid
+                return Promise.resolve(cached['value'])
 
         def _resolve_total_get_total_authorized(data):
             transactions, payments = data
@@ -2536,18 +2537,8 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
         
-        # Rate limiting: prevent too frequent queries for the same order
-        cache_key = f"transactions_{order.id}"
-        current_time = time()
-        
-        # Check global cache first (rate limiting)
-        if cache_key in _order_query_cache:
-            cached = _order_query_cache[cache_key]
-            if current_time - cached.get('timestamp', 0) < _cache_ttl:
-                # Return cached value if still valid
-                return Promise.resolve(cached['value'])
-        
         # Use request-level cache to prevent repeated loading within the same request
+        cache_key = f"transactions_{order.id}"
         if not hasattr(_thread_local, 'cache'):
             _thread_local.cache = {}
         
@@ -2557,6 +2548,15 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
             # Verify the order hasn't changed
             if cached_result.get('order_updated_at') == order.updated_at.isoformat():
                 return Promise.resolve(cached_result['value'])
+        
+        # Rate limiting: prevent too frequent queries for the same order
+        current_time = time()
+        # Check global cache (rate limiting) - but only if we don't have request cache
+        if cache_key in _order_query_cache:
+            cached = _order_query_cache[cache_key]
+            if current_time - cached.get('timestamp', 0) < _cache_ttl:
+                # Return cached value if still valid
+                return Promise.resolve(cached['value'])
         
         # Removed excessive debug logging to prevent performance issues during polling
         # Only log warnings for actual problems, not on every request
@@ -2597,7 +2597,7 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                 # Cache in global cache for rate limiting
                 _order_query_cache[cache_key] = {
                     'value': transactions,
-                    'timestamp': current_time
+                    'timestamp': time()
                 }
                 
                 return transactions
@@ -2605,7 +2605,7 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
         except Exception as e:
             logger.error(f"[ORDER TRANSACTIONS] Error loading transactions for order {order.id}: {e}", exc_info=True)
             # Возвращаем пустой список вместо ошибки, чтобы не вызывать цикл
-            from promise import Promise
+            # Promise уже импортирован в начале файла
             return Promise.resolve([])
 
     @staticmethod

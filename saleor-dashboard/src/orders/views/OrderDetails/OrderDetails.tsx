@@ -140,9 +140,11 @@ const OrderDetails = ({ id, params }: OrderDetailsProps) => {
           onInvoiceSend={orderMessages.handleInvoiceSend}
           onTransactionActionSend={orderMessages.handleTransactionAction}
           onManualTransactionAdded={async data => {
-            await apolloClient.refetchQueries({
-              include: [OrderDetailsWithMetadataDocument],
-            });
+            // Disabled automatic refetch to prevent infinite loops
+            // The cache will be updated by the mutation response
+            // await apolloClient.refetchQueries({
+            //   include: [OrderDetailsWithMetadataDocument],
+            // });
             orderMessages.handleAddManualTransaction(data);
           }}
         >
