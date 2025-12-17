@@ -342,11 +342,29 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     # Это критично для предотвращения бесконечных циклов в админке
                     try:
                         from ..payment.models import TransactionItem
+                        from decimal import Decimal
+                        
                         # Обновляем все transaction для checkout, связывая их с order
                         checkout_transactions = TransactionItem.objects.filter(checkout_id=checkout.pk)
                         if checkout_transactions.exists():
                             transaction_count = checkout_transactions.count()
                             logger.info(f'Found {transaction_count} transactions for checkout, updating them to order {order.id}')
+                            
+                            # Проверяем и исправляем неправильные суммы transaction
+                            order_total_cents = int(order.total_gross_amount * 100)  # Сумма заказа в копейках
+                            for trans in checkout_transactions:
+                                # Проверяем, не слишком ли большая сумма в transaction
+                                if trans.charged_amount and trans.charged_amount.amount > 1000000:
+                                    logger.warning(f'Transaction {trans.id} has suspiciously large amount: {trans.charged_amount.amount} cents. Order total: {order_total_cents} cents')
+                                    # Исправляем сумму transaction на правильную
+                                    if trans.charged_amount.amount > order_total_cents * 10:
+                                        # Если сумма в 10+ раз больше, это явно ошибка
+                                        logger.error(f'Transaction {trans.id} amount is {trans.charged_amount.amount} but order total is {order_total_cents}. This will cause issues in admin!')
+                                        # Обновляем сумму transaction на правильную
+                                        trans.charged_amount.amount = Decimal(order_total_cents)
+                                        trans.save(update_fields=['charged_amount'])
+                                        logger.info(f'Fixed transaction {trans.id} amount to {order_total_cents} cents')
+                            
                             checkout_transactions.update(checkout_id=None, order=order)
                             logger.info(f'Updated {transaction_count} transactions to link with order {order.id}')
                         
