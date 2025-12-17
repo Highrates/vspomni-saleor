@@ -2,6 +2,8 @@ import logging
 from decimal import Decimal
 from uuid import UUID
 
+logger = logging.getLogger(__name__)
+
 import graphene
 import prices
 from django.core.exceptions import ValidationError
@@ -2482,7 +2484,28 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
         [OrderPermissions.MANAGE_ORDERS, PaymentPermissions.HANDLE_PAYMENTS]
     )
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
-        return TransactionItemsByOrderIDLoader(info.context).load(root.node.id)
+        order = root.node
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Loading transactions for order {order.id} (#{order.number})")
+        try:
+            result = TransactionItemsByOrderIDLoader(info.context).load(order.id)
+            # Добавляем обработку ошибок для предотвращения циклов
+            def _log_transactions(transactions):
+                if transactions:
+                    logger.debug(f"Loaded {len(transactions)} transactions for order {order.id}")
+                    for trans in transactions:
+                        if trans.charged_value and trans.charged_value > order.total_gross_amount * 10:
+                            logger.warning(
+                                f"Order {order.id}: Transaction {trans.id} has suspicious amount: "
+                                f"{trans.charged_value} (order total: {order.total_gross_amount})"
+                            )
+                return transactions
+            return result.then(_log_transactions)
+        except Exception as e:
+            logger.error(f"Error loading transactions for order {order.id}: {e}", exc_info=True)
+            # Возвращаем пустой список вместо ошибки, чтобы не вызывать цикл
+            from promise import Promise
+            return Promise.resolve([])
 
     @staticmethod
     def resolve_status_display(root: SyncWebhookControlContext[models.Order], _info):
