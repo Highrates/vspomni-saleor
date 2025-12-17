@@ -315,7 +315,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         app=None,
                         metadata_list=None,
                         private_metadata_list=None,
-                        delete_checkout=False,
+                        delete_checkout=True,  # Удаляем checkout после создания order, чтобы избежать повторных попыток
                         is_automatic_completion=True,
                     )
                     

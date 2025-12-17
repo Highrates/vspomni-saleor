@@ -147,6 +147,19 @@ def automatic_checkout_completion_task(
         checkout = Checkout.objects.get(pk=checkout_pk)
     except Checkout.DoesNotExist:
         return
+    
+    # Проверяем, не был ли уже создан order из этого checkout
+    # Это предотвращает бесконечный цикл при повторных вызовах
+    from ..order.models import Order
+    existing_order = Order.objects.filter(checkout_token=str(checkout.token)).first()
+    if existing_order:
+        task_logger.info(
+            "Automatic checkout completion skipped for checkout: %s. Order already exists: %s.",
+            checkout_id,
+            existing_order.number or existing_order.id,
+            extra={"checkout_id": checkout_id, "order_id": str(existing_order.id)},
+        )
+        return
 
     user = User.objects.filter(pk=user_id).first()
     app = App.objects.filter(pk=app_id).first()
