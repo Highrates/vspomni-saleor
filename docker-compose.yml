@@ -26,7 +26,7 @@ services:
       retries: 5
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.19.0
     container_name: saleor_mailpit
     restart: unless-stopped
     ports:
