@@ -106,7 +106,7 @@ services:
   dashboard:
     build:
       context: ./saleor-dashboard
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.build
       args:
         API_URL: ${API_URL}
         APP_MOUNT_URI: /dashboard/
