@@ -2265,13 +2265,13 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
                 return quantize_price(authorized_money, order.currency)
             return get_total_authorized(payments, order.currency)
 
-        logger.info(f"[ORDER TOTAL AUTHORIZED] Loading for order {order.id} (#{order.number})")
+        logger.debug(f"[ORDER TOTAL AUTHORIZED] Loading for order {order.id} (#{order.number})")
         transactions = TransactionItemsByOrderIDLoader(info.context).load(order.id)
         payments = PaymentsByOrderIdLoader(info.context).load(order.id)
         
         def _log_and_resolve(data):
             trans_list, pay_list = data
-            logger.info(f"[ORDER TOTAL AUTHORIZED] Order {order.id}: {len(trans_list)} transactions, {len(pay_list)} payments")
+            logger.debug(f"[ORDER TOTAL AUTHORIZED] Order {order.id}: {len(trans_list)} transactions, {len(pay_list)} payments")
             return _resolve_total_get_total_authorized(data)
         
         return Promise.all([transactions, payments]).then(_log_and_resolve)
@@ -2490,50 +2490,39 @@ class Order(SyncWebhookControlContextModelObjectType[ModelObjectType[models.Orde
     )
     def resolve_transactions(root: SyncWebhookControlContext[models.Order], info):
         order = root.node
-        # Используем INFO уровень для гарантированного вывода в логи
-        logger.info(f"[ORDER TRANSACTIONS] Loading transactions for order {order.id} (#{order.number})")
+        # Используем DEBUG уровень, чтобы не засорять логи при нормальной работе
+        # INFO будет только при проблемах
+        logger.debug(f"[ORDER TRANSACTIONS] Loading transactions for order {order.id} (#{order.number})")
         try:
             result = TransactionItemsByOrderIDLoader(info.context).load(order.id)
             # Добавляем обработку ошибок для предотвращения циклов
             def _log_transactions(transactions):
+                # Убираем автоматическое исправление transaction из resolver,
+                # так как это может вызывать бесконечные циклы - каждое обновление
+                # может вызывать новый запрос от админки
+                # Исправление transaction должно делаться отдельным скриптом или задачей
                 if transactions:
-                    logger.info(f"[ORDER TRANSACTIONS] Loaded {len(transactions)} transactions for order {order.id}")
+                    logger.debug(f"[ORDER TRANSACTIONS] Loaded {len(transactions)} transactions for order {order.id}")
+                    # Только логируем, не исправляем
                     for trans in transactions:
                         if trans.charged_value:
-                            # order.total_gross_amount в рублях, trans.charged_value в копейках
-                            # Преобразуем order total в копейки для сравнения
                             order_total_cents = Decimal(int(order.total_gross_amount * 100))
                             trans_amount_cents = trans.charged_value
-                            
-                            # Проверяем, не слишком ли большая сумма (больше чем в 10 раз)
-                            # Также проверяем, что сумма не слишком маленькая (меньше чем 0.1 от суммы заказа)
                             ratio = trans_amount_cents / order_total_cents if order_total_cents > 0 else 0
                             
                             if trans_amount_cents > order_total_cents * 10:
                                 logger.warning(
                                     f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspicious amount: "
-                                    f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x)"
+                                    f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x). "
+                                    f"Run fix_transactions.py script to fix this."
                                 )
-                                # Исправляем сумму на правильную (в копейках)
-                                # Но только если она действительно неправильная (не равна уже правильной сумме)
-                                if trans_amount_cents != order_total_cents:
-                                    try:
-                                        trans.charged_value = order_total_cents
-                                        trans.save(update_fields=['charged_value'])
-                                        logger.info(f"[ORDER TRANSACTIONS] Fixed transaction {trans.id} amount from {trans_amount_cents} to {order_total_cents} cents")
-                                    except Exception as fix_error:
-                                        logger.error(f"[ORDER TRANSACTIONS] Failed to fix transaction {trans.id}: {fix_error}")
-                                else:
-                                    logger.debug(f"[ORDER TRANSACTIONS] Transaction {trans.id} already has correct amount: {order_total_cents} cents")
                             elif ratio < 0.1:
                                 logger.warning(
                                     f"[ORDER TRANSACTIONS] Order {order.id}: Transaction {trans.id} has suspiciously small amount: "
                                     f"{trans_amount_cents} cents (order total: {order_total_cents} cents, ratio: {ratio:.2f}x)"
                                 )
-                            else:
-                                logger.debug(f"[ORDER TRANSACTIONS] Transaction {trans.id} amount OK: {trans_amount_cents} cents (order: {order_total_cents} cents, ratio: {ratio:.2f}x)")
                 else:
-                    logger.info(f"[ORDER TRANSACTIONS] No transactions found for order {order.id}")
+                    logger.debug(f"[ORDER TRANSACTIONS] No transactions found for order {order.id}")
                 return transactions
             return result.then(_log_transactions)
         except Exception as e:
