@@ -338,16 +338,26 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     
                     logger.info(f'Order created successfully: {order.id}, number: {order.number}')
                     
-                    # Убеждаемся, что checkout удалён после создания order
-                    # Это критично для предотвращения бесконечных циклов
+                    # Убеждаемся, что все transaction правильно связаны с order
+                    # Это критично для предотвращения бесконечных циклов в админке
                     try:
+                        from ..payment.models import TransactionItem
+                        # Обновляем все transaction для checkout, связывая их с order
+                        checkout_transactions = TransactionItem.objects.filter(checkout_id=checkout.pk)
+                        if checkout_transactions.exists():
+                            transaction_count = checkout_transactions.count()
+                            logger.info(f'Found {transaction_count} transactions for checkout, updating them to order {order.id}')
+                            checkout_transactions.update(checkout_id=None, order=order)
+                            logger.info(f'Updated {transaction_count} transactions to link with order {order.id}')
+                        
+                        # Убеждаемся, что checkout удалён после создания order
                         checkout.refresh_from_db()
                         if checkout.pk:  # Если checkout ещё существует
                             logger.warning(f'Checkout {checkout_token} still exists after order creation, deleting it')
                             checkout.delete()
                             logger.info(f'Deleted checkout {checkout_token} after order creation')
-                    except Exception as delete_error:
-                        logger.warning(f'Failed to delete checkout {checkout_token}: {delete_error}')
+                    except Exception as cleanup_error:
+                        logger.warning(f'Error during cleanup after order creation: {cleanup_error}', exc_info=True)
                     
                 except Exception as e:
                     logger.error(f'Error creating order: {e}', exc_info=True)
