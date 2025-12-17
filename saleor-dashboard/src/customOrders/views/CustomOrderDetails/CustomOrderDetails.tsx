@@ -1,5 +1,8 @@
 // @ts-strict-ignore
-import { useOrderDetailsWithMetadataQuery, useOrderUpdateMutation } from "@dashboard/graphql";
+import {
+  useOrderDetailsWithMetadataQuery,
+  useOrderFulfillmentApproveMutation,
+} from "@dashboard/graphql";
 import useNavigator from "@dashboard/hooks/useNavigator";
 import useNotifier from "@dashboard/hooks/useNotifier";
 import { Box, Button, Card, Text } from "@saleor/macaw-ui-next";
@@ -21,20 +24,22 @@ const CustomOrderDetails = ({ id }: CustomOrderDetailsProps) => {
     fetchPolicy: "cache-first",
   });
 
-  const [updateOrder, { loading: updating }] = useOrderUpdateMutation({
+  const [approveFulfillment, { loading: updating }] = useOrderFulfillmentApproveMutation({
+    refetchQueries: ["OrderDetailsWithMetadata"],
     onCompleted: data => {
-      if (data.orderUpdate?.errors.length === 0) {
+      if (data.orderFulfillmentApprove?.errors.length === 0) {
         notify({
           status: "success",
           text: intl.formatMessage({
-            defaultMessage: "Статус заказа обновлен",
-            id: "orderStatusUpdated",
+            defaultMessage: "Заказ отмечен как доставленный",
+            id: "orderMarkedAsDelivered",
           }),
         });
       } else {
+        const error = data.orderFulfillmentApprove?.errors[0];
         notify({
           status: "error",
-          text: intl.formatMessage({
+          text: error?.message || intl.formatMessage({
             defaultMessage: "Ошибка при обновлении статуса",
             id: "orderStatusUpdateError",
           }),
@@ -48,18 +53,31 @@ const CustomOrderDetails = ({ id }: CustomOrderDetailsProps) => {
   const handleMarkAsDelivered = () => {
     if (!order) return;
 
-    // Для простоты обновляем fulfillment статус
-    // В реальности нужно использовать mutation для обновления fulfillment
-    notify({
-      status: "info",
-      text: intl.formatMessage({
-        defaultMessage: "Функция будет реализована через fulfillment API",
-        id: "markAsDelivered.info",
-      }),
+    // Находим первый fulfillment, который еще не одобрен
+    const unfulfilledFulfillment = order.fulfillments?.find(
+      f => f.status !== "FULFILLED" && f.status !== "CANCELED"
+    );
+
+    if (!unfulfilledFulfillment) {
+      // Если нет fulfillment, нужно сначала создать его
+      // Для простоты показываем сообщение
+      notify({
+        status: "error",
+        text: intl.formatMessage({
+          defaultMessage: "Нет fulfillment для одобрения. Сначала создайте fulfillment.",
+          id: "noFulfillmentToApprove",
+        }),
+      });
+      return;
+    }
+
+    // Одобряем fulfillment, что помечает заказ как доставленный
+    approveFulfillment({
+      variables: {
+        id: unfulfilledFulfillment.id,
+        notifyCustomer: false,
+      },
     });
-    
-    // TODO: Реализовать через OrderFulfillmentUpdateTrackingMutation
-    // или создать кастомную мутацию для изменения статуса
   };
 
   if (loading) {
@@ -158,7 +176,10 @@ const CustomOrderDetails = ({ id }: CustomOrderDetailsProps) => {
             </Box>
             <Button
               onClick={handleMarkAsDelivered}
-              disabled={updating || order.fulfillments?.some(f => f.status === "FULFILLED")}
+              disabled={
+                updating ||
+                order.fulfillments?.every(f => f.status === "FULFILLED" || f.status === "CANCELED")
+              }
               variant="primary"
             >
               <FormattedMessage defaultMessage="Отметить как доставлено" id="markAsDelivered" />
