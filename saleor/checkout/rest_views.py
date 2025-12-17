@@ -379,7 +379,56 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     
                 except Exception as e:
                     logger.error(f'Error creating order: {e}', exc_info=True)
-                    raise
+                    error_msg = str(e)
+                    
+                    # Специальный обход ошибки "Cannot add more than 1 times this item"
+                    # которая связана с ограничениями ваучера/промоакции на количество.
+                    if "Cannot add more than 1 times this item" in error_msg:
+                        logger.warning(
+                            'Detected quantity limit error when creating order. '
+                            'Retrying order creation after removing voucher/discounts.'
+                        )
+                        try:
+                            # Очищаем ваучер и скидки на checkout, чтобы убрать ограничение
+                            checkout.refresh_from_db()
+                            checkout.discount_amount = Decimal("0")
+                            checkout.discount_name = ""
+                            checkout.voucher_code = None
+                            checkout.save(
+                                update_fields=["discount_amount", "discount_name", "voucher_code"]
+                            )
+                            
+                            # Переинициализируем checkout_info после изменений
+                            checkout_lines, _ = fetch_checkout_lines(checkout)
+                            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+                            
+                            # Повторная попытка создания заказа уже без ваучера
+                            order = create_order_from_checkout(
+                                checkout_info=checkout_info,
+                                manager=manager,
+                                user=user,
+                                app=None,
+                                metadata_list=None,
+                                private_metadata_list=None,
+                                delete_checkout=True,
+                                is_automatic_completion=True,
+                            )
+                            
+                            logger.info(
+                                'Order created successfully on retry without voucher: %s',
+                                order.id,
+                            )
+                        except Exception as retry_error:
+                            logger.error(
+                                'Retry order creation without voucher failed: %s',
+                                retry_error,
+                                exc_info=True,
+                            )
+                            # Пробрасываем исходную ошибку, чтобы REST вернул её наверх
+                            raise e
+                    else:
+                        # Для всех остальных ошибок пробрасываем как есть
+                        raise
                 finally:
                     # Восстанавливаем track_inventory для всех вариантов
                     for line in checkout_lines:
