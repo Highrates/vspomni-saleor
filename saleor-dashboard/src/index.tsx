@@ -63,8 +63,8 @@ import { useLocationState } from "./hooks/useLocationState";
 import { commonMessages } from "./intl";
 import ArticlesSection from "./articles";
 import { articleListPath } from "./articles/urls";
-import StoriesSection from "./stories";
-import { storyListPath } from "./stories/urls";
+// import StoriesSection from "./stories";
+// import { storyListPath } from "./stories/urls";
 import PageSection from "./modeling";
 import PageTypesSection from "./modelTypes";
 import { NotFound } from "./NotFound";
@@ -237,11 +237,13 @@ const Routes = () => {
                   path={articleListPath}
                   component={ArticlesSection}
                 />
+                {/* Временно отключено - Story отсутствует в GraphQL схеме
                 <SectionRoute
                   permissions={[PermissionEnum.MANAGE_PAGES]}
                   path={storyListPath}
                   component={StoriesSection}
                 />
+                */}
                 <SectionRoute
                   permissions={[
                     PermissionEnum.MANAGE_PAGES,

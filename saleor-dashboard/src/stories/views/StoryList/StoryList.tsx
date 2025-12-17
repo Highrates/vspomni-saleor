@@ -52,11 +52,16 @@ const StoryList = ({ params }: StoryListProps) => {
     [paginationState],
   );
 
-  const { data, loading, refetch } = useQuery(storyList, {
-    variables: queryVariables,
-  });
-
-  const stories = mapEdgesToItems(data?.stories);
+  // Временно отключено - Story отсутствует в GraphQL схеме
+  // const { data, loading, refetch } = useQuery(storyList, {
+  //   variables: queryVariables,
+  // });
+  // const stories = mapEdgesToItems(data?.stories);
+  
+  const data = null;
+  const loading = false;
+  const refetch = () => Promise.resolve({});
+  const stories: any[] = [];
 
   const [openDialog, closeDialog] = createDialogActionHandlers<
     StoryListUrlDialog,
