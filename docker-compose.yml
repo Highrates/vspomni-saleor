@@ -45,7 +45,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
 
-    entrypoint: ["/app/docker-entrypoint.sh"]
+    entrypoint: ["/app/docker-entrypoint-wrapper.sh"]
 
     command:
       [
@@ -76,6 +76,8 @@ services:
     volumes:
       - static_files:/app/static
       - media_files:/app/media
+      - ./plugins/yandex_oauth:/app/saleor/plugins/yandex_oauth
+      - ./docker-entrypoint-wrapper.sh:/app/docker-entrypoint-wrapper.sh
 
 
   celery-worker:
