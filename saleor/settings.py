@@ -214,6 +214,13 @@ DEFAULT_FROM_EMAIL: str = os.environ.get(
 MEDIA_ROOT = "/app/media"
 MEDIA_URL: str = os.environ.get("MEDIA_URL", "/media/")
 
+# Лимит загрузки файлов через GraphQL (fileUpload): MP4 в сторис, изображения и т.д.
+_DATA_UPLOAD_MAX = int(os.environ.get("DATA_UPLOAD_MAX_MEMORY_SIZE", 104857600))  # 100 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = _DATA_UPLOAD_MAX
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(
+    os.environ.get("FILE_UPLOAD_MAX_MEMORY_SIZE", _DATA_UPLOAD_MAX)
+)
+
 STATIC_ROOT = "/app/static"
 STATIC_URL: str = os.environ.get("STATIC_URL", "/static/")
 STATICFILES_DIRS = [
