@@ -30,6 +30,84 @@ from ..product import models as product_models
 logger = logging.getLogger(__name__)
 
 
+def _confirmation_email_already_sent(order) -> bool:
+    from ..order import OrderEvents, OrderEventsEmails
+    from ..order.models import OrderEvent
+
+    return OrderEvent.objects.filter(
+        order_id=order.pk,
+        type=OrderEvents.EMAIL_SENT,
+        parameters__email_type=OrderEventsEmails.ORDER_CONFIRMATION,
+    ).exists()
+
+
+def _ensure_checkout_email(checkout, user_email: str | None):
+    if not user_email:
+        return
+
+    normalized_email = user_email.strip().lower()
+    if not normalized_email:
+        return
+
+    update_fields = []
+    if checkout.email != normalized_email:
+        checkout.email = normalized_email
+        update_fields.append("email")
+
+    if not checkout.user:
+        from ..account.utils import retrieve_user_by_email
+
+        try:
+            user = retrieve_user_by_email(normalized_email)
+            if user:
+                checkout.user = user
+                update_fields.append("user")
+        except Exception:
+            pass
+
+    if update_fields:
+        checkout.save(update_fields=update_fields)
+        logger.info(
+            "Updated checkout %s email/user before completion: %s",
+            checkout.token,
+            normalized_email,
+        )
+
+
+def _send_order_confirmation_if_needed(order, manager, redirect_url: str = ""):
+    from ..checkout.fetch import OrderInfo
+    from ..order.notifications import send_order_confirmation
+
+    customer_email = order.get_customer_email()
+    if not customer_email:
+        logger.warning(
+            "Order %s has no customer email, skipping confirmation email",
+            order.id,
+        )
+        return
+
+    if _confirmation_email_already_sent(order):
+        logger.info(
+            "Order confirmation email already sent for order %s",
+            order.id,
+        )
+        return
+
+    order_info = OrderInfo(
+        order=order,
+        customer_email=customer_email,
+        channel=order.channel,
+        payment=order.get_last_payment(),
+        lines_data=[],
+    )
+    logger.info(
+        "Sending order confirmation email to %s for order %s",
+        customer_email,
+        order.id,
+    )
+    send_order_confirmation(order_info, redirect_url, manager)
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CreateCheckoutWithoutStockCheckView(View):
     """
@@ -233,6 +311,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
         try:
             data = json.loads(request.body)
             checkout_token = data.get('checkoutId') or data.get('checkout_token')
+            user_email = data.get('userEmail') or data.get('email')
             
             if not checkout_token:
                 return JsonResponse(
@@ -246,14 +325,36 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 from ..order.models import Order
                 existing_order = Order.objects.filter(checkout_token=checkout_token).first()
                 if existing_order:
-                    # Если order уже существует, удаляем checkout если он ещё существует, и возвращаем order
-                    logger.info(f'Checkout {checkout_token} already completed, returning existing order {existing_order.id}')
-                    # Удаляем checkout чтобы избежать повторных попыток автоматического завершения
+                    logger.info(
+                        'Checkout %s already completed, returning existing order %s',
+                        checkout_token,
+                        existing_order.id,
+                    )
+                    redirect_url = existing_order.redirect_url or ''
+                    from ..plugins.manager import get_plugins_manager
+                    plugin_manager = get_plugins_manager(allow_replica=False)
+                    transaction.on_commit(
+                        lambda order=existing_order, mgr=plugin_manager, url=redirect_url: (
+                            _send_order_confirmation_if_needed(order, mgr, url)
+                        )
+                    )
+
                     try:
-                        checkout.delete()
-                        logger.info(f'Deleted checkout {checkout_token} after finding existing order')
+                        stale_checkout = checkout_models.Checkout.objects.filter(
+                            token=checkout_token
+                        ).first()
+                        if stale_checkout:
+                            stale_checkout.delete()
+                            logger.info(
+                                'Deleted checkout %s after finding existing order',
+                                checkout_token,
+                            )
                     except Exception as e:
-                        logger.warning(f'Failed to delete checkout {checkout_token}: {e}')
+                        logger.warning(
+                            'Failed to delete checkout %s: %s',
+                            checkout_token,
+                            e,
+                        )
                     
                     return JsonResponse({
                         'success': True,
@@ -272,6 +373,9 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         {'error': 'Checkout not found'}, 
                         status=404
                     )
+
+                _ensure_checkout_email(checkout, user_email)
+                checkout.refresh_from_db()
                 
                 # Импортируем необходимые функции для создания order
                 from ..checkout.complete_checkout import complete_checkout

@@ -236,8 +236,8 @@ def send_order_confirmation(
         constants.ORDER_CONFIRMATION_SUBJECT_FIELD,
         constants.ORDER_CONFIRMATION_DEFAULT_SUBJECT,
     )
-    send_order_confirmation_email_task.delay(
-        recipient_email, payload, config, subject, template
+    send_order_confirmation_email_task.apply(
+        args=(recipient_email, payload, config, subject, template),
     )
 
 
