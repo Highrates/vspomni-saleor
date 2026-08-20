@@ -28,6 +28,29 @@ def _generate_verification_code() -> str:
   return f"{randint(0, 999999):06d}"
 
 
+def _send_site_email(
+  *,
+  subject: str,
+  message: str,
+  recipient: str,
+  html_message: str | None = None,
+) -> int:
+  """
+  Та же отправка, что для OTP: Django EMAIL_URL / DEFAULT_FROM_EMAIL.
+  """
+  from django.core.mail import get_connection, send_mail
+
+  connection = get_connection(timeout=15)
+  return send_mail(
+    subject,
+    message,
+    settings.DEFAULT_FROM_EMAIL,
+    [recipient],
+    fail_silently=False,
+    connection=connection,
+    html_message=html_message,
+  )
+
 @method_decorator(csrf_exempt, name="dispatch")
 class AuthLoginView(View):
   def post(self, request):
@@ -273,8 +296,6 @@ class RequestEmailCodeView(View):
   """Отправить одноразовый код подтверждения email."""
 
   def post(self, request):
-    from django.core.mail import get_connection, send_mail
-
     try:
       data = json.loads(request.body)
       email = (data.get("email") or "").strip().lower()
@@ -299,14 +320,10 @@ class RequestEmailCodeView(View):
         "Если вы не регистрировались на vspomni.store, просто проигнорируйте это письмо."
       )
 
-      connection = get_connection(timeout=10)
-      sent = send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=False,
-        connection=connection,
+      sent = _send_site_email(
+        subject=subject,
+        message=message,
+        recipient=email,
       )
 
       return JsonResponse({"ok": True, "sent": sent})
@@ -400,10 +417,10 @@ class VerifyEmailCodeView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ForgotPasswordView(View):
-  """Запрос на сброс пароля."""
+  """Запрос на сброс пароля — письмо со ссылкой на FRONTEND_URL/login?token&email."""
 
   def post(self, request):
-    from django.core.mail import get_connection, send_mail
+    from urllib.parse import quote
 
     try:
       data = json.loads(request.body)
@@ -414,40 +431,53 @@ class ForgotPasswordView(View):
           {"ok": False, "error": "email is required"}, status=400
         )
 
-      user = User.objects.filter(email=email).first()
+      user = User.objects.filter(email__iexact=email).first()
       if not user:
         # Не раскрываем, существует ли пользователь
         return JsonResponse({"ok": True, "sent": True})
 
       # Генерируем токен для сброса пароля
       from ..core.tokens import token_generator
+
       token = token_generator.make_token(user)
 
-      # Отправляем письмо с инструкциями
-      subject = "Сброс пароля в VSPOMNI"
-      reset_url = f"{settings.FRONTEND_URL}/login?token={token}&email={email}"
+      frontend = (settings.FRONTEND_URL or "https://vspomni.store").rstrip("/")
+      reset_url = (
+        f"{frontend}/login?token={quote(token, safe='')}&email={quote(email)}"
+      )
+
+      subject = "Сброс пароля в ВСПОМНИ"
       message = (
         f"Здравствуйте, {user.first_name or 'друг'}!\n\n"
         f"Вы запросили сброс пароля на vspomni.store.\n\n"
         f"Для сброса пароля перейдите по ссылке:\n{reset_url}\n\n"
-        "Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо."
+        "Ссылка одноразовая. Если вы не запрашивали сброс пароля, "
+        "просто проигнорируйте это письмо."
+      )
+      html_message = (
+        f"<p>Здравствуйте, {user.first_name or 'друг'}!</p>"
+        f"<p>Вы запросили сброс пароля на <strong>vspomni.store</strong>.</p>"
+        f'<p><a href="{reset_url}">Нажмите здесь, чтобы задать новый пароль</a></p>'
+        f"<p style=\"color:#666;font-size:12px\">Или скопируйте ссылку:<br>{reset_url}</p>"
+        f"<p style=\"color:#666;font-size:12px\">Если вы не запрашивали сброс — "
+        f"проигнорируйте это письмо.</p>"
       )
 
-      connection = get_connection(timeout=10)
-      sent = send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=False,
-        connection=connection,
+      # Та же почта, что и для OTP (EMAIL_URL / DEFAULT_FROM_EMAIL)
+      sent = _send_site_email(
+        subject=subject,
+        message=message,
+        recipient=user.email,
+        html_message=html_message,
       )
 
-      return JsonResponse({"ok": True, "sent": sent})
+      return JsonResponse({"ok": True, "sent": bool(sent)})
     except json.JSONDecodeError:
       return JsonResponse({"error": "Неверный формат JSON"}, status=400)
     except Exception as e:
-      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      return JsonResponse(
+        {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
+      )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -471,7 +501,7 @@ class ResetPasswordView(View):
           status=400,
         )
 
-      user = User.objects.filter(email=email).first()
+      user = User.objects.filter(email__iexact=email).first()
       if not user:
         return JsonResponse(
           {"ok": False, "error": "Пользователь с таким email не найден"},
