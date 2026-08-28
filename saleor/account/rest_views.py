@@ -618,7 +618,9 @@ class GetOrdersView(View):
             
             # Также проверяем заказы по email (на случай если user не установлен)
             if user.email:
-                orders_by_email = Order.objects.filter(user_email=user.email).exclude(user=user)
+                orders_by_email = Order.objects.filter(
+                    user_email__iexact=user.email,
+                ).exclude(user=user)
                 logger.info(f'GetOrdersView: Found {orders_by_email.count()} orders by email {user.email} without user link')
                 if orders_by_email.exists():
                     # Обновляем заказы, связывая их с пользователем

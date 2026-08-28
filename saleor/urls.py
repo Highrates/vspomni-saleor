@@ -27,6 +27,7 @@ from .account.rest_views import (
     GetOrdersView,
 )
 from .checkout.rest_views import (
+    ApplyExternalShippingView,
     CreateCheckoutWithoutStockCheckView,
     CompleteCheckoutWithoutStockCheckView,
     ValidateVoucherView,
@@ -116,6 +117,16 @@ urlpatterns = [
         r"^checkout/create-without-stock-check/$",
         CreateCheckoutWithoutStockCheckView.as_view(),
         name="checkout-create-without-stock-check-alt",
+    ),
+    re_path(
+        r"^api/checkout/apply-external-shipping/$",
+        ApplyExternalShippingView.as_view(),
+        name="checkout-apply-external-shipping",
+    ),
+    re_path(
+        r"^checkout/apply-external-shipping/$",
+        ApplyExternalShippingView.as_view(),
+        name="checkout-apply-external-shipping-alt",
     ),
     re_path(
         r"^api/checkout/complete-without-stock-check/$",

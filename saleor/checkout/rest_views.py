@@ -108,6 +108,171 @@ def _send_order_confirmation_if_needed(order, manager, redirect_url: str = ""):
     send_order_confirmation(order_info, redirect_url, manager)
 
 
+CARRIER_SHIPPING_NAMES = {
+    "cdek": "CDEK",
+    "yandex": "Яндекс Доставка",
+    "ozon": "Ozon",
+}
+
+
+def _build_external_shipping_method(shipping_amount, shipping_carrier, currency):
+    from prices import Money
+
+    from ..shipping.interface import ShippingMethodData
+
+    carrier = (shipping_carrier or "cdek").strip().lower()
+    name = CARRIER_SHIPPING_NAMES.get(carrier, "Доставка")
+    method_id = f"vspomni-external:{carrier}"
+    amount = Decimal(str(shipping_amount or 0))
+    return ShippingMethodData(
+        id=method_id,
+        name=name,
+        price=Money(amount, currency),
+    )
+
+
+def _apply_external_shipping_to_checkout(
+    checkout,
+    checkout_info,
+    lines,
+    manager,
+    shipping_amount,
+    shipping_carrier=None,
+):
+    from ..checkout.calculations import fetch_checkout_data
+    from ..checkout.utils import assign_external_shipping_to_checkout, invalidate_checkout
+
+    amount = Decimal(str(shipping_amount or 0))
+    if amount <= 0:
+        return checkout_info, lines
+
+    shipping_data = _build_external_shipping_method(
+        shipping_amount, shipping_carrier, checkout.currency
+    )
+    fields = assign_external_shipping_to_checkout(checkout, shipping_data)
+    invalidate_fields = invalidate_checkout(checkout_info, lines, manager, save=False)
+    update_fields = list(set(fields + invalidate_fields))
+    if update_fields:
+        checkout.save(update_fields=update_fields)
+
+    return fetch_checkout_data(checkout_info, manager, lines)
+
+
+def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, manager):
+    from ..payment.models import TransactionItem
+    from ..payment.utils import (
+        create_manual_adjustment_events,
+        get_transaction_item_params,
+        process_order_or_checkout_with_transaction,
+        recalculate_transaction_amounts,
+    )
+
+    amount = Decimal(str(payment_amount or 0))
+    if amount <= 0:
+        return None
+
+    psp_ref = (payment_id or "").strip()
+    name = f"YooKassa Payment {psp_ref}" if psp_ref else "YooKassa Payment"
+
+    if psp_ref:
+        existing = TransactionItem.objects.filter(
+            checkout_id=checkout.pk,
+            psp_reference=psp_ref,
+        ).first()
+        if existing:
+            return existing
+
+    existing_charged = TransactionItem.objects.filter(
+        checkout_id=checkout.pk,
+        charged_value__gte=amount,
+    ).first()
+    if existing_charged:
+        return existing
+
+    txn = TransactionItem.objects.create(
+        **get_transaction_item_params(
+            source_object=checkout,
+            user=user,
+            app=None,
+            psp_reference=psp_ref or None,
+            available_actions=["CHARGE", "REFUND"],
+            name=name,
+        )
+    )
+    create_manual_adjustment_events(
+        transaction=txn,
+        money_data={"charged_value": amount},
+        user=user,
+        app=None,
+    )
+    recalculate_transaction_amounts(transaction=txn)
+    process_order_or_checkout_with_transaction(txn, manager, user, None)
+    return txn
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ApplyExternalShippingView(View):
+    """Apply CDEK/Yandex/Ozon shipping price to checkout before payment."""
+
+    def options(self, request):
+        response = JsonResponse({})
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            checkout_token = data.get("checkoutId") or data.get("checkout_token")
+            shipping_amount = data.get("shippingAmount") or data.get("shipping_amount")
+            shipping_carrier = data.get("shippingCarrier") or data.get("shipping_carrier")
+
+            if not checkout_token:
+                return JsonResponse({"error": "checkoutId is required"}, status=400)
+
+            amount = Decimal(str(shipping_amount or 0))
+            if amount <= 0:
+                return JsonResponse({"error": "shippingAmount must be positive"}, status=400)
+
+            try:
+                checkout = checkout_models.Checkout.objects.get(token=checkout_token)
+            except checkout_models.Checkout.DoesNotExist:
+                return JsonResponse({"error": "Checkout not found"}, status=404)
+
+            manager = get_plugins_manager(allow_replica=False)
+            checkout_lines, _ = fetch_checkout_lines(checkout)
+            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+            checkout_info, checkout_lines = _apply_external_shipping_to_checkout(
+                checkout,
+                checkout_info,
+                checkout_lines,
+                manager,
+                amount,
+                shipping_carrier,
+            )
+
+            total = checkout_info.checkout.total.gross
+            return JsonResponse(
+                {
+                    "success": True,
+                    "total": {
+                        "amount": float(total.amount),
+                        "currency": str(total.currency),
+                    },
+                    "shipping": {
+                        "amount": float(amount),
+                        "carrier": (shipping_carrier or "cdek"),
+                    },
+                }
+            )
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            logger.error("Error applying external shipping", exc_info=e)
+            return JsonResponse({"error": str(e)}, status=500)
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class CreateCheckoutWithoutStockCheckView(View):
     """
@@ -138,6 +303,8 @@ class CreateCheckoutWithoutStockCheckView(View):
             channel_slug = data.get('channel', 'vspomni-site')
             lines = data.get('lines', [])
             email = data.get('email')
+            if email:
+                email = email.strip().lower()
             
             if not lines:
                 return JsonResponse(
@@ -312,6 +479,10 @@ class CompleteCheckoutWithoutStockCheckView(View):
             data = json.loads(request.body)
             checkout_token = data.get('checkoutId') or data.get('checkout_token')
             user_email = data.get('userEmail') or data.get('email')
+            payment_id = data.get('paymentId') or data.get('payment_id')
+            payment_amount = data.get('paymentAmount') or data.get('payment_amount')
+            shipping_amount = data.get('shippingAmount') or data.get('shipping_amount')
+            shipping_carrier = data.get('shippingCarrier') or data.get('shipping_carrier')
             
             if not checkout_token:
                 return JsonResponse(
@@ -387,28 +558,14 @@ class CompleteCheckoutWithoutStockCheckView(View):
                 checkout_lines, _ = fetch_checkout_lines(checkout)
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
 
-                # ВАЖНО: для кастомного завершения checkout мы намеренно убираем ваучер/скидки,
-                # чтобы обойти ограничения типа "Cannot add more than 1 times this item".
-                # Скидка уже была учтена при внешнем платеже (YooKassa), поэтому здесь
-                # приоритет – успешное создание заказа, даже если в Saleor он будет без ваучера.
-                if checkout.voucher_code or checkout.discount_amount:
+                if checkout.voucher_code:
                     logger.info(
-                        "Removing voucher/discount from checkout %s before completion. "
-                        "voucher_code=%s, discount_amount=%s",
+                        "Keeping voucher on checkout %s before completion: code=%s, discount=%s",
                         checkout_token,
                         checkout.voucher_code,
                         checkout.discount_amount,
                     )
-                    checkout.voucher_code = None
-                    checkout.discount_amount = Decimal("0")
-                    checkout.discount_name = ""
-                    checkout.save(
-                        update_fields=["voucher_code", "discount_amount", "discount_name"]
-                    )
-                    # Переинициализируем данные после изменения
-                    checkout_lines, _ = fetch_checkout_lines(checkout)
-                    checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
-                
+
                 # Убеждаемся, что shipping address установлен, если его нет
                 # Это может предотвратить бесконечные циклы в админке
                 if not checkout.shipping_address and checkout.billing_address:
@@ -452,6 +609,30 @@ class CompleteCheckoutWithoutStockCheckView(View):
                             user = retrieve_user_by_email(checkout.email)
                         except Exception:
                             user = None
+
+                    if shipping_amount:
+                        checkout_info, checkout_lines = _apply_external_shipping_to_checkout(
+                            checkout,
+                            checkout_info,
+                            checkout_lines,
+                            manager,
+                            shipping_amount,
+                            shipping_carrier,
+                        )
+
+                    if payment_amount:
+                        _ensure_yookassa_transaction(
+                            checkout,
+                            user,
+                            payment_id,
+                            payment_amount,
+                            manager,
+                        )
+                        from ..checkout.calculations import fetch_checkout_data
+
+                        checkout_info, checkout_lines = fetch_checkout_data(
+                            checkout_info, manager, checkout_lines
+                        )
                     
                     # Используем create_order_from_checkout с правильными параметрами
                     # Передаём checkout_info, а не checkout
@@ -520,8 +701,24 @@ class CompleteCheckoutWithoutStockCheckView(View):
                             'Retrying order creation after removing voucher/discounts.'
                         )
                         try:
-                            # Очищаем ваучер и скидки на checkout, чтобы убрать ограничение
                             checkout.refresh_from_db()
+                            original_voucher = checkout.voucher_code
+                            promo_metadata = None
+                            if original_voucher:
+                                promo_metadata = [
+                                    {
+                                        "key": "external_promo_code",
+                                        "value": original_voucher,
+                                    },
+                                    {
+                                        "key": "promo_note",
+                                        "value": (
+                                            "Promo was applied at payment; removed on "
+                                            "complete due to Saleor quantity limits"
+                                        ),
+                                    },
+                                ]
+
                             checkout.discount_amount = Decimal("0")
                             checkout.discount_name = ""
                             checkout.voucher_code = None
@@ -529,18 +726,16 @@ class CompleteCheckoutWithoutStockCheckView(View):
                                 update_fields=["discount_amount", "discount_name", "voucher_code"]
                             )
                             
-                            # Переинициализируем checkout_info после изменений
                             checkout_lines, _ = fetch_checkout_lines(checkout)
                             checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
                             
-                            # Повторная попытка создания заказа уже без ваучера
                             order = create_order_from_checkout(
                                 checkout_info=checkout_info,
                                 manager=manager,
                                 user=user,
                                 app=None,
                                 metadata_list=None,
-                                private_metadata_list=None,
+                                private_metadata_list=promo_metadata,
                                 delete_checkout=True,
                                 is_automatic_completion=True,
                             )
