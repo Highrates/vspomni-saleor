@@ -115,6 +115,94 @@ CARRIER_SHIPPING_NAMES = {
 }
 
 
+def _country_code_from_payload(address: dict) -> str:
+    country = address.get("country")
+    if isinstance(country, dict):
+        return (country.get("code") or "RU").strip().upper() or "RU"
+    if isinstance(country, str) and country.strip():
+        return country.strip().upper()
+    return "RU"
+
+
+def _create_address_from_payload(address: dict | None):
+    """Create Saleor Address without GraphQL quantity/stock validation."""
+    from ..account.models import Address
+
+    if not address:
+        return None
+
+    return Address.objects.create(
+        first_name=(address.get("firstName") or address.get("first_name") or "Пользователь")[:256],
+        last_name=(address.get("lastName") or address.get("last_name") or "")[:256],
+        company_name=(address.get("companyName") or address.get("company_name") or "")[:256],
+        street_address_1=(
+            address.get("streetAddress1") or address.get("street_address_1") or "Адрес не указан"
+        )[:256],
+        street_address_2=(
+            address.get("streetAddress2") or address.get("street_address_2") or ""
+        )[:256],
+        city=(address.get("city") or "Москва")[:256],
+        city_area=(address.get("cityArea") or address.get("city_area") or "")[:128],
+        postal_code=(address.get("postalCode") or address.get("postal_code") or "000000")[:20],
+        country=_country_code_from_payload(address),
+        country_area=(address.get("countryArea") or address.get("country_area") or "")[:128],
+        phone=(address.get("phone") or "")[:128],
+        validation_skipped=True,
+    )
+
+
+def _assign_addresses_to_checkout(checkout, address_payload: dict | None):
+    if not address_payload:
+        return False
+
+    billing = _create_address_from_payload(address_payload)
+    shipping = _create_address_from_payload(address_payload)
+    if not billing or not shipping:
+        return False
+
+    checkout.billing_address = billing
+    checkout.shipping_address = shipping
+    checkout.save(update_fields=["billing_address", "shipping_address"])
+    logger.info("Set billing/shipping addresses on checkout %s via REST", checkout.token)
+    return True
+
+
+def _apply_promo_code_without_quantity_limits(checkout, promo_code: str | None):
+    """Apply voucher bypassing quantity_limit_per_customer checks."""
+    if not promo_code or not str(promo_code).strip():
+        return None
+
+    from ..warehouse.availability import set_disable_quantity_limits
+
+    code = str(promo_code).strip()
+    manager = get_plugins_manager(allow_replica=False)
+    lines, _ = fetch_checkout_lines(checkout)
+    checkout_info = fetch_checkout_info(checkout, lines, manager)
+
+    set_disable_quantity_limits(True)
+    try:
+        add_promo_code_to_checkout(checkout_info, lines, code, manager)
+        from ..checkout.calculations import fetch_checkout_data
+
+        checkout_info, lines = fetch_checkout_data(checkout_info, manager, lines)
+        checkout.refresh_from_db()
+        total = checkout.total.gross
+        logger.info(
+            "Applied promo %s on checkout %s without quantity limits, total=%s",
+            code,
+            checkout.token,
+            total.amount,
+        )
+        return {
+            "code": checkout.voucher_code or code,
+            "total": float(total.amount),
+            "currency": str(total.currency),
+            "discount": float(checkout.discount_amount or 0),
+        }
+    finally:
+        set_disable_quantity_limits(False)
+
+
 def _build_external_shipping_method(shipping_amount, shipping_carrier, currency):
     from prices import Money
 
@@ -187,7 +275,7 @@ def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, man
         charged_value__gte=amount,
     ).first()
     if existing_charged:
-        return existing
+        return existing_charged
 
     txn = TransactionItem.objects.create(
         **get_transaction_item_params(
@@ -305,6 +393,8 @@ class CreateCheckoutWithoutStockCheckView(View):
             email = data.get('email')
             if email:
                 email = email.strip().lower()
+            address_payload = data.get('address') or data.get('deliveryAddress')
+            promo_code = data.get('promoCode') or data.get('promo_code')
             
             if not lines:
                 return JsonResponse(
@@ -412,6 +502,7 @@ class CreateCheckoutWithoutStockCheckView(View):
                 
                 # Создаем линии checkout напрямую, обходя проверку наличия
                 checkout_lines = []
+                promo_info = None
                 
                 for i, variant_db_id in enumerate(variant_db_ids):
                     variant = variant_map[variant_db_id]
@@ -435,16 +526,65 @@ class CreateCheckoutWithoutStockCheckView(View):
                 # Массово создаем линии
                 checkout_models.CheckoutLine.objects.bulk_create(checkout_lines)
                 logger.info(f'Created {len(checkout_lines)} checkout lines')
+
+                if address_payload:
+                    try:
+                        _assign_addresses_to_checkout(checkout, address_payload)
+                    except Exception as addr_error:
+                        logger.warning(
+                            "Failed to set addresses on checkout %s: %s",
+                            checkout.token,
+                            addr_error,
+                            exc_info=True,
+                        )
+
+                if promo_code:
+                    try:
+                        promo_info = _apply_promo_code_without_quantity_limits(
+                            checkout, promo_code
+                        )
+                    except Exception as promo_error:
+                        logger.warning(
+                            "Failed to apply promo %s on checkout %s: %s",
+                            promo_code,
+                            checkout.token,
+                            promo_error,
+                            exc_info=True,
+                        )
             
             logger.info(f'Checkout creation completed: {checkout.token}')
-            
-            return JsonResponse({
+
+            response_payload = {
                 'success': True,
                 'checkout': {
                     'id': str(checkout.token),
                     'token': str(checkout.token),
                 }
-            })
+            }
+            if promo_info:
+                response_payload['promo'] = promo_info
+                response_payload['total'] = {
+                    'amount': promo_info['total'],
+                    'currency': promo_info['currency'],
+                }
+            else:
+                try:
+                    manager = get_plugins_manager(allow_replica=False)
+                    checkout_lines_info, _ = fetch_checkout_lines(checkout)
+                    checkout_info = fetch_checkout_info(checkout, checkout_lines_info, manager)
+                    from ..checkout.calculations import fetch_checkout_data
+                    checkout_info, _ = fetch_checkout_data(
+                        checkout_info, manager, checkout_lines_info
+                    )
+                    total = checkout_info.checkout.total.gross
+                    response_payload['total'] = {
+                        'amount': float(total.amount),
+                        'currency': str(total.currency),
+                    }
+                except Exception:
+                    pass
+            
+            return JsonResponse(response_payload)
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
@@ -483,6 +623,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
             payment_amount = data.get('paymentAmount') or data.get('payment_amount')
             shipping_amount = data.get('shippingAmount') or data.get('shipping_amount')
             shipping_carrier = data.get('shippingCarrier') or data.get('shipping_carrier')
+            address_payload = data.get('address') or data.get('deliveryAddress')
             
             if not checkout_token:
                 return JsonResponse(
@@ -547,6 +688,18 @@ class CompleteCheckoutWithoutStockCheckView(View):
 
                 _ensure_checkout_email(checkout, user_email)
                 checkout.refresh_from_db()
+
+                if address_payload:
+                    try:
+                        _assign_addresses_to_checkout(checkout, address_payload)
+                        checkout.refresh_from_db()
+                    except Exception as addr_error:
+                        logger.warning(
+                            "Failed to set addresses before complete on %s: %s",
+                            checkout_token,
+                            addr_error,
+                            exc_info=True,
+                        )
                 
                 # Импортируем необходимые функции для создания order
                 from ..checkout.complete_checkout import complete_checkout
