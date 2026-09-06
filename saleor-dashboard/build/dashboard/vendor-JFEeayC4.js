@@ -5,7 +5,7 @@ var __publicField = (obj, key, value3) => __defNormalProp(obj, typeof key !== "s
 !function() {
   try {
     var e3 = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {}, n3 = new e3.Error().stack;
-    n3 && (e3._sentryDebugIds = e3._sentryDebugIds || {}, e3._sentryDebugIds[n3] = "726ce923-27be-4cd0-a6be-284e36927ee4", e3._sentryDebugIdIdentifier = "sentry-dbid-726ce923-27be-4cd0-a6be-284e36927ee4");
+    n3 && (e3._sentryDebugIds = e3._sentryDebugIds || {}, e3._sentryDebugIds[n3] = "6d9591f6-3ad9-4bc2-89ab-1e3e687aa25a", e3._sentryDebugIdIdentifier = "sentry-dbid-6d9591f6-3ad9-4bc2-89ab-1e3e687aa25a");
   } catch (e4) {
   }
 }();
@@ -29,7 +29,7 @@ function _mergeNamespaces(n3, m4) {
   return Object.freeze(Object.defineProperty(n3, Symbol.toStringTag, { value: "Module" }));
 }
 var _global = typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : {};
-_global.SENTRY_RELEASE = { id: "a84a2085e3b71852cb274f8844c66e128f50087d" };
+_global.SENTRY_RELEASE = { id: "98eb91db069fce68341af031f91a0ca0c5da81c0" };
 var commonjsGlobal$3 = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs$1(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
@@ -141852,8 +141852,6 @@ ToolbarMenuRoot.displayName = "ToolbarMenu";
 createComponentGroup(ToolbarMenuRoot, {
   Item: Menu$2.Item
 });
-var momentWithLocalesExports = requireMomentWithLocales();
-const moment = /* @__PURE__ */ getDefaultExportFromCjs$1(momentWithLocalesExports);
 (function(thisArg, _arguments, P3, generator) {
   function adopt(value3) {
     return value3 instanceof P3 ? value3 : new P3(function(resolve6) {
@@ -144431,9 +144429,6 @@ const __iconNode = [
   ]
 ];
 const Gift = createLucideIcon("gift", __iconNode);
-const PaymentOutlined = createSvgIcon$1(/* @__PURE__ */ reactExports.createElement("path", {
-  d: "M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"
-}));
 var browser$2 = { exports: {} };
 var ms$1;
 var hasRequiredMs;
@@ -145336,41 +145331,9 @@ function requireBrowser$1() {
 }
 var browserExports$1 = requireBrowser$1();
 const debugPkg = /* @__PURE__ */ getDefaultExportFromCjs$1(browserExports$1);
-var isEmpty_1;
-var hasRequiredIsEmpty;
-function requireIsEmpty() {
-  if (hasRequiredIsEmpty) return isEmpty_1;
-  hasRequiredIsEmpty = 1;
-  var baseKeys = require_baseKeys(), getTag2 = require_getTag(), isArguments = requireIsArguments(), isArray2 = requireIsArray(), isArrayLike = requireIsArrayLike(), isBuffer2 = requireIsBuffer(), isPrototype = require_isPrototype(), isTypedArray = requireIsTypedArray();
-  var mapTag = "[object Map]", setTag = "[object Set]";
-  var objectProto = Object.prototype;
-  var hasOwnProperty2 = objectProto.hasOwnProperty;
-  function isEmpty3(value3) {
-    if (value3 == null) {
-      return true;
-    }
-    if (isArrayLike(value3) && (isArray2(value3) || typeof value3 == "string" || typeof value3.splice == "function" || isBuffer2(value3) || isTypedArray(value3) || isArguments(value3))) {
-      return !value3.length;
-    }
-    var tag = getTag2(value3);
-    if (tag == mapTag || tag == setTag) {
-      return !value3.size;
-    }
-    if (isPrototype(value3)) {
-      return !baseKeys(value3).length;
-    }
-    for (var key in value3) {
-      if (hasOwnProperty2.call(value3, key)) {
-        return false;
-      }
-    }
-    return true;
-  }
-  isEmpty_1 = isEmpty3;
-  return isEmpty_1;
-}
-var isEmptyExports = requireIsEmpty();
-const isEmpty$1 = /* @__PURE__ */ getDefaultExportFromCjs$1(isEmptyExports);
+const PaymentOutlined = createSvgIcon$1(/* @__PURE__ */ reactExports.createElement("path", {
+  d: "M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"
+}));
 var isCheckBoxInput = (element) => element.type === "checkbox";
 var isDateObject = (value3) => value3 instanceof Date;
 var isNullOrUndefined = (value3) => value3 == null;
@@ -161074,6 +161037,41 @@ function requirePick() {
 }
 var pickExports = requirePick();
 const pick = /* @__PURE__ */ getDefaultExportFromCjs$1(pickExports);
+var isEmpty_1;
+var hasRequiredIsEmpty;
+function requireIsEmpty() {
+  if (hasRequiredIsEmpty) return isEmpty_1;
+  hasRequiredIsEmpty = 1;
+  var baseKeys = require_baseKeys(), getTag2 = require_getTag(), isArguments = requireIsArguments(), isArray2 = requireIsArray(), isArrayLike = requireIsArrayLike(), isBuffer2 = requireIsBuffer(), isPrototype = require_isPrototype(), isTypedArray = requireIsTypedArray();
+  var mapTag = "[object Map]", setTag = "[object Set]";
+  var objectProto = Object.prototype;
+  var hasOwnProperty2 = objectProto.hasOwnProperty;
+  function isEmpty3(value3) {
+    if (value3 == null) {
+      return true;
+    }
+    if (isArrayLike(value3) && (isArray2(value3) || typeof value3 == "string" || typeof value3.splice == "function" || isBuffer2(value3) || isTypedArray(value3) || isArguments(value3))) {
+      return !value3.length;
+    }
+    var tag = getTag2(value3);
+    if (tag == mapTag || tag == setTag) {
+      return !value3.size;
+    }
+    if (isPrototype(value3)) {
+      return !baseKeys(value3).length;
+    }
+    for (var key in value3) {
+      if (hasOwnProperty2.call(value3, key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  isEmpty_1 = isEmpty3;
+  return isEmpty_1;
+}
+var isEmptyExports = requireIsEmpty();
+const isEmpty$1 = /* @__PURE__ */ getDefaultExportFromCjs$1(isEmptyExports);
 function canUseDOM$1() {
   return !!(typeof window !== "undefined" && window.document && window.document.createElement);
 }
@@ -177855,6 +177853,8 @@ function requireAdd() {
 }
 var AddExports = /* @__PURE__ */ requireAdd();
 const AddIcon = /* @__PURE__ */ getDefaultExportFromCjs$1(AddExports);
+var momentWithLocalesExports = requireMomentWithLocales();
+const moment = /* @__PURE__ */ getDefaultExportFromCjs$1(momentWithLocalesExports);
 var Launch = {};
 var hasRequiredLaunch;
 function requireLaunch() {
@@ -258338,213 +258338,213 @@ export {
   useDragResize as Z,
   _2 as _,
   Route as a,
-  debugPkg as a$,
-  moment as a0,
-  debounce$3 as a1,
-  GraphiQLProvider as a2,
-  useEditorContext as a3,
-  useExecutionContext as a4,
-  useSchemaContext as a5,
-  useStorageContext as a6,
-  useCopyQuery as a7,
-  useMergeQuery as a8,
-  usePrettifyEditors as a9,
-  init as aA,
-  reactRouterV5BrowserTracingIntegration as aB,
-  cp as aC,
-  Vv as aD,
-  FormattedDate as aE,
-  we$1 as aF,
-  he$3 as aG,
-  defineMessage as aH,
-  atom as aI,
-  useAtom as aJ,
-  getDefaultStore as aK,
-  lodashSet as aL,
-  atomWithStorage as aM,
-  Gs$1 as aN,
-  Wv as aO,
-  Gift as aP,
-  createSvgIcon$1 as aQ,
-  uniqBy as aR,
-  Ev as aS,
-  P2 as aT,
-  useSaleorConfig as aU,
-  Mv as aV,
-  useTheme$2 as aW,
-  useMediaQuery as aX,
-  PB as aY,
-  PaymentOutlined as aZ,
-  isEqualWith as a_,
-  ToolbarButton$1 as aa,
-  PrettifyIcon as ab,
-  MergeIcon as ac,
-  CopyIcon as ad,
-  Tooltip as ae,
-  UnStyledButton as af,
-  ReloadIcon as ag,
-  Tabs$1 as ah,
-  Tab$2 as ai,
-  PlusIcon as aj,
-  QueryEditor as ak,
-  ExecuteButton as al,
-  ChevronUpIcon as am,
-  ChevronDownIcon as an,
-  VariableEditor as ao,
-  HeaderEditor as ap,
-  Spinner as aq,
-  ResponseEditor as ar,
-  Dialog2 as as,
-  ButtonGroup as at,
-  Button as au,
-  createFetch as av,
-  createGraphiQLFetcher as aw,
-  clsx as ax,
-  setUser as ay,
-  captureException as az,
+  X2 as a$,
+  GraphiQLProvider as a0,
+  useEditorContext as a1,
+  useExecutionContext as a2,
+  useSchemaContext as a3,
+  useStorageContext as a4,
+  useCopyQuery as a5,
+  useMergeQuery as a6,
+  usePrettifyEditors as a7,
+  ToolbarButton$1 as a8,
+  PrettifyIcon as a9,
+  cp as aA,
+  Vv as aB,
+  FormattedDate as aC,
+  we$1 as aD,
+  he$3 as aE,
+  defineMessage as aF,
+  atom as aG,
+  useAtom as aH,
+  getDefaultStore as aI,
+  lodashSet as aJ,
+  atomWithStorage as aK,
+  Gs$1 as aL,
+  Wv as aM,
+  Gift as aN,
+  matchPath as aO,
+  isEqualWith as aP,
+  debugPkg as aQ,
+  DashboardEventFactory as aR,
+  IntlProvider as aS,
+  IntlErrorCode as aT,
+  __vitePreload as aU,
+  o$5 as aV,
+  Cloud as aW,
+  h2 as aX,
+  j2 as aY,
+  Z2 as aZ,
+  Ev as a_,
+  MergeIcon as aa,
+  CopyIcon as ab,
+  Tooltip as ac,
+  UnStyledButton as ad,
+  ReloadIcon as ae,
+  Tabs$1 as af,
+  Tab$2 as ag,
+  PlusIcon as ah,
+  QueryEditor as ai,
+  ExecuteButton as aj,
+  ChevronUpIcon as ak,
+  ChevronDownIcon as al,
+  VariableEditor as am,
+  HeaderEditor as an,
+  Spinner as ao,
+  ResponseEditor as ap,
+  Dialog2 as aq,
+  ButtonGroup as ar,
+  Button as as,
+  createFetch as at,
+  createGraphiQLFetcher as au,
+  clsx as av,
+  setUser as aw,
+  captureException as ax,
+  init as ay,
+  reactRouterV5BrowserTracingIntegration as az,
   dp as b,
-  Ov as b$,
-  DashboardEventFactory as b0,
-  IntlProvider as b1,
-  IntlErrorCode as b2,
-  __vitePreload as b3,
-  o$5 as b4,
-  useLocation as b5,
-  matchPath as b6,
-  isEmpty$1 as b7,
-  Cloud as b8,
-  h2 as b9,
-  FormHelperText$1 as bA,
-  TableBody$2 as bB,
-  TableCell$2 as bC,
-  Radio$2 as bD,
-  TableHead$2 as bE,
-  Db as bF,
-  fv as bG,
-  uv as bH,
-  Ip as bI,
-  slugify as bJ,
-  Tv as bK,
-  Rb as bL,
-  Q2 as bM,
-  sortableContainer as bN,
-  sortableHandle as bO,
-  q2 as bP,
-  sortableElement as bQ,
-  yt$4 as bR,
-  I2 as bS,
-  E2 as bT,
-  TableFooter$1 as bU,
-  convert as bV,
-  Saturation as bW,
-  Hue as bX,
-  intersection as bY,
-  difference as bZ,
-  sortBy as b_,
-  j2 as ba,
-  Z2 as bb,
-  X2 as bc,
-  _v as bd,
-  Cv as be,
-  G2 as bf,
-  LinearProgress$1 as bg,
-  Root$1 as bh,
-  CheckIcon as bi,
-  objectType as bj,
-  stringType as bk,
-  useForm as bl,
-  bv as bm,
-  t$1 as bn,
-  useApolloClient as bo,
-  unionBy as bp,
-  Sv as bq,
-  vv as br,
-  _b as bs,
-  ev as bt,
-  Ec as bu,
-  mergeWith as bv,
-  InfiniteScroll as bw,
-  Table$3 as bx,
-  TableRow$2 as by,
-  Checkbox$1 as bz,
+  FormControlLabel$1 as b$,
+  _v as b0,
+  Cv as b1,
+  G2 as b2,
+  LinearProgress$1 as b3,
+  P2 as b4,
+  useSaleorConfig as b5,
+  Mv as b6,
+  Root$1 as b7,
+  CheckIcon as b8,
+  createSvgIcon$1 as b9,
+  TableHead$2 as bA,
+  Db as bB,
+  fv as bC,
+  uv as bD,
+  useLocation as bE,
+  Ip as bF,
+  slugify as bG,
+  Tv as bH,
+  Rb as bI,
+  Q2 as bJ,
+  sortableContainer as bK,
+  sortableHandle as bL,
+  q2 as bM,
+  sortableElement as bN,
+  yt$4 as bO,
+  I2 as bP,
+  E2 as bQ,
+  TableFooter$1 as bR,
+  convert as bS,
+  Saturation as bT,
+  Hue as bU,
+  intersection as bV,
+  difference as bW,
+  sortBy as bX,
+  Ov as bY,
+  nh as bZ,
+  Divider$1 as b_,
+  uniqBy as ba,
+  useTheme$2 as bb,
+  useMediaQuery as bc,
+  PB as bd,
+  PaymentOutlined as be,
+  objectType as bf,
+  stringType as bg,
+  useForm as bh,
+  bv as bi,
+  t$1 as bj,
+  useApolloClient as bk,
+  unionBy as bl,
+  Sv as bm,
+  vv as bn,
+  _b as bo,
+  ev as bp,
+  Ec as bq,
+  mergeWith as br,
+  InfiniteScroll as bs,
+  Table$3 as bt,
+  TableRow$2 as bu,
+  Checkbox$1 as bv,
+  FormHelperText$1 as bw,
+  TableBody$2 as bx,
+  TableCell$2 as by,
+  Radio$2 as bz,
   createBrowserHistory as c,
-  useSortable as c$,
-  nh as c0,
-  Divider$1 as c1,
-  FormControlLabel$1 as c2,
-  oe$5 as c3,
-  Xn$3 as c4,
-  Q$5 as c5,
-  makeStyles as c6,
-  alpha$2 as c7,
-  Paper$1 as c8,
-  BV as c9,
-  useAuthState as cA,
-  ApolloError as cB,
-  createGenericInlineTool as cC,
-  n as cD,
-  m$1 as cE,
-  G$2 as cF,
-  v$3 as cG,
-  m$3 as cH,
-  ReactEditorJS$2 as cI,
-  Ts as cJ,
-  useId$1 as cK,
-  Dropzone as cL,
-  Px as cM,
-  y7 as cN,
-  HelpOutline as cO,
-  AddIcon as cP,
-  h7 as cQ,
-  D2 as cR,
-  uniq as cS,
-  currencyCodes as cT,
-  numberType as cU,
-  arrayType as cV,
-  z2 as cW,
-  LaunchIcon as cX,
-  MuiAvatar as cY,
-  Di$3 as cZ,
-  List$1 as c_,
-  VV as ca,
-  compact as cb,
-  ClickAwayListener as cc,
-  Popper as cd,
-  Grow as ce,
-  If as cf,
-  q0 as cg,
-  mb as ch,
-  nv as ci,
-  ReactDOM as cj,
-  th$1 as ck,
-  MenuList$2 as cl,
-  MenuItem$2 as cm,
-  rg as cn,
-  pick as co,
-  FormControl$1 as cp,
-  RadioGroup$1 as cq,
-  GrowingEntry as cr,
-  useExtraCells as cs,
-  throttle$3 as ct,
-  range$2 as cu,
-  DataEditor as cv,
-  sv as cw,
-  Av as cx,
-  lv as cy,
-  rv as cz,
+  CSS$1 as c$,
+  oe$5 as c0,
+  Xn$3 as c1,
+  Q$5 as c2,
+  makeStyles as c3,
+  alpha$2 as c4,
+  Paper$1 as c5,
+  BV as c6,
+  VV as c7,
+  compact as c8,
+  ClickAwayListener as c9,
+  createGenericInlineTool as cA,
+  n as cB,
+  m$1 as cC,
+  G$2 as cD,
+  v$3 as cE,
+  m$3 as cF,
+  ReactEditorJS$2 as cG,
+  Ts as cH,
+  useId$1 as cI,
+  Dropzone as cJ,
+  Px as cK,
+  y7 as cL,
+  HelpOutline as cM,
+  AddIcon as cN,
+  h7 as cO,
+  D2 as cP,
+  uniq as cQ,
+  currencyCodes as cR,
+  numberType as cS,
+  arrayType as cT,
+  moment as cU,
+  z2 as cV,
+  LaunchIcon as cW,
+  MuiAvatar as cX,
+  Di$3 as cY,
+  List$1 as cZ,
+  useSortable as c_,
+  Popper as ca,
+  Grow as cb,
+  If as cc,
+  q0 as cd,
+  mb as ce,
+  nv as cf,
+  ReactDOM as cg,
+  th$1 as ch,
+  MenuList$2 as ci,
+  MenuItem$2 as cj,
+  rg as ck,
+  pick as cl,
+  FormControl$1 as cm,
+  RadioGroup$1 as cn,
+  GrowingEntry as co,
+  useExtraCells as cp,
+  throttle$3 as cq,
+  range$2 as cr,
+  DataEditor as cs,
+  sv as ct,
+  Av as cu,
+  lv as cv,
+  rv as cw,
+  useAuthState as cx,
+  isEmpty$1 as cy,
+  ApolloError as cz,
   defineMessages as d,
   createUploadLink as d$,
-  CSS$1 as d0,
-  useSensors as d1,
-  useSensor as d2,
-  arrayMove as d3,
-  sortableKeyboardCoordinates as d4,
-  KeyboardSensor as d5,
-  PointerSensor as d6,
-  DndContext as d7,
-  closestCenter as d8,
-  SortableContext as d9,
-  useFormState as dA,
+  useSensors as d0,
+  useSensor as d1,
+  arrayMove as d2,
+  sortableKeyboardCoordinates as d3,
+  KeyboardSensor as d4,
+  PointerSensor as d5,
+  DndContext as d6,
+  closestCenter as d7,
+  SortableContext as d8,
+  verticalListSortingStrategy as d9,
+  debounce$3 as dA,
   useWatch as dB,
   recordType as dC,
   print$1 as dD,
@@ -258571,31 +258571,31 @@ export {
   ErrorBoundary as dY,
   reduce as dZ,
   ApolloLink as d_,
-  verticalListSortingStrategy as da,
-  ReactMoment as db,
-  Redirect as dc,
-  PostHogProvider as dd,
-  v0 as de,
-  getOperationAST as df,
-  enumType as dg,
-  anyType as dh,
-  booleanType as di,
-  FormProvider as dj,
-  useFormContext as dk,
-  useController as dl,
-  cv as dm,
-  useFieldArray as dn,
-  discriminatedUnionType as dp,
-  intersectionType as dq,
-  literalType as dr,
-  nullType as ds,
-  tupleType as dt,
-  R2 as du,
-  Pp as dv,
-  ArrowIcon as dw,
-  no$2 as dx,
-  v4 as dy,
-  V2 as dz,
+  ReactMoment as da,
+  Redirect as db,
+  PostHogProvider as dc,
+  v0 as dd,
+  getOperationAST as de,
+  enumType as df,
+  anyType as dg,
+  booleanType as dh,
+  FormProvider as di,
+  useFormContext as dj,
+  useController as dk,
+  cv as dl,
+  useFieldArray as dm,
+  discriminatedUnionType as dn,
+  intersectionType as dp,
+  literalType as dq,
+  nullType as dr,
+  tupleType as ds,
+  R2 as dt,
+  Pp as du,
+  ArrowIcon as dv,
+  no$2 as dw,
+  v4 as dx,
+  V2 as dy,
+  useFormState as dz,
   useIntl as e,
   ApolloClient as e0,
   InMemoryCache as e1,

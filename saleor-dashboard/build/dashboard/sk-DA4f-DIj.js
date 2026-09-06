@@ -2,7 +2,7 @@
 !function() {
   try {
     var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {}, n = new e.Error().stack;
-    n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "bec7d68e-3991-459c-8dc9-6ea7de90db73", e._sentryDebugIdIdentifier = "sentry-dbid-bec7d68e-3991-459c-8dc9-6ea7de90db73");
+    n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "5e5daf9f-884c-40b3-832d-0ca597bc9485", e._sentryDebugIdIdentifier = "sentry-dbid-5e5daf9f-884c-40b3-832d-0ca597bc9485");
   } catch (e2) {
   }
 }();
@@ -11797,7 +11797,7 @@ const FemBUF$1 = { "context": "header", "string": "Переводы на {langua
 const CxfKLC$1 = { "string": "Страницы" };
 const VKb1MS$1 = { "string": "Категории" };
 const RzsKm8$1 = { "string": "Способы доставки" };
-const c8nvms$1 = { "string": "Распродажи" };
+const c8nvms$1 = { "string": "Продажи сегодня" };
 const ikRuLs$1 = { "context": "translation progress", "string": "{current} из {max}" };
 const vcwrgW$1 = { "string": "Переводимые объекты не найдены" };
 const LWmYSU$1 = { "string": "Завершенные переводы" };

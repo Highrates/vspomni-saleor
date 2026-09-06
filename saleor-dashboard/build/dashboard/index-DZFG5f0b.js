@@ -5,11 +5,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 !function() {
   try {
     var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {}, n2 = new e.Error().stack;
-    n2 && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n2] = "2f7a3cb0-c95b-4448-93e6-18ff9eed052d", e._sentryDebugIdIdentifier = "sentry-dbid-2f7a3cb0-c95b-4448-93e6-18ff9eed052d");
+    n2 && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n2] = "6b367dec-b62b-4867-9459-7f9dd57f11d4", e._sentryDebugIdIdentifier = "sentry-dbid-6b367dec-b62b-4867-9459-7f9dd57f11d4");
   } catch (e2) {
   }
 }();
-import { c as createBrowserHistory, w as withSentryRouting, j as jsxRuntimeExports, R as Router$1, a as Route$1, l as libExports, u as urlJoin, f, C as CircularProgress, B, I as InlineSVG, d as defineMessages, o as oo, M as MemoizedFormattedMessage, J, P as Pv, b as dp, r as reactExports, T as Ts, e as useIntl, g as useHistory, h as useRouter, i as ae, $ as $1, k as Transition$1, m as Portal$1, n as TransitionGroup, Q as Q0, p as isEqual, q as omit, s as cn, z as z7, L as Link$1, t as TextField, v as useAuth, x as chroma, G as GridCellKind, y as getMiddleCenterBias, F as Fuse, A as moment, D as kh, E as C2, S as Switch, H as useMutation$1, K as useQuery$1, N as gql, O as useLazyQuery, U as usePostHog, V as HelmetExport, _ as _2, W as Wt, X as useTheme$1, Y as usePluginContext, Z as useDragResize, a0 as moment$1, a1 as debounce, a2 as GraphiQLProvider, a3 as useEditorContext, a4 as useExecutionContext, a5 as useSchemaContext, a6 as useStorageContext, a7 as useCopyQuery, a8 as useMergeQuery, a9 as usePrettifyEditors, aa as ToolbarButton, ab as PrettifyIcon, ac as MergeIcon, ad as CopyIcon, ae as Tooltip, af as UnStyledButton, ag as ReloadIcon, ah as Tabs, ai as Tab$1, aj as PlusIcon, ak as QueryEditor, al as ExecuteButton, am as ChevronUpIcon, an as ChevronDownIcon, ao as VariableEditor, ap as HeaderEditor, aq as Spinner, ar as ResponseEditor, as as Dialog2, at as ButtonGroup, au as Button$1, av as createFetch, aw as createGraphiQLFetcher, ax as clsx, ay as setUser, az as captureException, aA as init, aB as reactRouterV5BrowserTracingIntegration, aC as cp, aD as Vv, aE as FormattedDate, aF as we, aG as he, aH as defineMessage, aI as atom, aJ as useAtom, aK as getDefaultStore, aL as lodashSet, aM as atomWithStorage, aN as Gs, aO as Wv, aP as Gift, aQ as createSvgIcon, aR as uniqBy, aS as Ev, aT as P2, aU as useSaleorConfig, aV as Mv, aW as useTheme$2, aX as useMediaQuery, aY as PB, aZ as PaymentOutlined, a_ as isEqualWith, a$ as debugPkg, b0 as DashboardEventFactory, b1 as IntlProvider, b2 as IntlErrorCode, b3 as __vitePreload, b4 as o, b5 as useLocation, b6 as matchPath, b7 as isEmpty, b8 as Cloud, b9 as h2, ba as j2, bb as Z2, bc as X2, bd as _v, be as Cv, bf as G2, bg as LinearProgress, bh as Root$5, bi as CheckIcon$1, bj as objectType, bk as stringType, bl as useForm$1, bm as bv, bn as t, bo as useApolloClient, bp as unionBy, bq as Sv, br as vv, bs as _b, bt as ev, bu as Ec, bv as mergeWith, bw as InfiniteScroll$1, bx as Table, by as TableRow, bz as Checkbox$1, bA as FormHelperText, bB as TableBody, bC as TableCell, bD as Radio, bE as TableHead$1, bF as Db, bG as fv, bH as uv, bI as Ip, bJ as slugify, bK as Tv, bL as Rb, bM as Q2, bN as sortableContainer, bO as sortableHandle, bP as q2, bQ as sortableElement, bR as yt, bS as I2, bT as E2, bU as TableFooter, bV as convert, bW as Saturation, bX as Hue, bY as intersection, bZ as difference, b_ as sortBy, b$ as Ov, c0 as nh, c1 as Divider$2, c2 as FormControlLabel, c3 as oe, c4 as Xn, c5 as Q, c6 as makeStyles, c7 as alpha, c8 as Paper, c9 as BV, ca as VV, cb as compact, cc as ClickAwayListener, cd as Popper, ce as Grow, cf as If, cg as q0, ch as mb, ci as nv, cj as ReactDOM, ck as th, cl as MenuList$3, cm as MenuItem$1, cn as rg, co as pick, cp as FormControl, cq as RadioGroup, cr as GrowingEntry, cs as useExtraCells, ct as throttle, cu as range, cv as DataEditor, cw as sv, cx as Av, cy as lv, cz as rv, cA as useAuthState, cB as ApolloError, cC as createGenericInlineTool, cD as n, cE as m, cF as G, cG as v, cH as m$1, cI as ReactEditorJS$2, cJ as Ts$1, cK as useId, cL as Dropzone, cM as Px, cN as y7, cO as HelpOutline, cP as AddIcon, cQ as h7, cR as D2, cS as uniq, cT as currencyCodes, cU as numberType, cV as arrayType, cW as z2, cX as LaunchIcon, cY as MuiAvatar, cZ as Di, c_ as List, c$ as useSortable, d0 as CSS$1, d1 as useSensors, d2 as useSensor, d3 as arrayMove, d4 as sortableKeyboardCoordinates, d5 as KeyboardSensor, d6 as PointerSensor, d7 as DndContext, d8 as closestCenter, d9 as SortableContext, da as verticalListSortingStrategy, db as ReactMoment, dc as Redirect, dd as PostHogProvider, de as v0, df as getOperationAST, dg as enumType, dh as anyType, di as booleanType, dj as FormProvider, dk as useFormContext, dl as useController, dm as cv, dn as useFieldArray, dp as discriminatedUnionType, dq as intersectionType, dr as literalType, ds as nullType, dt as tupleType, du as R2, dv as Pp, dw as ArrowIcon, dx as no, dy as v4, dz as V2, dA as useFormState, dB as useWatch, dC as recordType, dD as print, dE as parse, dF as visit, dG as Kind, dH as buildClientSchema, dI as GraphQLObjectType, dJ as GraphQLNonNull, dK as GraphQLList, dL as getIntrospectionQuery, dM as pB, dN as tB, dO as nB, dP as sB, dQ as lB, dR as iB, dS as mapValues, dT as keyBy, dU as camelCase, dV as capitalize$2, dW as PlayIcon, dX as L, dY as ErrorBoundary, dZ as reduce, d_ as ApolloLink, d$ as createUploadLink, e0 as ApolloClient, e1 as InMemoryCache, e2 as createSaleorClient, e3 as B2, e4 as reactDomExports, e5 as restrictToFirstScrollableAncestor, e6 as pointerWithin, e7 as DragOverlay, e8 as InputAdornment, e9 as J8, ea as Indicator, eb as Item2, ec as Root2, ed as CardHeader, ee as Id, ef as CardActions, eg as lf, eh as Gf, ei as vm, ej as currency, ek as Ho, el as Je, em as Ye, en as we$1, eo as Controller, ep as coerce, eq as Dv, er as distExports, es as ut, et as CloseIcon, eu as Button$2, ev as W2, ew as L2, ex as arrayMove$1, ey as capitalize$3, ez as differenceBy, eA as Fu, eB as React, eC as MeasuringStrategy, eD as defaultDropAnimationConfiguration, eE as KeyboardCode, eF as closestCorners, eG as getFirstCollision, eH as isUrl, eI as Card, eJ as CardContent, eK as Typography, eL as t5, eM as e5, eN as wt, eO as J$1, eP as de, eQ as Go, eR as createReactEditorJS, eS as Tab$2, eT as Tabs$1, eU as TagManager, eV as clientExports, eW as SaleorProvider, eX as ApolloProvider, eY as Qu } from "./vendor-CAZ5XXPC.js";
+import { c as createBrowserHistory, w as withSentryRouting, j as jsxRuntimeExports, R as Router$1, a as Route$1, l as libExports, u as urlJoin, f, C as CircularProgress, B, I as InlineSVG, d as defineMessages, o as oo, M as MemoizedFormattedMessage, J, P as Pv, b as dp, r as reactExports, T as Ts, e as useIntl, g as useHistory, h as useRouter, i as ae, $ as $1, k as Transition$1, m as Portal$1, n as TransitionGroup, Q as Q0, p as isEqual, q as omit, s as cn, z as z7, L as Link$1, t as TextField, v as useAuth, x as chroma, G as GridCellKind, y as getMiddleCenterBias, F as Fuse, A as moment, D as kh, E as C2, S as Switch, H as useMutation$1, K as useQuery$1, N as gql, O as useLazyQuery, U as usePostHog, V as HelmetExport, _ as _2, W as Wt, X as useTheme$1, Y as usePluginContext, Z as useDragResize, a0 as GraphiQLProvider, a1 as useEditorContext, a2 as useExecutionContext, a3 as useSchemaContext, a4 as useStorageContext, a5 as useCopyQuery, a6 as useMergeQuery, a7 as usePrettifyEditors, a8 as ToolbarButton, a9 as PrettifyIcon, aa as MergeIcon, ab as CopyIcon, ac as Tooltip, ad as UnStyledButton, ae as ReloadIcon, af as Tabs, ag as Tab$1, ah as PlusIcon, ai as QueryEditor, aj as ExecuteButton, ak as ChevronUpIcon, al as ChevronDownIcon, am as VariableEditor, an as HeaderEditor, ao as Spinner, ap as ResponseEditor, aq as Dialog2, ar as ButtonGroup, as as Button$1, at as createFetch, au as createGraphiQLFetcher, av as clsx, aw as setUser, ax as captureException, ay as init, az as reactRouterV5BrowserTracingIntegration, aA as cp, aB as Vv, aC as FormattedDate, aD as we, aE as he, aF as defineMessage, aG as atom, aH as useAtom, aI as getDefaultStore, aJ as lodashSet, aK as atomWithStorage, aL as Gs, aM as Wv, aN as Gift, aO as matchPath, aP as isEqualWith, aQ as debugPkg, aR as DashboardEventFactory, aS as IntlProvider, aT as IntlErrorCode, aU as __vitePreload, aV as o, aW as Cloud, aX as h2, aY as j2, aZ as Z2, a_ as Ev, a$ as X2, b0 as _v, b1 as Cv, b2 as G2, b3 as LinearProgress, b4 as P2, b5 as useSaleorConfig, b6 as Mv, b7 as Root$5, b8 as CheckIcon$1, b9 as createSvgIcon, ba as uniqBy, bb as useTheme$2, bc as useMediaQuery, bd as PB, be as PaymentOutlined, bf as objectType, bg as stringType, bh as useForm$1, bi as bv, bj as t, bk as useApolloClient, bl as unionBy, bm as Sv, bn as vv, bo as _b, bp as ev, bq as Ec, br as mergeWith, bs as InfiniteScroll$1, bt as Table, bu as TableRow, bv as Checkbox$1, bw as FormHelperText, bx as TableBody, by as TableCell, bz as Radio, bA as TableHead$1, bB as Db, bC as fv, bD as uv, bE as useLocation, bF as Ip, bG as slugify, bH as Tv, bI as Rb, bJ as Q2, bK as sortableContainer, bL as sortableHandle, bM as q2, bN as sortableElement, bO as yt, bP as I2, bQ as E2, bR as TableFooter, bS as convert, bT as Saturation, bU as Hue, bV as intersection, bW as difference, bX as sortBy, bY as Ov, bZ as nh, b_ as Divider$2, b$ as FormControlLabel, c0 as oe, c1 as Xn, c2 as Q, c3 as makeStyles, c4 as alpha, c5 as Paper, c6 as BV, c7 as VV, c8 as compact, c9 as ClickAwayListener, ca as Popper, cb as Grow, cc as If, cd as q0, ce as mb, cf as nv, cg as ReactDOM, ch as th, ci as MenuList$3, cj as MenuItem$1, ck as rg, cl as pick, cm as FormControl, cn as RadioGroup, co as GrowingEntry, cp as useExtraCells, cq as throttle, cr as range, cs as DataEditor, ct as sv, cu as Av, cv as lv, cw as rv, cx as useAuthState, cy as isEmpty, cz as ApolloError, cA as createGenericInlineTool, cB as n, cC as m, cD as G, cE as v, cF as m$1, cG as ReactEditorJS$2, cH as Ts$1, cI as useId, cJ as Dropzone, cK as Px, cL as y7, cM as HelpOutline, cN as AddIcon, cO as h7, cP as D2, cQ as uniq, cR as currencyCodes, cS as numberType, cT as arrayType, cU as moment$1, cV as z2, cW as LaunchIcon, cX as MuiAvatar, cY as Di, cZ as List, c_ as useSortable, c$ as CSS$1, d0 as useSensors, d1 as useSensor, d2 as arrayMove, d3 as sortableKeyboardCoordinates, d4 as KeyboardSensor, d5 as PointerSensor, d6 as DndContext, d7 as closestCenter, d8 as SortableContext, d9 as verticalListSortingStrategy, da as ReactMoment, db as Redirect, dc as PostHogProvider, dd as v0, de as getOperationAST, df as enumType, dg as anyType, dh as booleanType, di as FormProvider, dj as useFormContext, dk as useController, dl as cv, dm as useFieldArray, dn as discriminatedUnionType, dp as intersectionType, dq as literalType, dr as nullType, ds as tupleType, dt as R2, du as Pp, dv as ArrowIcon, dw as no, dx as v4, dy as V2, dz as useFormState, dA as debounce, dB as useWatch, dC as recordType, dD as print, dE as parse, dF as visit, dG as Kind, dH as buildClientSchema, dI as GraphQLObjectType, dJ as GraphQLNonNull, dK as GraphQLList, dL as getIntrospectionQuery, dM as pB, dN as tB, dO as nB, dP as sB, dQ as lB, dR as iB, dS as mapValues, dT as keyBy, dU as camelCase, dV as capitalize$2, dW as PlayIcon, dX as L, dY as ErrorBoundary, dZ as reduce, d_ as ApolloLink, d$ as createUploadLink, e0 as ApolloClient, e1 as InMemoryCache, e2 as createSaleorClient, e3 as B2, e4 as reactDomExports, e5 as restrictToFirstScrollableAncestor, e6 as pointerWithin, e7 as DragOverlay, e8 as InputAdornment, e9 as J8, ea as Indicator, eb as Item2, ec as Root2, ed as CardHeader, ee as Id, ef as CardActions, eg as lf, eh as Gf, ei as vm, ej as currency, ek as Ho, el as Je, em as Ye, en as we$1, eo as Controller, ep as coerce, eq as Dv, er as distExports, es as ut, et as CloseIcon, eu as Button$2, ev as W2, ew as L2, ex as arrayMove$1, ey as capitalize$3, ez as differenceBy, eA as Fu, eB as React, eC as MeasuringStrategy, eD as defaultDropAnimationConfiguration, eE as KeyboardCode, eF as closestCorners, eG as getFirstCollision, eH as isUrl, eI as Card, eJ as CardContent, eK as Typography, eL as t5, eM as e5, eN as wt, eO as J$1, eP as de, eQ as Go, eR as createReactEditorJS, eS as Tab$2, eT as Tabs$1, eU as TagManager, eV as clientExports, eW as SaleorProvider, eX as ApolloProvider, eY as Qu } from "./vendor-JFEeayC4.js";
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -92,7 +92,7 @@ var StatusType = /* @__PURE__ */ ((StatusType2) => {
   StatusType2["SUCCESS"] = "success";
   return StatusType2;
 })(StatusType || {});
-var define_process_env_default$5 = {};
+var define_process_env_default$4 = {};
 const getAppDefaultUri = () => "/";
 const getAppMountUri = () => {
   var _a;
@@ -231,10 +231,10 @@ const defaultListSettings = {
     columns: ["product", "unitPrice", "qtyOrdered", "maxQty", "qtyToRefund", "reason"]
   }
 };
-const APP_VERSION = define_process_env_default$5.CUSTOM_VERSION || `v${packageInfo.version}`;
-const GTM_ID = define_process_env_default$5.GTM_ID;
+const APP_VERSION = define_process_env_default$4.CUSTOM_VERSION || `v${packageInfo.version}`;
+const GTM_ID = define_process_env_default$4.GTM_ID;
 const DEFAULT_NOTIFICATION_SHOW_TIME$1 = 3e3;
-const ENABLED_SERVICE_NAME_HEADER = define_process_env_default$5.ENABLED_SERVICE_NAME_HEADER === "true";
+const ENABLED_SERVICE_NAME_HEADER = define_process_env_default$4.ENABLED_SERVICE_NAME_HEADER === "true";
 const history = createBrowserHistory({
   basename: getAppMountUri()
 });
@@ -1117,6 +1117,16 @@ const sectionNames = defineMessages({
     id: "mFr9YY",
     defaultMessage: "Refunds Settings",
     description: "configuration section name for refund settings"
+  },
+  articles: {
+    id: "articles.title",
+    defaultMessage: "News and Articles",
+    description: "articles section name"
+  },
+  stories: {
+    id: "stories.title",
+    defaultMessage: "Stories",
+    description: "stories section name"
   }
 });
 const commonStatusMessages = defineMessages({
@@ -3086,10 +3096,11 @@ function parseBoolean(a, defaultValue) {
 function capitalize$1(s) {
   return s.charAt(0).toLocaleUpperCase() + s.slice(1);
 }
-function transformFormToAddressInput(address) {
+function transformFormToAddressInput(address, skipValidation) {
   return {
     ...address,
-    country: findInEnum(address.country, CountryCode)
+    country: findInEnum(address.country, CountryCode),
+    ...skipValidation && { skipValidation: true }
   };
 }
 function getStringOrPlaceholder(s, placeholder) {
@@ -9568,6 +9579,42 @@ const WebhookDetailsFragmentDoc = gql`
   customHeaders
 }
     ${WebhookFragmentDoc}`;
+gql`
+    fragment Story on Shop {
+  id
+}
+    `;
+gql`
+    query ArticleList($first: Int, $after: String, $last: Int, $before: String, $sort: PageSortingInput, $filter: PageFilterInput) {
+  pages(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sortBy: $sort
+    filter: $filter
+  ) {
+    edges {
+      node {
+        ...Page
+      }
+    }
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+  }
+}
+    ${PageFragmentDoc}`;
+gql`
+    query ArticleDetails($id: ID!, $firstValues: Int, $afterValues: String, $lastValues: Int, $beforeValues: String) {
+  page(id: $id) {
+    ...PageDetails
+  }
+}
+    ${PageDetailsFragmentDoc}`;
 const AttributeBulkDeleteDocument = gql`
     mutation AttributeBulkDelete($ids: [ID!]!) {
   attributeBulkDelete(ids: $ids) {
@@ -11587,7 +11634,7 @@ gql`
   }
 }
     ${PromotionRuleChannelFragmentDoc}`;
-const AppFailedPendingWebhooksDocument = gql`
+gql`
     query AppFailedPendingWebhooks($canFetchAppEvents: Boolean!) {
   apps(first: 50, filter: {type: THIRDPARTY}) {
     edges {
@@ -11599,10 +11646,6 @@ const AppFailedPendingWebhooksDocument = gql`
   }
 }
     ${AppEventDeliveriesFragmentDoc}`;
-function useAppFailedPendingWebhooksLazyQuery(baseOptions) {
-  const options2 = { ...defaultOptions, ...baseOptions };
-  return useLazyQuery(AppFailedPendingWebhooksDocument, options2);
-}
 const AppDeleteFailedInstallationDocument = gql`
     mutation AppDeleteFailedInstallation($id: ID!) {
   appDeleteFailedInstallation(id: $id) {
@@ -16212,6 +16255,20 @@ function useStaffMemberDetailsQuery(baseOptions) {
   const options2 = { ...defaultOptions, ...baseOptions };
   return useQuery(StaffMemberDetailsDocument, options2);
 }
+gql`
+    query StoryList {
+  shop {
+    id
+  }
+}
+    `;
+gql`
+    query StoryDetails {
+  shop {
+    id
+  }
+}
+    `;
 const MenuCreateDocument = gql`
     mutation MenuCreate($input: MenuCreateInput!) {
   menuCreate(input: $input) {
@@ -17329,7 +17386,7 @@ function useWarehousesCountQuery(baseOptions) {
   const options2 = { ...defaultOptions, ...baseOptions };
   return useQuery(WarehousesCountDocument, options2);
 }
-const SaveOnBoardingStateDocument = gql`
+gql`
     mutation SaveOnBoardingState($id: ID!, $input: [MetadataInput!]!) {
   updateMetadata(id: $id, input: $input) {
     errors {
@@ -17338,10 +17395,6 @@ const SaveOnBoardingStateDocument = gql`
   }
 }
     ${MetadataErrorFragmentDoc}`;
-function useSaveOnBoardingStateMutation(baseOptions) {
-  const options2 = { ...defaultOptions, ...baseOptions };
-  return useMutation(SaveOnBoardingStateDocument, options2);
-}
 const WelcomePageActivitiesDocument = gql`
     query WelcomePageActivities($hasPermissionToManageOrders: Boolean!) {
   activities: homepageEvents(last: 10) @include(if: $hasPermissionToManageOrders) {
@@ -17385,53 +17438,6 @@ function useWelcomePageNotificationsQuery(baseOptions) {
   const options2 = { ...defaultOptions, ...baseOptions };
   return useQuery(WelcomePageNotificationsDocument, options2);
 }
-const AbandonedCheckoutsDocument = gql`
-    query AbandonedCheckouts($channel: String!) {
-  checkouts(first: 100, channel: $channel) {
-    totalCount
-    edges {
-      node {
-        id
-        token
-        email
-        user {
-          email
-          firstName
-          lastName
-        }
-        created
-        lastChange
-        lines {
-          id
-          quantity
-          variant {
-            id
-            name
-            product {
-              name
-            }
-          }
-          totalPrice {
-            gross {
-              amount
-            }
-          }
-        }
-        totalPrice {
-          gross {
-            amount
-            currency
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-function useAbandonedCheckoutsQuery(baseOptions) {
-  const options2 = { ...defaultOptions, ...baseOptions };
-  return useQuery(AbandonedCheckoutsDocument, options2);
-}
 const TopProductSalesDocument = gql`
     query TopProductSales($period: ReportingPeriod!, $channel: String!) {
   reportProductSales(period: $period, first: 5, channel: $channel) {
@@ -17464,48 +17470,18 @@ function useTopProductSalesQuery(baseOptions) {
   return useQuery(TopProductSalesDocument, options2);
 }
 const ComplexDashboardStatsDocument = gql`
-    query ComplexDashboardStats($period: ReportingPeriod!, $channel: String!) {
+    query ComplexDashboardStats($period: ReportingPeriod!, $channel: String!, $ordersCreatedGte: Date!, $customersJoinedGte: Date!) {
   ordersTotal(period: $period, channel: $channel) {
     gross {
       amount
       currency
     }
   }
-  orders(first: 100, channel: $channel) {
+  orders(first: 0, channel: $channel, filter: {created: {gte: $ordersCreatedGte}}) {
     totalCount
-    edges {
-      node {
-        id
-        created
-        total {
-          gross {
-            amount
-          }
-        }
-      }
-    }
   }
-  checkouts(first: 100, channel: $channel) {
+  customers(first: 0, filter: {dateJoined: {gte: $customersJoinedGte}}) {
     totalCount
-    edges {
-      node {
-        id
-        created
-        lastChange
-        lines {
-          id
-        }
-      }
-    }
-  }
-  customers(first: 100) {
-    totalCount
-    edges {
-      node {
-        id
-        dateJoined
-      }
-    }
   }
 }
     `;
@@ -17700,109 +17676,6 @@ const useGraphiQLThemeSwitcher = () => {
     setGraphiQLTheme(theme.theme === "defaultDark" ? "dark" : "light");
   });
 };
-const cloneMetadata = (data) => ({
-  key: data.key,
-  value: data.value
-});
-const byKey = (keyToFind) => (metadataItem) => metadataItem.key === keyToFind;
-const isEntryValueTrue = ([_id, value]) => value;
-const toStepWithClientState = (state) => (step) => ({
-  ...step,
-  completed: state.stepsCompleted.includes(step.id),
-  expanded: state.stepsExpanded[step.id]
-});
-const isStepNotCompletedAndNotCollapsed = (step) => !step.completed && step.expanded !== false;
-const byStepId = (idToFind) => (step) => step.id === idToFind;
-const handleStateChangeAfterStepCompleted = (state, id) => {
-  const newCompletedSteps = [...state.stepsCompleted];
-  const stepsExpanded = { ...state.stepsExpanded };
-  if (!newCompletedSteps.includes("get-started") && id !== "get-started") {
-    newCompletedSteps.push("get-started");
-  }
-  newCompletedSteps.push(id);
-  if (stepsExpanded[id]) {
-    delete stepsExpanded[id];
-  }
-  return {
-    ...state,
-    stepsExpanded,
-    stepsCompleted: newCompletedSteps
-  };
-};
-const handleStateChangeAfterToggle = (state, expandedId, id) => {
-  const stepsExpanded = { ...state.stepsExpanded };
-  for (const key in stepsExpanded) {
-    if (stepsExpanded[key]) {
-      delete stepsExpanded[key];
-    }
-  }
-  stepsExpanded[expandedId] = id !== "";
-  return {
-    ...state,
-    stepsExpanded
-  };
-};
-const getFirstExpanderStepId = (onboardingState) => {
-  var _a;
-  const stepsExpandedEntries = Object.entries(onboardingState.stepsExpanded);
-  return ((_a = stepsExpandedEntries.find(isEntryValueTrue)) == null ? void 0 : _a[0]) ?? "";
-};
-const getFirstNotCompletedAndNotExpandedStep = (onboardingState, visibleSteps) => {
-  var _a;
-  const stepsWithState = visibleSteps.map(toStepWithClientState(onboardingState));
-  return ((_a = stepsWithState.find(isStepNotCompletedAndNotCollapsed)) == null ? void 0 : _a.id) ?? "";
-};
-const getNextStepToExpand = (onboardingState, visibleSteps) => {
-  var _a;
-  const lastCompletedStepId = onboardingState.stepsCompleted[onboardingState.stepsCompleted.length - 1];
-  const stepsWithState = visibleSteps.map(toStepWithClientState(onboardingState));
-  const stepIndex = stepsWithState.findIndex(byStepId(lastCompletedStepId));
-  if (stepIndex === -1 || stepIndex === stepsWithState.length - 1) {
-    return "";
-  }
-  return ((_a = stepsWithState.slice(stepIndex + 1).find(isStepNotCompletedAndNotCollapsed)) == null ? void 0 : _a.id) ?? "";
-};
-const METADATA_KEY$1 = "onboarding";
-const prepareUserMetadata = (metadata, onboardingState) => {
-  const userMetadata = (metadata == null ? void 0 : metadata.map(cloneMetadata)) ?? [];
-  const metadataValue = JSON.stringify(onboardingState);
-  const metadataIndex = userMetadata.findIndex(byKey(METADATA_KEY$1));
-  if (metadataIndex !== -1) {
-    userMetadata[metadataIndex] = {
-      key: METADATA_KEY$1,
-      value: metadataValue
-    };
-  } else {
-    userMetadata.push({
-      key: METADATA_KEY$1,
-      value: metadataValue
-    });
-  }
-  return userMetadata;
-};
-var define_process_env_default$4 = {};
-const useNewUserCheck = () => {
-  const { user } = useUser();
-  const thresholdDateString = define_process_env_default$4.ONBOARDING_USER_JOINED_DATE_THRESHOLD || "2024-11-29";
-  if (!user) {
-    return {
-      isNewUser: false,
-      isUserLoading: true
-    };
-  }
-  const userJoinedDate = moment$1(user.dateJoined);
-  const thresholdDate = moment$1(thresholdDateString);
-  if (!userJoinedDate.isValid() || !thresholdDate.isValid()) {
-    return {
-      isNewUser: false,
-      isUserLoading: false
-    };
-  }
-  return {
-    isNewUser: userJoinedDate.isAfter(thresholdDate),
-    isUserLoading: false
-  };
-};
 const initialOnboardingSteps = [
   {
     id: "get-started",
@@ -17836,171 +17709,27 @@ const initialOnboardingSteps = [
   }
 ];
 const TOTAL_STEPS_COUNT = initialOnboardingSteps.length - 1;
-const getInitialOnboardingState = (isNewUser) => {
-  if (isNewUser) {
-    return {
-      onboardingExpanded: true,
-      stepsCompleted: [],
-      stepsExpanded: {}
-    };
-  }
-  return {
-    onboardingExpanded: false,
-    stepsCompleted: initialOnboardingSteps.map((step) => step.id),
-    stepsExpanded: {}
-  };
-};
-const useExpandedOnboardingId = (onboardingState, loaded, visibleSteps) => {
-  const hasBeenCalled = reactExports.useRef(false);
-  const [expandedStepId, setExpandedStepId] = reactExports.useState("");
-  reactExports.useEffect(() => {
-    if (hasBeenCalled.current) {
-      const firstExpandedStepId = getFirstExpanderStepId(onboardingState);
-      if (firstExpandedStepId) {
-        setExpandedStepId(firstExpandedStepId);
-      } else {
-        setExpandedStepId(getFirstNotCompletedAndNotExpandedStep(onboardingState, visibleSteps));
-      }
-    }
-  }, [onboardingState.stepsExpanded, visibleSteps]);
-  reactExports.useEffect(() => {
-    if (hasBeenCalled.current) {
-      setExpandedStepId(getNextStepToExpand(onboardingState, visibleSteps));
-    }
-  }, [onboardingState.stepsCompleted, visibleSteps]);
-  reactExports.useEffect(() => {
-    if (loaded && !hasBeenCalled.current) {
-      hasBeenCalled.current = true;
-      const firstExpandedStep = getFirstExpanderStepId(onboardingState);
-      if (firstExpandedStep) {
-        setExpandedStepId(firstExpandedStep);
-      } else {
-        setExpandedStepId(getFirstNotCompletedAndNotExpandedStep(onboardingState, visibleSteps));
-      }
-    }
-  }, [loaded, onboardingState, visibleSteps]);
-  return expandedStepId;
-};
-const useOnboardingStorage = () => {
-  const { user } = useUser();
-  const [saveOnboarding] = useSaveOnBoardingStateMutation({});
-  const getOnboardingState = () => {
-    try {
-      const metadata = user == null ? void 0 : user.metadata.find((m2) => m2.key === METADATA_KEY$1);
-      if (!metadata) {
-        return void 0;
-      }
-      return JSON.parse(metadata.value);
-    } catch (error) {
-      console.warn("Could not get onboarding state from metadata", { error });
-      return void 0;
-    }
-  };
-  const saveOnboardingState = reactExports.useCallback(
-    async (onboardingState) => {
-      if (!user) {
-        return;
-      }
-      try {
-        const userMetadata = prepareUserMetadata(user == null ? void 0 : user.metadata, onboardingState);
-        await saveOnboarding({
-          variables: {
-            id: user.id,
-            input: userMetadata
-          }
-        });
-      } catch (error) {
-        console.warn("Could not save onboarding state to metadata");
-      }
-    },
-    [saveOnboarding, user]
-  );
-  const debouncedSaveOnboardingState = reactExports.useMemo(
-    () => debounce(saveOnboardingState, 1e3),
-    [saveOnboardingState]
-  );
-  return {
-    getOnboardingState,
-    saveOnboardingState: debouncedSaveOnboardingState
-  };
-};
 const OnboardingContext = reactExports.createContext(null);
+const disabledOnboardingState = {
+  onboardingExpanded: false,
+  stepsCompleted: initialOnboardingSteps.map((step) => step.id),
+  stepsExpanded: {}
+};
 const OnboardingProvider = ({ children }) => {
-  const analytics = useAnalytics();
-  const [onboardingState, setOnboardingState] = reactExports.useState({
-    onboardingExpanded: true,
-    stepsCompleted: [],
-    stepsExpanded: {}
-  });
-  const loaded = reactExports.useRef(false);
-  const { isNewUser, isUserLoading } = useNewUserCheck();
-  const storageService = useOnboardingStorage();
-  reactExports.useEffect(() => {
-    if (loaded.current || isUserLoading) return;
-    const onboardingStateFromUserMetadata = storageService.getOnboardingState();
-    if (!onboardingStateFromUserMetadata) {
-      setOnboardingState(getInitialOnboardingState(isNewUser));
-    } else {
-      setOnboardingState(onboardingStateFromUserMetadata);
-    }
-    loaded.current = true;
-  }, [isNewUser, isUserLoading, loaded, storageService]);
-  reactExports.useEffect(() => {
-    if (loaded.current) {
-      storageService.saveOnboardingState(onboardingState);
-    }
-  }, [onboardingState]);
-  const validCompletedSteps = onboardingState.stepsCompleted;
-  const validCompletedStepsCount = validCompletedSteps.length;
-  const isOnboardingCompleted = isNewUser ? validCompletedStepsCount >= TOTAL_STEPS_COUNT : true;
-  const extendedStepId = useExpandedOnboardingId(
-    onboardingState,
-    loaded.current,
-    initialOnboardingSteps
-  );
-  const markOnboardingStepAsCompleted = (id) => {
-    if (onboardingState.stepsCompleted.includes(id)) return;
-    setOnboardingState(
-      (prevOnboardingState) => handleStateChangeAfterStepCompleted(prevOnboardingState, id)
-    );
-  };
-  const markAllAsCompleted = () => {
-    analytics.trackEvent("home_onboarding_mark_all_steps_completed");
-    setOnboardingState((prevOnboardingState) => ({
-      ...prevOnboardingState,
-      stepsCompleted: initialOnboardingSteps.map((step) => step.id),
-      stepsExpanded: {}
-    }));
-  };
-  const toggleExpandedOnboardingStep = (id, currentExpandedId) => {
-    const expandedId = id || currentExpandedId;
-    setOnboardingState(
-      (prev) => handleStateChangeAfterToggle(prev, expandedId, id)
-    );
-  };
-  const toggleOnboarding = (value) => {
-    setOnboardingState((prev) => {
-      const newState = {
-        ...prev,
-        onboardingExpanded: value
-      };
-      storageService.saveOnboardingState(newState);
-      return newState;
-    });
-  };
+  const noop = () => void 0;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     OnboardingContext.Provider,
     {
       value: {
-        isOnboardingCompleted,
-        onboardingState,
-        extendedStepId,
-        loading: !loaded,
-        markOnboardingStepAsCompleted,
-        markAllAsCompleted,
-        toggleExpandedOnboardingStep,
-        toggleOnboarding,
-        validCompletedStepsCount,
+        isOnboardingCompleted: true,
+        onboardingState: disabledOnboardingState,
+        extendedStepId: "",
+        loading: false,
+        markOnboardingStepAsCompleted: noop,
+        markAllAsCompleted: noop,
+        toggleExpandedOnboardingStep: noop,
+        toggleOnboarding: noop,
+        validCompletedStepsCount: TOTAL_STEPS_COUNT,
         visibleSteps: initialOnboardingSteps
       },
       children
@@ -22673,1194 +22402,141 @@ const Shortcusts = () => {
   const shortcuts = useShortcuts();
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ShortcutsItems, { items: shortcuts });
 };
-const AttributesIcons = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M29 3C29.5523 3 30 3.44772 30 4V8C30 8.55229 29.5523 9 29 9C28.4477 9 28 8.55229 28 8V7L12 7V8C12 8.55229 11.5523 9 11 9C10.4477 9 10 8.55229 10 8V4C10 3.44772 10.4477 3 11 3C11.5523 3 12 3.44772 12 4V5L28 5V4C28 3.44772 28.4477 3 29 3ZM2 12C2 11.4477 2.44772 11 3 11H7C7.55228 11 8 11.4477 8 12C8 12.5523 7.55228 13 7 13H6V27H7C7.55228 27 8 27.4477 8 28C8 28.5523 7.55228 29 7 29H3C2.44772 29 2 28.5523 2 28C2 27.4477 2.44772 27 3 27H4V13H3C2.44772 13 2 12.5523 2 12ZM14.2997 11C13.1142 11 12.0398 11.6982 11.5583 12.7816L10.0862 16.0939C10.0294 16.2217 10 16.3601 10 16.5V26C10 27.6569 11.3431 29 13 29H27C28.6569 29 30 27.6569 30 26V16.5C30 16.3601 29.9706 16.2217 29.9138 16.0939L28.4417 12.7816C27.9602 11.6982 26.8858 11 25.7003 11H14.2997ZM13.3859 13.5939C13.5464 13.2327 13.9046 13 14.2997 13H25.7003C26.0954 13 26.4536 13.2327 26.6141 13.5939L27.4612 15.5H12.5388L13.3859 13.5939ZM23.5 17.5H28V26C28 26.5523 27.5523 27 27 27H13C12.4477 27 12 26.5523 12 26V17.5H16.5V23C16.5 23.3603 16.6938 23.6927 17.0073 23.8702C17.3208 24.0477 17.7056 24.0429 18.0145 23.8575L20 22.6662L21.9855 23.8575C22.2944 24.0429 22.6792 24.0477 22.9927 23.8702C23.3062 23.6927 23.5 23.3603 23.5 23V17.5ZM18.5 21.2338V17.5H21.5V21.2338L20.5145 20.6425C20.1978 20.4525 19.8022 20.4525 19.4855 20.6425L18.5 21.2338Z",
-      fill: "currentColor"
-    }
-  )
-);
-function Attributes$1(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(AttributesIcons, { ...props, viewBox: "0 0 32 32" });
-}
-const ChannelsIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M22.2066 26.2723C20.3957 27.3688 18.2716 28 16 28C13.7284 28 11.6043 27.3688 9.7934 26.2723C9.9274 25.8726 10 25.4448 10 25C10 22.7909 8.20914 21 6 21C5.7019 21 5.41143 21.0326 5.13194 21.0945C4.4058 19.5481 4 17.8214 4 16C4 14.1786 4.4058 12.4519 5.13194 10.9055C5.41143 10.9674 5.7019 11 6 11C8.20914 11 10 9.20914 10 7C10 6.5552 9.9274 6.12736 9.7934 5.72768C11.6043 4.63116 13.7284 4 16 4C18.2716 4 20.3957 4.63116 22.2066 5.72768C22.0726 6.12736 22 6.5552 22 7C22 9.20914 23.7909 11 26 11C26.2981 11 26.5886 10.9674 26.8681 10.9055C27.5942 12.4519 28 14.1786 28 16C28 17.8214 27.5942 19.5481 26.8681 21.0945C26.5886 21.0326 26.2981 21 26 21C23.7909 21 22 22.7909 22 25C22 25.4448 22.0726 25.8726 22.2066 26.2723ZM23.2982 27.9496C21.173 29.2503 18.6741 30 16 30C13.3259 30 10.827 29.2503 8.70185 27.9496C7.9901 28.6019 7.04154 29 6 29C3.79086 29 2 27.2091 2 25C2 23.8076 2.52171 22.7371 3.34931 22.0043C2.48415 20.1847 2 18.1489 2 16C2 13.8511 2.48415 11.8153 3.34931 9.9957C2.52171 9.26286 2 8.19236 2 7C2 4.79086 3.79086 3 6 3C7.04154 3 7.99011 3.39808 8.70185 4.05039C10.827 2.7497 13.3259 2 16 2C18.6741 2 21.173 2.74971 23.2982 4.05039C24.0099 3.39808 24.9585 3 26 3C28.2091 3 30 4.79086 30 7C30 8.19236 29.4783 9.26286 28.6507 9.99569C29.5159 11.8153 30 13.8511 30 16C30 18.1489 29.5159 20.1847 28.6507 22.0043C29.4783 22.7371 30 23.8076 30 25C30 27.2091 28.2091 29 26 29C24.9585 29 24.0099 28.6019 23.2982 27.9496ZM6 9C7.10457 9 8 8.10457 8 7C8 5.89543 7.10457 5 6 5C4.89543 5 4 5.89543 4 7C4 8.10457 4.89543 9 6 9ZM26 9C27.1046 9 28 8.10457 28 7C28 5.89543 27.1046 5 26 5C24.8954 5 24 5.89543 24 7C24 8.10457 24.8954 9 26 9ZM28 25C28 26.1046 27.1046 27 26 27C24.8954 27 24 26.1046 24 25C24 23.8954 24.8954 23 26 23C27.1046 23 28 23.8954 28 25ZM6 27C7.10457 27 8 26.1046 8 25C8 23.8954 7.10457 23 6 23C4.89543 23 4 23.8954 4 25C4 26.1046 4.89543 27 6 27ZM17.6882 15C17.5151 13.5884 16.9729 12.0742 16 10.1898C15.0271 12.0742 14.4849 13.5884 14.3118 15H17.6882ZM18.3698 10.4862C20.2107 11.2784 21.5757 12.9657 21.917 15H19.7003C19.556 13.5436 19.1004 12.0837 18.3698 10.4862ZM19.7003 17H21.917C21.5757 19.0344 20.2107 20.7216 18.3697 21.5139C19.1003 19.9163 19.556 18.4564 19.7003 17ZM16 21.81C16.9729 19.9257 17.515 18.4115 17.6882 17H14.3118C14.485 18.4115 15.0271 19.9257 16 21.81ZM13.6302 10.4862C12.8996 12.0837 12.444 13.5436 12.2997 15H10.083C10.4243 12.9657 11.7893 11.2784 13.6302 10.4862ZM13.6303 21.5139C12.8997 19.9163 12.444 18.4564 12.2997 17H10.083C10.4243 19.0344 11.7893 20.7216 13.6303 21.5139ZM16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24Z",
-      fill: "currentColor"
-    }
-  )
-);
-function Channels(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelsIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const PermissionGroupsIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M16 4C13.7909 4 12 5.79086 12 8V11.9355C13.205 11.3367 14.5632 11 16 11C17.4368 11 18.795 11.3367 20 11.9355V8C20 5.79086 18.2091 4 16 4ZM22 13.2917V8C22 4.68629 19.3137 2 16 2C12.6863 2 10 4.68629 10 8V13.2917C8.15875 14.9396 7 17.3345 7 20C7 24.9706 11.0294 29 16 29C20.9706 29 25 24.9706 25 20C25 17.3345 23.8412 14.9396 22 13.2917ZM14 18C14 17.4477 14.4477 17 15 17H17C17.5523 17 18 17.4477 18 18C18 18.5523 17.5523 19 17 19V22C17 22.5523 16.5523 23 16 23C15.4477 23 15 22.5523 15 22V19C14.4477 19 14 18.5523 14 18ZM23 20C23 23.866 19.866 27 16 27C12.134 27 9 23.866 9 20C9 16.134 12.134 13 16 13C19.866 13 23 16.134 23 20Z",
-      fill: "currentColor"
-    }
-  )
-);
-function PermissionGroups(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(PermissionGroupsIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const ProductTypesIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M0 6.5V33L20 40L40 33V6.5L20 0L0 6.5ZM2.5 8.69935V31.2263L18.75 36.9138V14.3869L2.5 8.69935ZM21.25 14.3869V36.9138L37.5 31.2263V8.69935L21.25 14.3869ZM34.1436 7.22539L20 2.62872L5.8564 7.22539L20 12.1756L34.1436 7.22539Z",
-      fill: "currentColor"
-    }
-  ) })
-);
-function ProductTypes(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ProductTypesIcon, { ...props, viewBox: "0 0 44 44" });
-}
-const ShippingMethodsIcons = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M12.4476 8.88049C12.5081 8.37806 12.9344 8 13.4405 8H15.8867L15.4413 10.467C15.109 12.3074 16.5233 14 18.3936 14H20.8289C22.2801 14 23.5233 12.9612 23.7812 11.533L24.4191 8H26.7449C27.3446 8 27.8094 8.52414 27.7378 9.11951L26.0526 23.1195C25.9921 23.6219 25.5658 24 25.0598 24H11.7553C11.1556 24 10.6908 23.4759 10.7625 22.8805L12.4476 8.88049ZM17.4095 10.8223L17.9191 8H22.3867L21.813 11.1777C21.727 11.6537 21.3126 12 20.8289 12H18.3936C17.7702 12 17.2987 11.4358 17.4095 10.8223ZM13.4405 6C11.9223 6 10.6434 7.13417 10.462 8.64148L8.7768 22.6415C8.5618 24.4276 9.95629 26 11.7553 26H25.0598C26.5779 26 27.8568 24.8658 28.0383 23.3585L29.7234 9.35852C29.9384 7.57241 28.5439 6 26.7449 6H13.4405ZM3 9.78943C2.44772 9.78943 2 10.2371 2 10.7894C2 11.3417 2.44772 11.7894 3 11.7894H8.57143C9.12371 11.7894 9.57143 11.3417 9.57143 10.7894C9.57143 10.2371 9.12371 9.78943 8.57143 9.78943H3ZM2 15.5264C2 14.9741 2.44772 14.5264 3 14.5264H7.64286C8.19514 14.5264 8.64286 14.9741 8.64286 15.5264C8.64286 16.0787 8.19514 16.5264 7.64286 16.5264H3C2.44772 16.5264 2 16.0787 2 15.5264ZM3 19.2632C2.44772 19.2632 2 19.7109 2 20.2632C2 20.8155 2.44772 21.2632 3 21.2632H6.71429C7.26657 21.2632 7.71429 20.8155 7.71429 20.2632C7.71429 19.7109 7.26657 19.2632 6.71429 19.2632H3Z",
-      fill: "currentColor"
-    }
-  )
-);
-function ShippingMethods(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(ShippingMethodsIcons, { ...props, viewBox: "0 0 32 32" });
-}
-const SiteSettingsIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
+const customOrderSectionUrl = "/custom-orders";
+const customOrderListPath = customOrderSectionUrl;
+const customOrderListUrl = () => {
+  return customOrderListPath;
+};
+const customOrderPath = (id) => urlJoin(customOrderSectionUrl, id);
+const customOrderUrl = (id) => {
+  return customOrderPath(encodeURIComponent(id));
+};
+const useMenuStructure = () => {
+  return reactExports.useMemo(
+    () => [
       {
-        fillRule: "evenodd",
-        clipRule: "evenodd",
-        d: "M14.5569 1.99987C14.5633 1.99994 14.5687 2 14.5732 2H17.3059C17.3105 2 17.3159 1.99994 17.3223 1.99987C17.4196 1.9988 17.7281 1.9954 18.0457 2.16599C18.3621 2.33595 18.568 2.60603 18.7172 2.84313C19.0113 3.31075 19.3827 4.15404 19.9745 5.63276C20.0129 5.7286 20.0876 5.80239 20.1755 5.83857C20.2665 5.87602 20.3735 5.87516 20.4702 5.83113C21.7035 5.26978 22.4275 4.97615 22.8699 4.82166C23.3214 4.66397 23.5477 4.62638 23.7607 4.62638C24.1447 4.62638 24.516 4.76407 24.8072 5.01445L24.8573 5.05748L26.8264 7.02071L26.8321 7.0266C26.8354 7.02999 26.8394 7.03403 26.8441 7.03872C26.914 7.10928 27.1285 7.3257 27.2303 7.66631C27.333 8.00963 27.2893 8.34564 27.2265 8.62294C27.1034 9.16609 26.7678 10.0291 26.1382 11.4982C26.0995 11.5884 26.1 11.688 26.1343 11.771C26.17 11.8573 26.2436 11.9299 26.339 11.9651C27.8172 12.5108 28.6684 12.8602 29.1436 13.1493C29.3878 13.2978 29.665 13.5062 29.8374 13.8331C30.0045 14.1502 30.0012 14.4607 30.0001 14.5585C30 14.5652 30 14.5709 30 14.5755V17.3077C30 17.3124 30.0001 17.318 30.0001 17.3245C30.0012 17.4229 30.0046 17.7311 29.8361 18.0485C29.6668 18.3676 29.3963 18.5758 29.1565 18.7273C28.6855 19.0249 27.8367 19.3984 26.3501 19.992C26.2595 20.0281 26.19 20.0987 26.1562 20.1812C26.1215 20.2658 26.1224 20.3671 26.164 20.4577C26.8211 21.8881 27.1744 22.7356 27.3062 23.2749C27.374 23.5522 27.4225 23.8923 27.3174 24.2424C27.2153 24.5829 26.9987 24.8009 26.9297 24.8703C26.925 24.8751 26.921 24.8791 26.9177 24.8825L26.9124 24.8879L24.9915 26.807C24.6928 27.1054 24.2913 27.2783 23.8693 27.2905L23.8405 26.2909V27.2909C23.6183 27.2909 23.3858 27.2317 23.2246 27.1862C23.033 27.1321 22.8055 27.056 22.549 26.9628C22.0343 26.7757 21.3525 26.5011 20.513 26.1445C20.4183 26.1042 20.3147 26.1046 20.2255 26.1414C20.134 26.1791 20.0576 26.2567 20.0203 26.357C19.4731 27.8282 19.124 28.6735 18.838 29.1449C18.6918 29.3856 18.4862 29.662 18.1631 29.8349C17.8454 30.005 17.5345 30.0013 17.4381 30.0001C17.4316 30.0001 17.4261 30 17.4216 30H14.6884C14.6839 30 14.6784 30.0001 14.6719 30.0001C14.5749 30.0012 14.2665 30.0047 13.949 29.8347C13.6321 29.6649 13.4258 29.3948 13.2763 29.1574C12.9817 28.6896 12.6099 27.8457 12.0175 26.366C11.9793 26.2707 11.9052 26.1973 11.818 26.1611C11.727 26.1233 11.6197 26.124 11.5229 26.1681C10.289 26.7303 9.56587 27.0242 9.12494 27.1788C8.67577 27.3363 8.44992 27.3747 8.23624 27.3747C7.84824 27.3747 7.47347 27.2336 7.18179 26.9778L7.13438 26.9362L5.16666 24.972C5.16337 24.9686 5.15942 24.9646 5.15478 24.9599C5.0846 24.8898 4.86835 24.6737 4.76541 24.3321C4.66184 23.9883 4.70551 23.6517 4.76815 23.3746C4.89096 22.8313 5.22649 21.9679 5.85632 20.4988C5.89444 20.4099 5.89387 20.3116 5.86007 20.23C5.82504 20.1454 5.75279 20.074 5.65904 20.0393C4.18074 19.491 3.32977 19.1401 2.85487 18.8502C2.61094 18.7013 2.33422 18.4928 2.16222 18.1663C1.99509 17.849 1.99871 17.5386 1.99985 17.4408C1.99992 17.4341 1.99999 17.4285 1.99999 17.4238V14.6895C1.99999 14.6848 1.99993 14.6791 1.99985 14.6724C1.99874 14.5736 1.99524 14.2642 2.16284 13.9468C2.33284 13.6248 2.60536 13.4163 2.84509 13.2656C3.31517 12.9702 4.16344 12.5995 5.64698 12.0074C5.73702 11.9714 5.80635 11.9013 5.84029 11.8192C5.87534 11.7344 5.87461 11.6326 5.8327 11.5414C5.1727 10.1062 4.81717 9.25205 4.68784 8.70729C4.62117 8.42646 4.57457 8.07733 4.69254 7.71996C4.80574 7.37703 5.03525 7.16207 5.10707 7.0948C5.10944 7.09257 5.11164 7.09051 5.11366 7.08861L7.0056 5.19568C7.30278 4.89835 7.70209 4.72542 8.12227 4.71211L8.15395 5.7116V4.7116C8.37565 4.7116 8.60784 4.77026 8.77018 4.81582C8.96241 4.86977 9.19061 4.94573 9.44798 5.03891C9.9644 5.22588 10.6481 5.50041 11.4896 5.85727C11.5829 5.89683 11.6849 5.89633 11.7723 5.86009C11.8619 5.82297 11.9371 5.74672 11.9737 5.64785C12.5208 4.17297 12.8719 3.32652 13.16 2.85389C13.307 2.61271 13.5125 2.33806 13.8335 2.16572C14.1511 1.99518 14.461 1.99876 14.5569 1.99987ZM8.27526 6.75452L6.66608 8.36455C6.77144 8.71717 7.04331 9.38697 7.64979 10.7059C7.92061 11.2948 7.9395 11.9761 7.68866 12.5831C7.4454 13.1717 6.97234 13.6318 6.38834 13.8649C4.99859 14.4196 4.32571 14.7205 3.99999 14.9051V17.2019C4.32437 17.3767 4.99072 17.6583 6.35448 18.1641C6.96227 18.3895 7.45687 18.8583 7.70801 19.4651C7.95107 20.0523 7.94163 20.7105 7.69451 21.2869C7.10208 22.6688 6.84085 23.3592 6.74298 23.7196L8.35461 25.3283C8.38591 25.3181 8.42192 25.3059 8.46313 25.2915C8.81825 25.167 9.47667 24.9026 10.6937 24.3481C11.2885 24.0772 11.9737 24.0603 12.5846 24.3138C13.1764 24.5595 13.639 25.0353 13.8742 25.6226C14.4272 27.0038 14.7294 27.6748 14.9141 28H17.1889C17.363 27.6747 17.6434 27.0105 18.1457 25.6598C18.3743 25.0452 18.849 24.5458 19.4626 24.2926C20.053 24.049 20.7131 24.0565 21.2949 24.3037C22.122 24.655 22.7664 24.9138 23.2323 25.0831C23.4389 25.1582 23.6007 25.2122 23.722 25.2481L25.3329 23.6388C25.2272 23.2864 24.9549 22.6168 24.3466 21.2926C24.0771 20.7058 24.0576 20.0275 24.3057 19.4223C24.5483 18.8309 25.0226 18.3685 25.6085 18.1346C27.0016 17.5783 27.6751 17.2749 28 17.0893V14.7987C27.6754 14.6246 27.0092 14.3444 25.6464 13.8414C25.0353 13.6157 24.538 13.1447 24.286 12.535C24.0429 11.9468 24.0524 11.2877 24.2999 10.7103C24.8931 9.32619 25.1545 8.63573 25.2523 8.27547L23.6433 6.67135C23.6107 6.6819 23.5729 6.69459 23.5293 6.70982C23.1736 6.83405 22.5149 7.09788 21.2988 7.65142C20.7062 7.92117 20.0239 7.93887 19.4145 7.68813C18.8193 7.44325 18.3539 6.96588 18.1177 6.37596C17.5655 4.9962 17.2635 4.32536 17.079 4H14.8078C14.6332 4.32454 14.3511 4.98941 13.8489 6.34343C13.6216 6.956 13.1493 7.45446 12.5379 7.70778C11.9488 7.95184 11.2897 7.94488 10.7088 7.69857C9.88024 7.34721 9.23429 7.08859 8.76713 6.91946C8.55969 6.84435 8.39715 6.79042 8.27526 6.75452ZM25.3793 23.831C25.3793 23.831 25.3791 23.8298 25.379 23.8276Z",
-        fill: "currentColor"
+        id: "orders-section",
+        label: "Заказы",
+        children: [
+          {
+            id: "custom-orders",
+            label: "Кастомные заказы",
+            url: customOrderListUrl()
+          }
+        ]
+      }
+    ],
+    []
+  );
+};
+const Divider$1 = ({ menuItem }) => /* @__PURE__ */ jsxRuntimeExports.jsx(Gs.Divider, { paddingY: menuItem.paddingY ?? 1.5, paddingX: 1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 1, color: "default2", children: menuItem.label }) });
+const productReviewsSection = "/product-reviews/";
+const productReviewListPath = productReviewsSection;
+const productReviewPublishedPath = urlJoin(
+  productReviewsSection,
+  "published"
+);
+const productReviewListUrl = (params) => productReviewListPath + "";
+const productReviewPublishedUrl = (params) => productReviewPublishedPath + "";
+function isMenuActive(location2, menuItem) {
+  const menuUrlsToCheck = [...menuItem.matchUrls || [], menuItem.url].filter(Boolean).map((item) => item.split("?")[0]);
+  if (menuUrlsToCheck.length === 0) {
+    return false;
+  }
+  const activeUrl = getPureUrl(location2.split("?")[0]);
+  if (isMenuItemExtension(menuItem)) {
+    return false;
+  }
+  if (activeUrl === orderDraftListUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === orderListUrl().split("?")[0])) {
+    return false;
+  }
+  if (activeUrl === productReviewPublishedUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === productReviewListUrl().split("?")[0])) {
+    return false;
+  }
+  if (activeUrl === productReviewListUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === productReviewPublishedUrl().split("?")[0])) {
+    return false;
+  }
+  return menuUrlsToCheck.some((menuItemUrl) => {
+    return !!matchPath(activeUrl, {
+      exact: menuItemUrl === "/",
+      path: menuItemUrl
+    });
+  });
+}
+const getPureUrl = (url) => {
+  if (url.includes("/dashboard")) {
+    return url.split("/dashboard")[1];
+  }
+  return url;
+};
+const isMenuItemExtension = (menuItem) => menuItem.id.startsWith("extension-");
+const getMenuItemExtension = (extensions, id) => {
+  const extensionsList = Object.values(extensions).reduce(
+    (list, extensions2) => list.concat(extensions2),
+    []
+  );
+  const extension = extensionsList.find((extension2) => id === `extension-${extension2.id}`);
+  return extension;
+};
+const ItemGroup = ({ menuItem }) => {
+  var _a;
+  const hasSubmenuActive = menuItem == null ? void 0 : menuItem.children.some((item) => isMenuActive(location.pathname, item));
+  const isActive2 = isMenuActive(location.pathname, menuItem) && !hasSubmenuActive;
+  const isExpanded = isActive2 || hasSubmenuActive;
+  const handleMenuGroupClick = () => {
+    if (menuItem.onClick) {
+      menuItem.onClick();
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Gs.ItemGroup, { defaultExpanded: isExpanded, "data-test-id": `menu-list-item`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Gs.ItemGroup.Trigger,
+      {
+        paddingX: 2,
+        paddingRight: 1,
+        borderRadius: 3,
+        size: "small",
+        active: isActive2,
+        justifyContent: "space-between",
+        "data-test-id": `menu-item-label-${menuItem.id}`,
+        position: "relative",
+        onClick: handleMenuGroupClick,
+        className: "sidebar-item-group-trigger",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Link$1,
+          {
+            replace: isActive2,
+            to: (menuItem == null ? void 0 : menuItem.url) ?? "",
+            className: ae({
+              width: "100%",
+              display: "block"
+            }),
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", gap: 3, paddingY: 1.5, borderRadius: 3, children: [
+              menuItem.icon,
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, fontWeight: "medium", children: menuItem.label }),
+              menuItem.endAdornment && /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: menuItem.endAdornment })
+            ] })
+          }
+        )
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Gs.ItemGroup.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      J,
       {
-        fillRule: "evenodd",
-        clipRule: "evenodd",
-        d: "M16 18C17.1046 18 18 17.1046 18 16C18 14.8954 17.1046 14 16 14C14.8954 14 14 14.8954 14 16C14 17.1046 14.8954 18 16 18ZM16 20C18.2091 20 20 18.2091 20 16C20 13.7909 18.2091 12 16 12C13.7909 12 12 13.7909 12 16C12 18.2091 13.7909 20 16 20Z",
-        fill: "currentColor"
+        borderLeftWidth: 1,
+        borderLeftStyle: "solid",
+        borderColor: "default1",
+        paddingLeft: 4,
+        marginLeft: 4,
+        display: "flex",
+        flexDirection: "column",
+        marginBottom: 2,
+        marginTop: 1,
+        gap: "px",
+        children: (_a = menuItem.children) == null ? void 0 : _a.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(MenuItem, { menuItem: child }, child.id))
       }
-    )
-  ] })
-);
-function SiteSettings$2(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(SiteSettingsIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const StaffMembersIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M10 4C10 2.89543 10.8954 2 12 2H14C15.1046 2 16 2.89543 16 4V5.5H19C20.6569 5.5 22 6.84315 22 8.5V27C22 28.6569 20.6569 30 19 30H7C5.34315 30 4 28.6569 4 27V8.5C4 6.84315 5.34315 5.5 7 5.5H10V4ZM10 7.5H7C6.44772 7.5 6 7.94772 6 8.5V27C6 27.5523 6.44772 28 7 28H19C19.5523 28 20 27.5523 20 27V8.5C20 7.94772 19.5523 7.5 19 7.5H16V7.57143C16 8.676 15.1046 9.57143 14 9.57143H12C10.8954 9.57143 10 8.676 10 7.57143V7.5ZM14 4H12V7.57143L14 7.57143V4ZM8.5835 18.4762C8.5835 16.5563 10.1398 15 12.0597 15H14.4406C16.3605 15 17.9168 16.5563 17.9168 18.4762C17.9168 19.7123 16.9148 20.7143 15.6787 20.7143H10.8216C9.58553 20.7143 8.5835 19.7123 8.5835 18.4762ZM12.0597 17C11.2444 17 10.5835 17.6609 10.5835 18.4762C10.5835 18.6077 10.6901 18.7143 10.8216 18.7143H15.6787C15.8102 18.7143 15.9168 18.6077 15.9168 18.4762C15.9168 17.6609 15.2559 17 14.4406 17H12.0597ZM8.66675 21.5C8.11446 21.5 7.66675 21.9477 7.66675 22.5C7.66675 23.0523 8.11446 23.5 8.66675 23.5H17.8334C18.3857 23.5 18.8334 23.0523 18.8334 22.5C18.8334 21.9477 18.3857 21.5 17.8334 21.5H8.66675ZM7.66675 25.2858C7.66675 24.7335 8.11446 24.2858 8.66675 24.2858H11.4167C11.969 24.2858 12.4167 24.7335 12.4167 25.2858C12.4167 25.8381 11.969 26.2858 11.4167 26.2858H8.66675C8.11446 26.2858 7.66675 25.8381 7.66675 25.2858ZM16.0002 24.2858C15.448 24.2858 15.0002 24.7335 15.0002 25.2858C15.0002 25.8381 15.448 26.2858 16.0002 26.2858H17.8336C18.3859 26.2858 18.8336 25.8381 18.8336 25.2858C18.8336 24.7335 18.3859 24.2858 17.8336 24.2858H16.0002ZM15.0834 12.2857C15.0834 13.3114 14.2626 14.1429 13.2501 14.1429C12.2376 14.1429 11.4167 13.3114 11.4167 12.2857C11.4167 11.2601 12.2376 10.4286 13.2501 10.4286C14.2626 10.4286 15.0834 11.2601 15.0834 12.2857ZM21 2C20.4477 2 20 2.44772 20 3C20 3.55228 20.4477 4 21 4H25C25.5523 4 26 4.44772 26 5V25C26 25.5523 25.5523 26 25 26H24.4285C23.8763 26 23.4285 26.4477 23.4285 27C23.4285 27.5523 23.8763 28 24.4285 28H25C26.6569 28 28 26.6569 28 25V5C28 3.34314 26.6569 2 25 2H21Z",
-      fill: "currentColor"
-    }
-  )
-);
-function StaffMembers(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(StaffMembersIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const TaxesIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M8 4C7.44772 4 7 4.44772 7 5V27C7 27.5523 7.44772 28 8 28H24C24.5523 28 25 27.5523 25 27V5C25 4.44772 24.5523 4 24 4H8ZM5 5C5 3.34315 6.34315 2 8 2H24C25.6569 2 27 3.34315 27 5V27C27 28.6569 25.6569 30 24 30H8C6.34315 30 5 28.6569 5 27V5ZM9 9C9 7.89543 9.89543 7 11 7L21 7C22.1046 7 23 7.89543 23 9V11C23 12.1046 22.1046 13 21 13H11C9.89543 13 9 12.1046 9 11V9ZM21 9L11 9V11H21V9ZM12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17ZM17 16C17 16.5523 16.5523 17 16 17C15.4477 17 15 16.5523 15 16C15 15.4477 15.4477 15 16 15C16.5523 15 17 15.4477 17 16ZM20 17C20.5523 17 21 16.5523 21 16C21 15.4477 20.5523 15 20 15C19.4477 15 19 15.4477 19 16C19 16.5523 19.4477 17 20 17ZM13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20C11 19.4477 11.4477 19 12 19C12.5523 19 13 19.4477 13 20ZM16 21C16.5523 21 17 20.5523 17 20C17 19.4477 16.5523 19 16 19C15.4477 19 15 19.4477 15 20C15 20.5523 15.4477 21 16 21ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20ZM16 25C16.5523 25 17 24.5523 17 24C17 23.4477 16.5523 23 16 23C15.4477 23 15 23.4477 15 24C15 24.5523 15.4477 25 16 25Z",
-      fill: "currentColor"
-    }
-  )
-);
-function Taxes(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(TaxesIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const WarehousesIcon = createSvgIcon(
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      fillRule: "evenodd",
-      clipRule: "evenodd",
-      d: "M10.5 5C10.5 4.44772 10.9477 4 11.5 4H13.1429V6.64286C13.1429 7.74743 14.0383 8.64286 15.1429 8.64286H16.8571C17.9617 8.64286 18.8571 7.74743 18.8571 6.64286V4H20.5C21.0523 4 21.5 4.44772 21.5 5V14C21.5 14.5523 21.0523 15 20.5 15H18H14H11.5C10.9477 15 10.5 14.5523 10.5 14V5ZM8.67071 15C8.56015 14.6872 8.5 14.3506 8.5 14V5C8.5 3.34315 9.84314 2 11.5 2H20.5C22.1569 2 23.5 3.34315 23.5 5V14C23.5 14.3506 23.4398 14.6872 23.3293 15H27C28.6569 15 30 16.3431 30 18V27C30 28.6569 28.6569 30 27 30H18C17.2316 30 16.5308 29.7111 16 29.2361C15.4692 29.7111 14.7684 30 14 30H5C3.34315 30 2 28.6569 2 27V18C2 16.3431 3.34315 15 5 15H8.67071ZM12.3571 17V19.6429C12.3571 20.7474 11.4617 21.6429 10.3571 21.6429H8.64286C7.53829 21.6429 6.64286 20.7474 6.64286 19.6429V17H5C4.44772 17 4 17.4477 4 18V27C4 27.5523 4.44772 28 5 28H14C14.5523 28 15 27.5523 15 27V18C15 17.4477 14.5523 17 14 17H12.3571ZM18 17C17.4477 17 17 17.4477 17 18V27C17 27.5523 17.4477 28 18 28H27C27.5523 28 28 27.5523 28 27V18C28 17.4477 27.5523 17 27 17H25.3571V19.6429C25.3571 20.7474 24.4617 21.6429 23.3571 21.6429H21.6429C20.5383 21.6429 19.6429 20.7474 19.6429 19.6429V17H18ZM15.1429 6.64286V4H16.8571V6.64286L15.1429 6.64286ZM8.64286 17V19.6429H10.3571V17H8.64286ZM21.6429 17V19.6429H23.3571V17H21.6429Z",
-      fill: "currentColor"
-    }
-  )
-);
-function Warehouses$1(props) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(WarehousesIcon, { ...props, viewBox: "0 0 32 32" });
-}
-const permissionGroupSection = "/permission-groups/";
-const permissionGroupListPath = permissionGroupSection;
-var PermissionGroupListUrlSortField = /* @__PURE__ */ ((PermissionGroupListUrlSortField2) => {
-  PermissionGroupListUrlSortField2["name"] = "name";
-  return PermissionGroupListUrlSortField2;
-})(PermissionGroupListUrlSortField || {});
-const permissionGroupListUrl = (params) => permissionGroupListPath + "?" + stringifyQs(params);
-const permissionGroupAddPath = urlJoin(permissionGroupSection, "add");
-const permissionGroupAddUrl = permissionGroupAddPath;
-var MembersListUrlSortField = /* @__PURE__ */ ((MembersListUrlSortField2) => {
-  MembersListUrlSortField2["name"] = "name";
-  MembersListUrlSortField2["email"] = "email";
-  return MembersListUrlSortField2;
-})(MembersListUrlSortField || {});
-const permissionGroupDetailsPath = (id) => urlJoin(permissionGroupSection, id);
-const permissionGroupDetailsUrl = (id, params) => permissionGroupDetailsPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
-const productTypeSection = "/product-types/";
-const productTypeListPath = productTypeSection;
-var ProductTypeListUrlFiltersEnum = /* @__PURE__ */ ((ProductTypeListUrlFiltersEnum2) => {
-  ProductTypeListUrlFiltersEnum2["configurable"] = "configurable";
-  ProductTypeListUrlFiltersEnum2["type"] = "type";
-  ProductTypeListUrlFiltersEnum2["query"] = "query";
-  return ProductTypeListUrlFiltersEnum2;
-})(ProductTypeListUrlFiltersEnum || {});
-var ProductTypeListUrlSortField = /* @__PURE__ */ ((ProductTypeListUrlSortField2) => {
-  ProductTypeListUrlSortField2["name"] = "name";
-  ProductTypeListUrlSortField2["digital"] = "digital";
-  return ProductTypeListUrlSortField2;
-})(ProductTypeListUrlSortField || {});
-const productTypeListUrl = (params) => productTypeListPath + "?" + stringifyQs(params);
-const productTypeAddPath = urlJoin(productTypeSection, "add");
-const productTypeAddUrl = (params) => productTypeAddPath + "?" + stringifyQs(params);
-const productTypePath = (id) => urlJoin(productTypeSection, id);
-const productTypeUrl = (id, params) => productTypePath(encodeURIComponent(id)) + "?" + stringifyQs(params);
-const siteSettingsSection = "/site-settings";
-const siteSettingsPath = siteSettingsSection;
-const siteSettingsUrl = (params) => `${siteSettingsPath}?${stringifyQs(params)}`;
-const encodeURIComponentOptional = (uriComponent) => uriComponent ? encodeURIComponent(uriComponent) : void 0;
-const mapUndefinedTaxRatesToCountries = (taxConfigurations, taxClasses) => taxConfigurations.map((config) => {
-  if (config.taxClassCountryRates.length === taxClasses.length + 1) {
-    return {
-      ...config,
-      taxClassCountryRates: [...config.taxClassCountryRates].sort(
-        (rate) => rate.taxClass ? 1 : -1
-      )
-    };
-  } else {
-    const taxClassCountryRates = uniqBy(
-      [
-        ...config.taxClassCountryRates,
-        ...taxClasses.map((taxClass) => ({
-          taxClass,
-          rate: void 0,
-          __typename: "TaxClassCountryRate"
-        }))
-      ],
-      "taxClass.id"
-    );
-    const defaultRate = taxClassCountryRates.find((rate) => rate.taxClass === null);
-    const parsedCountryRates = taxClassCountryRates.filter((rate) => rate.taxClass !== null);
-    parsedCountryRates.unshift(
-      defaultRate ?? {
-        rate: void 0,
-        taxClass: null,
-        __typename: "TaxClassCountryRate"
-      }
-    );
-    return {
-      ...config,
-      taxClassCountryRates: parsedCountryRates
-    };
-  }
-}).sort((a, b) => a.country.country.localeCompare(b.country.country));
-const mapUndefinedCountriesToTaxClasses = (taxConfigurations, taxClasses) => taxClasses.map((taxClass) => ({
-  ...taxClass,
-  countries: uniqBy(
-    [
-      ...taxClass.countries,
-      ...taxConfigurations.map(({ country }) => ({
-        __typename: "TaxClassCountryRate",
-        rate: void 0,
-        country
-      }))
-    ],
-    "country.code"
-  )
-}));
-const isLastElement = (arr, index) => index === arr.length - 1;
-const excludeExistingCountries = (allCountries, existingCountries) => allCountries.filter(
-  (dialogCountry) => !(existingCountries == null ? void 0 : existingCountries.some(
-    (existingCountry) => existingCountry.country.code === dialogCountry.code
-  ))
-);
-const taxSection = "/taxes/";
-const taxTabPath = (tab) => urlJoin(taxSection, tab);
-const taxConfigurationListPath = (id) => id ? urlJoin(taxTabPath("channels"), id) : taxTabPath("channels");
-const taxConfigurationListUrl = (id, params) => taxConfigurationListPath(encodeURIComponentOptional(id)) + "?" + stringifyQs(params);
-const taxCountriesListPath = (id) => id ? urlJoin(taxTabPath("countries"), id) : taxTabPath("countries");
-const taxCountriesListUrl = (id, params) => taxCountriesListPath(encodeURIComponentOptional(id)) + "?" + stringifyQs(params);
-const taxClassesListUrl = (id) => id ? urlJoin(taxTabPath("tax-classes"), id) : taxTabPath("tax-classes");
-const Menu$1 = ({ items, dataTestId }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Ev, { "data-test-id": dataTestId, children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Trigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(P2, {}), variant: "secondary", "data-test-id": "show-more-button" }) }),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Content, { align: "end", children: /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Gs, { padding: 2, borderRadius: 4, boxShadow: "defaultOverlay", backgroundColor: "default1", children: items.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Item, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Gs.Item,
-    {
-      borderRadius: 4,
-      paddingX: 1.5,
-      paddingY: 2,
-      onClick: item.onSelect,
-      "data-test-id": item.testId,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: item.label })
-    }
-  ) }, item.label)) }) }) })
-] });
-const AppChannelContext = reactExports.createContext({
-  availableChannels: [],
-  channel: void 0,
-  isPickerActive: false,
-  refreshChannels: () => void 0,
-  setChannel: () => void 0,
-  setPickerActive: () => void 0
-});
-const isValidChannel = (channelId, channelList) => {
-  if (!channelId) {
-    return false;
-  }
-  return channelList == null ? void 0 : channelList.some(getById(channelId));
-};
-const AppChannelProvider = ({ children }) => {
-  const { setChannel } = useSaleorConfig();
-  const { authenticated, user } = useUser();
-  const [selectedChannel, setSelectedChannel] = useLocalStorage("channel", "");
-  const { data: channelData, refetch } = useBaseChannelsQuery({
-    skip: !authenticated || !user
-  });
-  const [isPickerActive, setPickerActive] = reactExports.useState(false);
-  reactExports.useEffect(() => {
-    const channels = (user == null ? void 0 : user.accessibleChannels) ?? [];
-    const isValid = isValidChannel(selectedChannel, channels);
-    if (!isValid && (channels == null ? void 0 : channels.length) > 0) {
-      setSelectedChannel(channels[0].id);
-    }
-    if (!isValid && selectedChannel !== "") {
-      setSelectedChannel("");
-    }
-  }, [selectedChannel, setSelectedChannel, user]);
-  reactExports.useEffect(() => {
-    setChannel(selectedChannel);
-  }, [selectedChannel]);
-  const availableChannels = (channelData == null ? void 0 : channelData.channels) || [];
-  const channel = channelData && (availableChannels.find(getById(selectedChannel)) || null);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    AppChannelContext.Provider,
-    {
-      value: {
-        availableChannels,
-        channel,
-        isPickerActive,
-        refreshChannels: refetch,
-        setChannel: setSelectedChannel,
-        setPickerActive
-      },
-      children
-    }
-  );
-};
-AppChannelProvider.displayName = "AppChannelProvider";
-function useAppChannel(enablePicker = true) {
-  const { setPickerActive, ...data } = reactExports.useContext(AppChannelContext);
-  reactExports.useEffect(() => {
-    if (enablePicker) {
-      setPickerActive(true);
-    }
-    return () => setPickerActive(false);
-  }, [enablePicker]);
-  return data;
-}
-const Select = ({
-  onChange,
-  ...props
-}) => {
-  const handleOnChange = (value) => {
-    onChange({
-      target: {
-        value: typeof value === "string" ? value : value == null ? void 0 : value.value,
-        name: props.name ?? ""
-      }
-    });
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Mv, { ...props, onChange: handleOnChange });
-};
-const AppChannelSelect = ({
-  channels,
-  onChannelSelect,
-  selectedChannelId
-}) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-    Select,
-    {
-      __width: 130,
-      "data-test-id": "app-channel-select",
-      size: "large",
-      onChange: ({ target }) => onChannelSelect(target.value),
-      value: selectedChannelId,
-      options: mapNodeToChoice(channels)
-    }
-  ) });
-};
-AppChannelSelect.displayName = "AppChannelSelect";
-const TopNavLink = ({ to, variant = "secondary" }) => /* @__PURE__ */ jsxRuntimeExports.jsx(Link$1, { to, className: ae({ marginRight: 2 }), children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-  oo,
-  {
-    icon: /* @__PURE__ */ jsxRuntimeExports.jsx(C2, {}),
-    variant,
-    size: "large",
-    "data-test-id": "app-header-back-button"
-  }
-) });
-const topBarHeight = "77px";
-const topBarHeightSubtitle = "120px";
-const appLoaderHeight = 2;
-const savebarHeight = "64px";
-const borderHeight = "1px";
-const TopNavWrapper = ({
-  children,
-  withoutBorder,
-  hasSubtitle,
-  ...props
-}) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  J,
-  {
-    display: hasSubtitle ? "block" : "flex",
-    alignItems: "center",
-    paddingX: 6,
-    paddingY: 5,
-    borderBottomWidth: withoutBorder ? 0 : 1,
-    borderBottomStyle: "solid",
-    borderColor: "default1",
-    position: "relative",
-    "data-test-id": "page-header",
-    __height: hasSubtitle ? topBarHeightSubtitle : topBarHeight,
-    gridColumn: "8",
-    gridRowStart: "1",
-    backgroundColor: "default1",
-    ...props,
-    children
-  }
-);
-const Root$2 = ({
-  title,
-  subtitle,
-  href,
-  withoutBorder = false,
-  isAlignToRight = true,
-  children,
-  ...wrapperProps
-}) => {
-  var _a;
-  const { channel, isPickerActive, setChannel } = useAppChannel(false);
-  const user = useUser();
-  const channels = ((_a = user == null ? void 0 : user.user) == null ? void 0 : _a.accessibleChannels) ?? [];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(TopNavWrapper, { withoutBorder, hasSubtitle: !!subtitle, ...wrapperProps, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", width: "100%", children: [
-      href && /* @__PURE__ */ jsxRuntimeExports.jsx(TopNavLink, { to: href }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(J, { __flex: isAlignToRight ? 1 : 0, __minWidth: "max-content", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 6, children: title }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", flexWrap: "nowrap", height: "100%", __flex: isAlignToRight ? "initial" : 1, children: [
-        isPickerActive && channels.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          AppChannelSelect,
-          {
-            channels,
-            selectedChannelId: channel == null ? void 0 : channel.id,
-            onChannelSelect: setChannel
-          }
-        ),
-        children
-      ] })
-    ] }),
-    subtitle ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ContextualLine,
-      {
-        gridColumn: "8",
-        marginLeft: href ? 12 : 0,
-        __marginTop: href ? "-0.6rem" : 0,
-        children: subtitle
-      }
-    ) : null
+    ) })
   ] });
-};
-const TopNav = Object.assign(Root$2, {
-  Menu: Menu$1
-});
-const Content$2 = ({
-  children,
-  hideScrollbar = true,
-  ...rest
-}) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    J,
-    {
-      height: "100%",
-      overflowY: "auto",
-      className: hideScrollbar ? "hide-scrollbar" : "",
-      gridColumn: "8",
-      gridRow: { mobile: "6", tablet: "12", desktop: "12" },
-      ...rest,
-      children
-    }
-  );
-};
-const RightSidebar = ({ children, ...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  J,
-  {
-    borderLeftStyle: "solid",
-    borderColor: "default1",
-    height: "100%",
-    overflowY: "auto",
-    className: "hide-scrollbar",
-    borderLeftWidth: 1,
-    gridColumn: "8",
-    gridRow: { mobile: "6", tablet: "full", desktop: "full" },
-    paddingBottom: 6,
-    ...props,
-    children
-  }
-);
-const contentWithSidebarHeight = `calc(100vh - ${savebarHeight} - ${borderHeight} * 2)`;
-const contentWithoutSidebarHeight = `calc(100vh - ${borderHeight}`;
-const RootLayout = ({
-  children,
-  gridTemplateColumns = 12,
-  withSavebar = true,
-  testId,
-  ...props
-}) => {
-  const gridTemplateColumnsValue = reactExports.useMemo(() => {
-    if (gridTemplateColumns instanceof Object) {
-      return {
-        mobile: gridTemplateColumns.mobile ?? 1,
-        tablet: gridTemplateColumns.tablet,
-        ...gridTemplateColumns
-      };
-    }
-    return {
-      mobile: 1,
-      tablet: gridTemplateColumns,
-      desktop: gridTemplateColumns
-    };
-  }, [gridTemplateColumns]);
-  const heightValue = reactExports.useMemo(() => {
-    return withSavebar ? contentWithSidebarHeight : contentWithoutSidebarHeight;
-  }, [withSavebar]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    J,
-    {
-      className: "mobile-full-height",
-      display: "grid",
-      gridTemplateColumns: gridTemplateColumnsValue,
-      __gridTemplateRows: "auto 1fr",
-      __height: heightValue,
-      "data-test-id": testId,
-      ...props,
-      children
-    }
-  );
-};
-const DetailPageLayout = Object.assign(RootLayout, {
-  Content: Content$2,
-  RightSidebar
-});
-const ListPageLayout = ({ children }) => /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "grid", __gridTemplateColumns: "1fr", __gridTemplateRows: "auto 1fr", height: "100%", children });
-const useStyles$2J = f(
-  (theme) => ({
-    container: {
-      display: "flex",
-      justifyContent: "flex-end"
-    },
-    versionItem: {
-      [theme.breakpoints.down("md")]: {
-        fontSize: theme.spacing(1.75)
-      },
-      [theme.breakpoints.up("md")]: {
-        fontSize: theme.spacing(2)
-      },
-      color: theme.palette.saleor.main[3],
-      lineHeight: theme.spacing(3.2),
-      fontSize: theme.spacing(2),
-      marginLeft: theme.spacing(1.5),
-      letterSpacing: "0.02em"
-    }
-  }),
-  {
-    name: "VersionInfo"
-  }
-);
-const VersionInfo = ({ dashboardVersion, coreVersion }) => {
-  const classes2 = useStyles$2J({});
-  if (!dashboardVersion || !coreVersion) {
-    return null;
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 2, fontWeight: "light", className: classes2.container, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.versionItem, children: `dashboard ${dashboardVersion}` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.versionItem, children: `core v${coreVersion}` })
-  ] });
-};
-VersionInfo.displayName = "VersionInfo";
-const useStyles$2I = f(
-  (theme) => ({
-    configurationCategory: {
-      [theme.breakpoints.down("md")]: {
-        gridTemplateColumns: "1fr"
-      },
-      display: "grid",
-      gap: theme.spacing(4),
-      gridTemplateColumns: "1fr 3fr",
-      padding: theme.spacing(4, 0)
-    },
-    configurationItem: {
-      display: "grid",
-      gap: theme.spacing(4),
-      gridTemplateColumns: "1fr 1fr"
-    },
-    configurationLabel: {
-      paddingBottom: 20
-    },
-    link: {
-      display: "contents",
-      marginBottom: theme.spacing(4)
-    },
-    icon: {
-      "& path": {
-        fill: theme.palette.primary.main
-      },
-      fontSize: 48
-    },
-    sectionDescription: {},
-    sectionTitle: {
-      fontSize: 20,
-      fontWeight: 600
-    },
-    navigationCard: {
-      border: `1px solid ${Wt.colors.border.default1}`,
-      height: 130,
-      boxShadow: "none !important",
-      "& .MuiCardContent-root": {
-        borderRadius: Wt.borderRadius[3]
-      }
-    }
-  }),
-  { name: "ConfigurationPage" }
-);
-const hasPermission = (permission, user) => {
-  var _a;
-  return (_a = user.userPermissions) == null ? void 0 : _a.map((perm) => perm.code).includes(permission);
-};
-const hasAnyPermissions = (permissions, user) => (permissions == null ? void 0 : permissions.some((permission) => hasPermission(permission, user))) || false;
-const hasAllPermissions = (permissions, user) => (permissions == null ? void 0 : permissions.every((permission) => hasPermission(permission, user))) || false;
-const getConfigMenuItemsPermissions = (intl) => createConfigurationMenu(intl).reduce(
-  (prev, { menuItems }) => [...prev, ...menuItems.map(({ permissions }) => permissions)],
-  []
-).flat();
-const hasUserMenuItemPermissions = (menuItem, user) => {
-  if (menuItem.permissions) {
-    if (menuItem.requireAllPermissions) {
-      return hasAllPermissions(menuItem.permissions, user);
-    }
-    return hasAnyPermissions(menuItem.permissions, user);
-  }
-  return true;
-};
-const ConfigurationPage = (props) => {
-  const {
-    menu: menus,
-    user,
-    versionInfo: { dashboardVersion, coreVersion }
-  } = props;
-  const classes2 = useStyles$2I(props);
-  const theme = useTheme$2();
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
-  const renderVersionInfo = /* @__PURE__ */ jsxRuntimeExports.jsx(VersionInfo, { dashboardVersion, coreVersion });
-  const intl = useIntl();
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(DetailPageLayout, { gridTemplateColumns: 1, withSavebar: false, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(TopNav, { title: intl.formatMessage(sectionNames.configuration), children: isSmUp && renderVersionInfo }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(DetailPageLayout.Content, { "data-test-id": "configuration-menu", children: /* @__PURE__ */ jsxRuntimeExports.jsx(J, { paddingX: 6, __maxWidth: "1024px", margin: "auto", children: menus.filter(
-      (menu) => menu.menuItems.some((menuItem) => hasUserMenuItemPermissions(menuItem, user))
-    ).map((menu, menuIndex) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: classes2.configurationCategory, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.configurationLabel, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: menu.label }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.configurationItem, children: menu.menuItems.filter(
-        (menuItem) => hasUserMenuItemPermissions(menuItem, user) && !(menuItem == null ? void 0 : menuItem.hidden)
-      ).map((item, itemIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Link$1,
-        {
-          className: classes2.link,
-          to: item.url,
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            PB,
-            {
-              className: classes2.navigationCard,
-              icon: item.icon,
-              title: item.title,
-              description: item.description,
-              "data-test-id": item.testId + "-settings-subsection-" + item.title.toLowerCase()
-            },
-            itemIndex
-          )
-        },
-        `${item.title}-${itemIndex}`
-      )) })
-    ] }, menuIndex)) }) })
-  ] });
-};
-ConfigurationPage.displayName = "ConfigurationPage";
-function createConfigurationMenu(intl) {
-  return [
-    {
-      label: intl.formatMessage({
-        id: "HP6m+q",
-        defaultMessage: "Attributes and Product Types"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "19/lwV",
-            defaultMessage: "Determine attributes used to create product types"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Attributes$1, {}),
-          requireAllPermissions: true,
-          permissions: [
-            PermissionEnum.MANAGE_PRODUCT_TYPES_AND_ATTRIBUTES,
-            PermissionEnum.MANAGE_PAGE_TYPES_AND_ATTRIBUTES
-          ],
-          title: intl.formatMessage(sectionNames.attributes),
-          url: attributeListUrl(),
-          testId: "configuration-menu-attributes"
-        },
-        {
-          description: intl.formatMessage({
-            id: "n0RwMK",
-            defaultMessage: "Define types of products you sell"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ProductTypes, {}),
-          permissions: [PermissionEnum.MANAGE_PRODUCT_TYPES_AND_ATTRIBUTES],
-          title: intl.formatMessage(sectionNames.productTypes),
-          url: productTypeListUrl(),
-          testId: "configuration-menu-product-types"
-        }
-      ]
-    },
-    {
-      label: intl.formatMessage({
-        id: "jFrdB5",
-        defaultMessage: "Product Settings"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "EIULpW",
-            defaultMessage: "Manage how your store charges tax"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Taxes, {}),
-          title: intl.formatMessage(sectionNames.taxes),
-          url: taxConfigurationListUrl(),
-          testId: "configuration-menu-taxes"
-        }
-      ]
-    },
-    {
-      label: intl.formatMessage({
-        id: "UN+yTt",
-        defaultMessage: "Staff Settings"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "RQUkVW",
-            defaultMessage: "Manage your employees and their permissions"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(StaffMembers, {}),
-          permissions: [PermissionEnum.MANAGE_STAFF],
-          title: intl.formatMessage(sectionNames.staff),
-          url: staffListUrl(),
-          testId: "configuration-menu-staff"
-        },
-        {
-          description: intl.formatMessage({
-            id: "ivJ1qt",
-            defaultMessage: "Manage your permission groups and their permissions"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PermissionGroups, {}),
-          permissions: [PermissionEnum.MANAGE_STAFF],
-          title: intl.formatMessage(sectionNames.permissionGroups),
-          url: permissionGroupListUrl(),
-          testId: "configuration-menu-permission-groups"
-        }
-      ]
-    },
-    {
-      label: intl.formatMessage({
-        id: "gTr0qE",
-        defaultMessage: "Shipping Settings"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "zxs6G3",
-            defaultMessage: "Manage how you ship out orders"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ShippingMethods, {}),
-          permissions: [PermissionEnum.MANAGE_SHIPPING],
-          title: intl.formatMessage(sectionNames.shipping),
-          url: shippingZonesListUrl(),
-          testId: "configurationMenuShipping"
-        },
-        {
-          description: intl.formatMessage({
-            id: "5RmuD+",
-            defaultMessage: "Manage and update your warehouse information"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Warehouses$1, {}),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          title: intl.formatMessage(sectionNames.warehouses),
-          url: warehouseSection,
-          testId: "configuration-menu-warehouses"
-        }
-      ]
-    },
-    {
-      label: intl.formatMessage({
-        id: "MWSacl",
-        defaultMessage: "Multichannel"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "8vJCJ4",
-            defaultMessage: "Define and manage your sales channels"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Channels, {}),
-          permissions: [PermissionEnum.MANAGE_CHANNELS],
-          title: intl.formatMessage(sectionNames.channels),
-          url: channelsListUrl(),
-          testId: "configuration-menu-channels"
-        }
-      ]
-    },
-    {
-      label: intl.formatMessage({
-        id: "YZl6cv",
-        defaultMessage: "Miscellaneous"
-      }),
-      menuItems: [
-        {
-          description: intl.formatMessage({
-            id: "5BajZK",
-            defaultMessage: "View and update your site settings"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(SiteSettings$2, {}),
-          permissions: [PermissionEnum.MANAGE_SETTINGS],
-          title: intl.formatMessage(sectionNames.siteSettings),
-          url: siteSettingsUrl(),
-          testId: "configuration-menu-site-settings"
-        },
-        {
-          description: intl.formatMessage({
-            id: "rUnw7n",
-            defaultMessage: "Configure refunds behavior"
-          }),
-          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PaymentOutlined, {}),
-          permissions: [PermissionEnum.MANAGE_SETTINGS],
-          title: intl.formatMessage(sectionNames.refundsSettings),
-          url: refundsSettingsPath,
-          testId: "configuration-menu-refunds-settings"
-        }
-      ]
-    }
-  ];
-}
-const configurationMenuUrl = "/configuration/";
-const ConfigurationSection = () => {
-  const shop = useShop();
-  const versions = {
-    dashboardVersion: APP_VERSION,
-    coreVersion: (shop == null ? void 0 : shop.version) ?? ""
-  };
-  const user = useUser();
-  const intl = useIntl();
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.configuration) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ConfigurationPage,
-      {
-        menu: createConfigurationMenu(intl),
-        user: maybe(() => user.user),
-        versionInfo: versions
-      }
-    )
-  ] });
-};
-const WARNING_ICON_COLOR = "#FFB84E";
-const WARNING_ICON_COLOR_LIGHTER = "#FFD87E";
-const SUCCESS_ICON_COLOR = "#0ABF53";
-const ExclamationIcon = ({
-  width = "12",
-  height = "12",
-  viewBox = "0 0 12 12"
-}) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-  "svg",
-  {
-    width,
-    height,
-    viewBox,
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("g", { clipPath: "url(#clip0_1226_7785)", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M6 11C8.76142 11 11 8.76142 11 6C11 3.23858 8.76142 1 6 1C3.23858 1 1 3.23858 1 6C1 8.76142 3.23858 11 6 11Z",
-            stroke: "currentColor",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M6 4V6",
-            stroke: "currentColor",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M6 8H6.00429",
-            stroke: "currentColor",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("clipPath", { id: "clip0_1226_7785", children: /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "12", height: "12", fill: "white" }) }) })
-    ]
-  }
-);
-const ExclamationIconFilled = ({
-  width = 17,
-  height = 17
-}) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-  "svg",
-  {
-    width,
-    height,
-    viewBox: "0 0 17 17",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("g", { clipPath: "url(#clip0_471_2501)", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M8.50008 15.5846C12.4121 15.5846 15.5834 12.4133 15.5834 8.5013C15.5834 4.58929 12.4121 1.41797 8.50008 1.41797C4.58806 1.41797 1.41675 4.58929 1.41675 8.5013C1.41675 12.4133 4.58806 15.5846 8.50008 15.5846Z",
-            fill: "currentColor",
-            stroke: "currentColor",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M8.5 5.66797V8.5013",
-            stroke: "white",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M8.5 11.332H8.50607",
-            stroke: "white",
-            strokeWidth: "1.5",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("clipPath", { id: "clip0_471_2501", children: /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "17", height: "17", fill: "white" }) }) })
-    ]
-  }
-);
-const AlertExclamationIcon = ({
-  width = 17,
-  height = 17
-}) => {
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    J,
-    {
-      __color: isHovered ? WARNING_ICON_COLOR_LIGHTER : WARNING_ICON_COLOR,
-      __width: width,
-      __height: height,
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      children: isHovered ? /* @__PURE__ */ jsxRuntimeExports.jsx(ExclamationIconFilled, { width, height }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ExclamationIcon, { width: `${width}px`, height: `${height}px` })
-    }
-  );
-};
-const SidebarAppAlert = ({
-  hasNewFailedAttempts,
-  small
-}) => {
-  if (!hasNewFailedAttempts) {
-    return null;
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Wv, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Wv.Trigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Link$1, { to: extensionsSection, "data-test-id": "sidebar-app-alert-trigger", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AlertExclamationIcon, { width: small ? 15 : 17, height: small ? 15 : 17 }) }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Wv.Content, { align: "start", side: "bottom", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MemoizedFormattedMessage,
-      {
-        defaultMessage: "Issues found.{break}Review extension alerts.",
-        id: "g9M3PH",
-        values: {
-          break: /* @__PURE__ */ jsxRuntimeExports.jsx("br", {})
-        }
-      }
-    ) }) })
-  ] });
-};
-const useUserPermissions = () => {
-  var _a;
-  return (_a = useUser().user) == null ? void 0 : _a.userPermissions;
-};
-const useHasManagedAppsPermission = () => {
-  const permissions = useUserPermissions();
-  const hasManagedAppsPermission = !!(permissions == null ? void 0 : permissions.find(
-    ({ code }) => code === PermissionEnum.MANAGE_APPS
-  ));
-  return {
-    hasManagedAppsPermission
-  };
-};
-const useIntervalActionWithState = ({
-  action,
-  key,
-  interval = 5e3,
-  skip = false
-}) => {
-  const savedAction = reactExports.useRef(action);
-  const timeout = reactExports.useRef(null);
-  const [lastInvocation, setLastInvocation] = useLocalStorage(key, (/* @__PURE__ */ new Date()).getTime());
-  reactExports.useEffect(() => {
-    const cleanup = () => {
-      if (timeout.current) {
-        clearTimeout(timeout.current);
-      }
-    };
-    if (skip) {
-      return cleanup;
-    }
-    const timeNow = (/* @__PURE__ */ new Date()).getTime();
-    const timePassed = timeNow - lastInvocation;
-    const nextDelay = Math.max(0, interval - timePassed);
-    const hasPassedInterval = timePassed >= interval;
-    const action2 = () => {
-      savedAction.current();
-      setLastInvocation((/* @__PURE__ */ new Date()).getTime());
-    };
-    if (hasPassedInterval) {
-      action2();
-      timeout.current = setTimeout(() => action2(), interval);
-    } else {
-      timeout.current = setTimeout(() => action2(), nextDelay);
-    }
-    return cleanup;
-  }, [lastInvocation, interval, key, setLastInvocation, skip]);
-};
-const toWebhookDeliveryWithMoment = (delivery) => delivery ? {
-  ...delivery,
-  createdAt: moment(delivery.createdAt)
-} : null;
-const getLatest = (a, b) => {
-  if (a && b) {
-    return a.createdAt.isAfter(b.createdAt) ? a : b;
-  }
-  return a ?? b;
-};
-const getLatestFailedAttemptFromWebhook = (webhook) => {
-  var _a, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
-  const failedEventDelivery = toWebhookDeliveryWithMoment((_c = (_b2 = (_a = webhook.failedDelivers) == null ? void 0 : _a.edges) == null ? void 0 : _b2[0]) == null ? void 0 : _c.node);
-  const fromFailedDeliveryAttempts = toWebhookDeliveryWithMoment(
-    (_j = (_i = (_h = (_g = (_f = (_e = (_d = webhook.failedDelivers) == null ? void 0 : _d.edges) == null ? void 0 : _e[0]) == null ? void 0 : _f.node) == null ? void 0 : _g.attempts) == null ? void 0 : _h.edges) == null ? void 0 : _i[0]) == null ? void 0 : _j.node
-  );
-  const fromFailedDelivers = getLatest(failedEventDelivery, fromFailedDeliveryAttempts);
-  const fromPendingDelivers = toWebhookDeliveryWithMoment(
-    (_o = (_n = (_m = (_l = (_k = webhook.pendingDelivers) == null ? void 0 : _k.edges) == null ? void 0 : _l[0]) == null ? void 0 : _m.node.attempts) == null ? void 0 : _n.edges.find(
-      ({ node: { status: status2 } }) => status2 === EventDeliveryStatusEnum.FAILED
-    )) == null ? void 0 : _o.node
-  );
-  return getLatest(fromFailedDelivers, fromPendingDelivers);
-};
-const getLatestFailedAttemptFromWebhooks = (webhooks) => webhooks.map(getLatestFailedAttemptFromWebhook).filter(Boolean).sort((a, b) => b == null ? void 0 : b.createdAt.diff(a == null ? void 0 : a.createdAt))[0] ?? null;
-const useAppsFailedDeliveries = () => {
-  var _a;
-  const [fetchAppsWebhooks, { data }] = useAppFailedPendingWebhooksLazyQuery({
-    fetchPolicy: "no-cache"
-  });
-  const lastFailedWebhookDate = reactExports.useMemo(
-    () => {
-      var _a2, _b2;
-      return ((_b2 = (_a2 = data == null ? void 0 : data.apps) == null ? void 0 : _a2.edges.reduce((acc, app) => {
-        const latestFailedAttempt = getLatestFailedAttemptFromWebhooks(app.node.webhooks ?? []);
-        if (!latestFailedAttempt) {
-          return acc;
-        }
-        if (!acc) {
-          return latestFailedAttempt;
-        }
-        return latestFailedAttempt.createdAt.isAfter(acc.createdAt) ? latestFailedAttempt : acc;
-      }, null)) == null ? void 0 : _b2.createdAt) ?? null;
-    },
-    [(_a = data == null ? void 0 : data.apps) == null ? void 0 : _a.edges]
-  );
-  const handleFetchAppsWebhooks = () => {
-    fetchAppsWebhooks({
-      variables: {
-        canFetchAppEvents: true
-      }
-    });
-  };
-  return {
-    hasFailed: !!lastFailedWebhookDate,
-    lastFailedWebhookDate,
-    fetchAppsWebhooks: handleFetchAppsWebhooks
-  };
-};
-const DELIVERY_ATTEMPT_KEY = "sidebar_app_webhook_alert_state";
-const useSidebarWebhookAlertMetadata = () => {
-  const { user } = useUser();
-  const [saveMetadata] = useUserAccountUpdateMutation();
-  const persist = async (metadataInput) => {
-    await saveMetadata({
-      variables: {
-        input: {
-          metadata: [
-            {
-              key: DELIVERY_ATTEMPT_KEY,
-              value: JSON.stringify(metadataInput)
-            }
-          ]
-        }
-      }
-    });
-  };
-  const sidebarDotRemoteState = reactExports.useMemo(() => {
-    const webhookAlertMetadata = (user == null ? void 0 : user.metadata.find((m2) => m2.key === DELIVERY_ATTEMPT_KEY)) ?? null;
-    if (!webhookAlertMetadata) {
-      return null;
-    }
-    try {
-      const parsed = JSON.parse(webhookAlertMetadata.value);
-      return parsed;
-    } catch (e) {
-      return null;
-    }
-  }, [user]);
-  return {
-    persist,
-    sidebarDotRemoteState
-  };
-};
-const shouldShowDotCheck = (lastClickDate, lastFailedAttemptDate) => {
-  if (!lastFailedAttemptDate) {
-    return false;
-  }
-  return !lastClickDate || lastFailedAttemptDate > lastClickDate;
-};
-const useSidebarDotState = () => {
-  const { persist, sidebarDotRemoteState } = useSidebarWebhookAlertMetadata();
-  const [hasNewFailedAttempts, setHasNewFailedAttempts] = reactExports.useState(false);
-  const lastClickDateRef = reactExports.useRef(null);
-  const lastFailedAttemptDateRef = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    if (sidebarDotRemoteState) {
-      lastClickDateRef.current = sidebarDotRemoteState.lastClickDate;
-      lastFailedAttemptDateRef.current = sidebarDotRemoteState.lastFailedAttemptDate;
-      const shouldShowDot = shouldShowDotCheck(
-        lastClickDateRef.current,
-        lastFailedAttemptDateRef.current
-      );
-      setHasNewFailedAttempts(shouldShowDot);
-    }
-  }, [sidebarDotRemoteState]);
-  const handleClick = async (clickDate) => {
-    try {
-      await persist({
-        lastClickDate: clickDate,
-        lastFailedAttemptDate: lastFailedAttemptDateRef.current ?? ""
-      });
-      lastClickDateRef.current = clickDate;
-    } catch (error) {
-      errorTracker.captureException(error);
-    }
-  };
-  const handleFailedAttempt = async (failedAttemptDate) => {
-    try {
-      await persist({
-        lastClickDate: lastClickDateRef.current ?? "",
-        lastFailedAttemptDate: failedAttemptDate
-      });
-      lastFailedAttemptDateRef.current = failedAttemptDate;
-      if (!lastClickDateRef.current || failedAttemptDate > lastClickDateRef.current) {
-        setHasNewFailedAttempts(true);
-      }
-    } catch (error) {
-      errorTracker.captureException(error);
-    }
-  };
-  return {
-    handleAppsListItemClick: handleClick,
-    handleFailedAttempt,
-    hasNewFailedAttempts
-  };
-};
-const DELIVERIES_FETCHING_INTERVAL = 5 * 60 * 1e3;
-const useAppsAlert = () => {
-  const { hasManagedAppsPermission } = useHasManagedAppsPermission();
-  const { hasNewFailedAttempts, handleFailedAttempt, handleAppsListItemClick } = useSidebarDotState();
-  const { lastFailedWebhookDate, fetchAppsWebhooks } = useAppsFailedDeliveries();
-  useIntervalActionWithState({
-    action: fetchAppsWebhooks,
-    interval: DELIVERIES_FETCHING_INTERVAL,
-    key: "webhook_deliveries_last_fetched",
-    skip: !hasManagedAppsPermission
-  });
-  reactExports.useEffect(() => {
-    if (lastFailedWebhookDate && lastFailedWebhookDate instanceof moment) {
-      handleFailedAttempt(lastFailedWebhookDate.toISOString());
-    }
-  }, [lastFailedWebhookDate]);
-  return {
-    hasNewFailedAttempts,
-    handleAppsListItemClick
-  };
 };
 const extensionMountPoints = {
   CATEGORY_LIST: [
@@ -24092,7 +22768,7 @@ const _AppIFrame = reactExports.forwardRef(
 );
 _AppIFrame.displayName = "AppIFrame";
 const AppIFrame = reactExports.memo(_AppIFrame, (prev, next) => isEqualWith(prev, next));
-const useStyles$2H = f(
+const useStyles$2J = f(
   () => ({
     iframe: {
       width: "100%",
@@ -24643,7 +23319,7 @@ const LocaleProvider = ({ children }) => {
   reactExports.useEffect(() => {
     async function changeLocale() {
       if (locale !== "en" && !loaded.current) {
-        const mod = await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "../../../locale/ar.json": () => __vitePreload(() => Promise.resolve().then(() => ar$1), true ? void 0 : void 0), "../../../locale/az.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.a), true ? [] : void 0), "../../../locale/bg.json": () => __vitePreload(() => import("./sk-BmnmIOZV.js").then((n2) => n2.b), true ? [] : void 0), "../../../locale/bn.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.b), true ? [] : void 0), "../../../locale/ca.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.c), true ? [] : void 0), "../../../locale/cs.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.a), true ? [] : void 0), "../../../locale/da.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.d), true ? [] : void 0), "../../../locale/de.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.d), true ? [] : void 0), "../../../locale/defaultMessages.json": () => __vitePreload(() => Promise.resolve().then(() => defaultMessages$1), true ? void 0 : void 0), "../../../locale/el.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/es.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/es_CO.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/et.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/fa.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.f), true ? [] : void 0), "../../../locale/fr.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.f), true ? [] : void 0), "../../../locale/hi.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/hu.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/hy.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/id.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/is.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/it.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/ja.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.j), true ? [] : void 0), "../../../locale/ko.json": () => __vitePreload(() => Promise.resolve().then(() => ko$1), true ? void 0 : void 0), "../../../locale/mn.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.m), true ? [] : void 0), "../../../locale/nb.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.n), true ? [] : void 0), "../../../locale/nl.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.n), true ? [] : void 0), "../../../locale/pl.json": () => __vitePreload(() => Promise.resolve().then(() => pl$1), true ? void 0 : void 0), "../../../locale/pt-BR.json": () => __vitePreload(() => import("./sk-BmnmIOZV.js").then((n2) => n2.p), true ? [] : void 0), "../../../locale/pt.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.p), true ? [] : void 0), "../../../locale/ro.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.r), true ? [] : void 0), "../../../locale/ru.json": () => __vitePreload(() => import("./sk-BmnmIOZV.js").then((n2) => n2.r), true ? [] : void 0), "../../../locale/sk.json": () => __vitePreload(() => import("./sk-BmnmIOZV.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sl.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sq.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sr.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sv.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/th.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.t), true ? [] : void 0), "../../../locale/tr.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.t), true ? [] : void 0), "../../../locale/uk.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.u), true ? [] : void 0), "../../../locale/vi.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.v), true ? [] : void 0), "../../../locale/zh-Hans.json": () => __vitePreload(() => Promise.resolve().then(() => zhHans$1), true ? void 0 : void 0), "../../../locale/zh-Hant.json": () => __vitePreload(() => Promise.resolve().then(() => zhHant$1), true ? void 0 : void 0) }), `../../../locale/${locale}.json`, 5);
+        const mod = await __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "../../../locale/ar.json": () => __vitePreload(() => Promise.resolve().then(() => ar$1), true ? void 0 : void 0), "../../../locale/az.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.a), true ? [] : void 0), "../../../locale/bg.json": () => __vitePreload(() => import("./sk-DA4f-DIj.js").then((n2) => n2.b), true ? [] : void 0), "../../../locale/bn.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.b), true ? [] : void 0), "../../../locale/ca.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.c), true ? [] : void 0), "../../../locale/cs.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.a), true ? [] : void 0), "../../../locale/da.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.d), true ? [] : void 0), "../../../locale/de.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.d), true ? [] : void 0), "../../../locale/defaultMessages.json": () => __vitePreload(() => Promise.resolve().then(() => defaultMessages$1), true ? void 0 : void 0), "../../../locale/el.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/es.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/es_CO.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/et.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.e), true ? [] : void 0), "../../../locale/fa.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.f), true ? [] : void 0), "../../../locale/fr.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.f), true ? [] : void 0), "../../../locale/hi.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/hu.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/hy.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.h), true ? [] : void 0), "../../../locale/id.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/is.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/it.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.i), true ? [] : void 0), "../../../locale/ja.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.j), true ? [] : void 0), "../../../locale/ko.json": () => __vitePreload(() => Promise.resolve().then(() => ko$1), true ? void 0 : void 0), "../../../locale/mn.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.m), true ? [] : void 0), "../../../locale/nb.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.n), true ? [] : void 0), "../../../locale/nl.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.n), true ? [] : void 0), "../../../locale/pl.json": () => __vitePreload(() => Promise.resolve().then(() => pl$1), true ? void 0 : void 0), "../../../locale/pt-BR.json": () => __vitePreload(() => import("./sk-DA4f-DIj.js").then((n2) => n2.p), true ? [] : void 0), "../../../locale/pt.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.p), true ? [] : void 0), "../../../locale/ro.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.r), true ? [] : void 0), "../../../locale/ru.json": () => __vitePreload(() => import("./sk-DA4f-DIj.js").then((n2) => n2.r), true ? [] : void 0), "../../../locale/sk.json": () => __vitePreload(() => import("./sk-DA4f-DIj.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sl.json": () => __vitePreload(() => import("./sl-BonY80Pk.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sq.json": () => __vitePreload(() => import("./sq-BQQE-U3a.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sr.json": () => __vitePreload(() => import("./sr-DHIrI5vn.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/sv.json": () => __vitePreload(() => import("./sv-CCtmxYOT.js").then((n2) => n2.s), true ? [] : void 0), "../../../locale/th.json": () => __vitePreload(() => import("./th-DX-ReGwg.js").then((n2) => n2.t), true ? [] : void 0), "../../../locale/tr.json": () => __vitePreload(() => import("./tr-DoWjlUPh.js").then((n2) => n2.t), true ? [] : void 0), "../../../locale/uk.json": () => __vitePreload(() => import("./uk-UN1b3Qh4.js").then((n2) => n2.u), true ? [] : void 0), "../../../locale/vi.json": () => __vitePreload(() => import("./vi-aCvAynor.js").then((n2) => n2.v), true ? [] : void 0), "../../../locale/zh-Hans.json": () => __vitePreload(() => Promise.resolve().then(() => zhHans$1), true ? void 0 : void 0), "../../../locale/zh-Hant.json": () => __vitePreload(() => Promise.resolve().then(() => zhHant$1), true ? void 0 : void 0) }), `../../../locale/${locale}.json`, 5);
         setMessages(mod.default);
         if (!loaded.current) {
           loaded.current = true;
@@ -24800,7 +23476,7 @@ const AppFrame = ({
   coreVersion = ""
 }) => {
   const frameRef = reactExports.useRef(null);
-  const classes2 = useStyles$2H();
+  const classes2 = useStyles$2J();
   const appOrigin = getOrigin(src);
   const flags = useAllFlags();
   const { postToExtension, handshakeDone, setHandshakeDone } = useAppActions(
@@ -24982,650 +23658,6 @@ const useExtensions = (mountList) => {
     extensionsMap
   );
 };
-const giftCardsSectionUrlName = "/gift-cards";
-const giftCardsListPath = `${giftCardsSectionUrlName}/`;
-const giftCardListUrl = (params) => giftCardsListPath + "?" + stringifyQs(params);
-const giftCardPath = (id) => urlJoin(giftCardsListPath, id);
-const giftCardUrl = (id, params) => giftCardPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
-const giftCardSettingsUrl = urlJoin(giftCardsListPath, "settings");
-const ConfigurationIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
-      {
-        d: "M11.562 18.333H8.437a.779.779 0 0 1-.541-.208.83.83 0 0 1-.271-.52l-.25-1.938c-.18-.07-.351-.153-.511-.25a6.692 6.692 0 0 1-.468-.313l-1.813.75a.933.933 0 0 1-.583.021.774.774 0 0 1-.458-.354L2 12.833a.783.783 0 0 1-.104-.583.8.8 0 0 1 .312-.5l1.563-1.188a1.992 1.992 0 0 1-.021-.281v-.562c0-.09.007-.184.02-.282L2.209 8.25a.8.8 0 0 1-.312-.5A.783.783 0 0 1 2 7.167l1.542-2.688a.656.656 0 0 1 .447-.365c.201-.049.4-.038.594.032l1.813.75c.152-.111.312-.215.479-.313.167-.097.333-.18.5-.25l.25-1.937a.83.83 0 0 1 .27-.521.779.779 0 0 1 .542-.208h3.125c.209 0 .39.07.542.208a.83.83 0 0 1 .27.52l.25 1.938c.181.07.352.153.512.25.16.098.316.202.468.313l1.813-.75A.933.933 0 0 1 16 4.125a.774.774 0 0 1 .458.354L18 7.167c.111.18.146.375.104.583a.8.8 0 0 1-.313.5L16.23 9.437c.014.098.02.192.02.282v.562c0 .09-.013.184-.04.281l1.562 1.188a.8.8 0 0 1 .312.5.782.782 0 0 1-.104.583L16.437 15.5a.82.82 0 0 1-.469.365.908.908 0 0 1-.593-.01l-1.771-.75a5.698 5.698 0 0 1-.48.312c-.166.097-.333.18-.5.25l-.25 1.937a.83.83 0 0 1-.27.521.778.778 0 0 1-.542.208Zm-1.52-5.416a2.81 2.81 0 0 0 2.062-.854A2.81 2.81 0 0 0 12.958 10a2.81 2.81 0 0 0-.854-2.063 2.81 2.81 0 0 0-2.063-.854c-.819 0-1.51.285-2.073.854A2.824 2.824 0 0 0 7.125 10c0 .806.281 1.493.843 2.063.562.569 1.254.854 2.073.854Zm0-1.667c-.348 0-.643-.122-.886-.365A1.202 1.202 0 0 1 8.792 10c0-.347.121-.643.365-.886.243-.243.538-.365.884-.364.348 0 .643.122.886.365.244.243.365.538.364.885 0 .347-.121.643-.364.886a1.202 1.202 0 0 1-.886.364Zm-.875 5.417h1.645l.292-2.209c.43-.11.83-.274 1.198-.49a4.98 4.98 0 0 0 1.01-.78l2.063.854.812-1.417-1.791-1.354c.07-.195.118-.4.145-.614a5.116 5.116 0 0 0 0-1.313 2.949 2.949 0 0 0-.145-.615l1.791-1.354-.812-1.417-2.063.875a4.623 4.623 0 0 0-1.01-.801 4.692 4.692 0 0 0-1.198-.49l-.27-2.209H9.186l-.291 2.209c-.43.11-.83.274-1.198.49a5.033 5.033 0 0 0-1.01.78l-2.063-.854-.813 1.417 1.792 1.333c-.07.209-.118.417-.146.625a5.05 5.05 0 0 0 0 1.313c.028.208.077.416.146.625l-1.792 1.354.813 1.417 2.062-.875c.306.32.643.587 1.011.802a4.65 4.65 0 0 0 1.198.49l.27 2.208Z",
-        fill: "currentColor"
-      }
-    )
-  }
-);
-const CustomersIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
-      {
-        d: "M9.999 10a3.21 3.21 0 0 1-2.354-.98 3.21 3.21 0 0 1-.98-2.353c0-.917.327-1.702.98-2.355a3.21 3.21 0 0 1 2.354-.979 3.21 3.21 0 0 1 2.354.98 3.21 3.21 0 0 1 .979 2.354 3.21 3.21 0 0 1-.98 2.354A3.21 3.21 0 0 1 10 10Zm5 6.667h-10c-.459 0-.851-.164-1.178-.49A1.602 1.602 0 0 1 3.332 15v-.667c0-.472.122-.906.365-1.302s.566-.698.968-.906c.861-.43 1.736-.754 2.625-.97A11.417 11.417 0 0 1 10 10.834c.916 0 1.82.108 2.708.324.889.215 1.764.538 2.625.968.403.208.726.51.97.907.242.396.364.83.363 1.301V15c0 .458-.163.85-.49 1.177-.326.327-.719.49-1.176.49ZM4.999 15h10v-.667a.816.816 0 0 0-.417-.708 10.844 10.844 0 0 0-2.27-.843 9.652 9.652 0 0 0-4.625 0c-.765.187-1.522.469-2.272.843a.815.815 0 0 0-.302.292.776.776 0 0 0-.114.416V15Zm5-6.667c.458 0 .85-.163 1.177-.49.327-.326.49-.719.49-1.176 0-.459-.164-.851-.49-1.178A1.602 1.602 0 0 0 9.998 5c-.459 0-.851.164-1.178.49-.326.328-.49.72-.489 1.178 0 .458.163.85.49 1.177.327.327.719.49 1.177.49Z",
-        fill: "currentColor"
-      }
-    )
-  }
-);
-const DiscountsIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
-      {
-        d: "M6.249 9.167a2.81 2.81 0 0 1-2.063-.855 2.81 2.81 0 0 1-.854-2.062c0-.806.285-1.493.854-2.063a2.81 2.81 0 0 1 2.063-.854 2.81 2.81 0 0 1 2.062.854c.57.57.854 1.257.854 2.063a2.81 2.81 0 0 1-.854 2.062 2.81 2.81 0 0 1-2.062.855Zm0-1.667c.347 0 .642-.122.886-.365.243-.243.364-.538.364-.885s-.122-.643-.365-.886A1.202 1.202 0 0 0 6.249 5c-.348 0-.643.122-.886.365a1.202 1.202 0 0 0-.364.885c0 .347.121.642.365.886.243.243.538.364.885.364Zm7.5 9.167a2.81 2.81 0 0 1-2.063-.855 2.81 2.81 0 0 1-.854-2.062c0-.806.285-1.493.854-2.063a2.81 2.81 0 0 1 2.063-.854 2.81 2.81 0 0 1 2.062.854c.57.57.854 1.257.854 2.063a2.81 2.81 0 0 1-.854 2.062 2.81 2.81 0 0 1-2.062.855Zm0-1.667c.347 0 .642-.122.885-.365.244-.243.365-.538.365-.885s-.122-.643-.365-.886a1.203 1.203 0 0 0-.885-.364c-.348 0-.643.122-.886.365a1.202 1.202 0 0 0-.364.885c0 .347.121.642.365.886.243.243.538.365.885.364Zm-9.834 1.083a.79.79 0 0 1-.229-.583.79.79 0 0 1 .23-.583l11-11a.79.79 0 0 1 .583-.23.79.79 0 0 1 .583.23.79.79 0 0 1 .23.583.79.79 0 0 1-.23.583l-11 11a.79.79 0 0 1-.583.23.79.79 0 0 1-.584-.23Z",
-        fill: "currentColor"
-      }
-    )
-  }
-);
-const HomeIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
-      {
-        d: "M4.999 15.833h2.5v-4.166c0-.236.08-.434.24-.594.16-.16.357-.24.593-.24h3.333c.237 0 .435.08.595.24.16.16.24.358.239.594v4.166h2.5v-7.5l-5-3.75-5 3.75v7.5Zm-1.667 0v-7.5c0-.263.06-.513.178-.75.118-.236.28-.43.489-.583l5-3.75a1.606 1.606 0 0 1 1-.333c.375 0 .708.11 1 .333l5 3.75a1.645 1.645 0 0 1 .667 1.333v7.5c0 .459-.164.851-.49 1.178-.327.327-.72.49-1.177.49h-3.334a.807.807 0 0 1-.594-.24.803.803 0 0 1-.239-.594V12.5H9.165v4.167c0 .236-.08.434-.24.594a.803.803 0 0 1-.593.24H4.999c-.459 0-.851-.164-1.178-.49a1.602 1.602 0 0 1-.489-1.178Z",
-        fill: "currentColor"
-      }
-    )
-  }
-);
-const MarketplaceIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("g", { clipPath: "url(#a)", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M13.313 3.938a.937.937 0 1 1 1.874 0v1.874h1.876a.937.937 0 1 1 0 1.875h-1.875v1.875a.937.937 0 1 1-1.876 0V7.688h-1.874a.937.937 0 1 1 0-1.875h1.874V3.938Z",
-            fill: "currentColor"
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "path",
-          {
-            d: "M12.188 12.375c0-.104.083-.188.187-.188h4.688c.103 0 .187.084.187.188v4.688a.187.187 0 0 1-.188.187h-4.687a.187.187 0 0 1-.188-.188v-4.687ZM3.75 12.375c0-.104.084-.188.188-.188h4.687c.104 0 .188.084.188.188v4.688a.187.187 0 0 1-.188.187H3.937a.187.187 0 0 1-.187-.188v-4.687ZM3.75 3.938c0-.104.084-.188.188-.188h4.687c.104 0 .188.084.188.188v4.687a.188.188 0 0 1-.188.188H3.937a.188.188 0 0 1-.187-.188V3.937Z",
-            stroke: "currentColor",
-            strokeWidth: "1.5"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("clipPath", { id: "a", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { fill: "#fff", d: "M0 0h20v20H0z" }) }) })
-    ]
-  }
-);
-const ModelingIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { viewBox: "0 0 20 20", fill: "none", xmlns: "http://www.w3.org/2000/svg", children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      d: "M7.5 2.5H4.16667C3.24619 2.5 2.5 3.24619 2.5 4.16667V7.5C2.5 8.42047 3.24619 9.16667 4.16667 9.16667H7.5C8.42047 9.16667 9.16667 8.42047 9.16667 7.5V4.16667C9.16667 3.24619 8.42047 2.5 7.5 2.5Z",
-      stroke: "#7C7E7E",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }
-  ),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      d: "M16.0417 2.5H13.9584C13.3831 2.5 12.9167 2.96637 12.9167 3.54167V5.625C12.9167 6.2003 13.3831 6.66667 13.9584 6.66667H16.0417C16.617 6.66667 17.0834 6.2003 17.0834 5.625V3.54167C17.0834 2.96637 16.617 2.5 16.0417 2.5Z",
-      stroke: "#7C7E7E",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }
-  ),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      d: "M5.83331 9.16663V12.5C5.83331 12.942 6.00891 13.3659 6.32147 13.6785C6.63403 13.991 7.05795 14.1666 7.49998 14.1666H10.8333",
-      stroke: "#7C7E7E",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }
-  ),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      d: "M15.8333 10.8334H12.5C11.5795 10.8334 10.8333 11.5796 10.8333 12.5V15.8334C10.8333 16.7538 11.5795 17.5 12.5 17.5H15.8333C16.7538 17.5 17.5 16.7538 17.5 15.8334V12.5C17.5 11.5796 16.7538 10.8334 15.8333 10.8334Z",
-      stroke: "#7C7E7E",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }
-  ),
-  /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "path",
-    {
-      d: "M15 10.8333V7.5",
-      stroke: "#7C7E7E",
-      strokeWidth: "1.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }
-  )
-] });
-const OrdersIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "path",
-      {
-        d: "M4.167 6.667v9.166h11.666V6.667h-2.5v5.312c0 .32-.132.56-.396.72a.791.791 0 0 1-.812.03L10 11.667l-2.125 1.062a.793.793 0 0 1-.813-.031.785.785 0 0 1-.395-.718V6.667h-2.5Zm0 10.833c-.459 0-.851-.163-1.178-.49a1.602 1.602 0 0 1-.489-1.177V5.437a1.7 1.7 0 0 1 .094-.562 1.64 1.64 0 0 1 .281-.5l1.042-1.27c.152-.195.343-.345.572-.45.23-.104.469-.156.72-.155h9.583c.25 0 .49.052.719.157.23.104.42.253.572.447l1.042 1.271a1.631 1.631 0 0 1 .375 1.063v10.395c0 .459-.163.851-.49 1.178-.327.326-.719.49-1.177.489H4.167ZM4.5 5h11l-.708-.833H5.208L4.5 5Zm3.833 1.667v3.958L10 9.792l1.667.833V6.667H8.333Z",
-        fill: "currentColor"
-      }
-    )
-  }
-);
-const ProductsIcon = () => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-  "svg",
-  {
-    width: "20",
-    height: "20",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg",
-    "data-macaw-ui-candidate": true,
-    children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("g", { clipPath: "url(#a)", fill: "currentColor", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M17.84 9.508 10.48 2.15a1.665 1.665 0 0 0-1.174-.483H3.33c-.917 0-1.667.75-1.667 1.666v5.975c0 .442.175.867.492 1.175l7.358 7.359c.65.65 1.708.65 2.358 0l5.975-5.975c.65-.65.65-1.7-.008-2.359Zm-7.15 7.159L3.33 9.308V3.333h5.976l7.358 7.359-5.975 5.975Z" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M5.414 6.667a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5Z" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("clipPath", { id: "a", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { fill: "#fff", d: "M0 0h20v20H0z" }) }) })
-    ]
-  }
-);
-const productReviewsSection = "/product-reviews/";
-const productReviewListPath = productReviewsSection;
-const productReviewPublishedPath = urlJoin(
-  productReviewsSection,
-  "published"
-);
-const productReviewListUrl = (params) => productReviewListPath + "";
-const productReviewPublishedUrl = (params) => productReviewPublishedPath + "";
-const FOCUSABLE_ELEMENTS = ["input", "textarea", "select", '[contenteditable="true"]'].join(", ");
-const SearchShortcut = () => {
-  const navigate = useNavigator();
-  const location2 = useLocation();
-  const focusActive = reactExports.useRef(false);
-  reactExports.useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key !== "/") return;
-      if (location2.pathname.includes("/search")) return;
-      if (focusActive.current) return;
-      event.preventDefault();
-      navigate("/search");
-    };
-    const handleFocusIn = (e) => {
-      if (e.target instanceof HTMLElement && e.target.matches(FOCUSABLE_ELEMENTS)) {
-        focusActive.current = true;
-      }
-    };
-    const handleFocusOut = (e) => {
-      if (e.target instanceof HTMLElement && e.target.matches(FOCUSABLE_ELEMENTS)) {
-        focusActive.current = false;
-      }
-    };
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
-    };
-  }, [navigate, focusActive.current]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    J,
-    {
-      borderColor: "default1",
-      borderStyle: "solid",
-      borderWidth: 1,
-      paddingX: 1.5,
-      borderRadius: 2,
-      fontWeight: "medium",
-      fontSize: 2,
-      textAlign: "center",
-      boxShadow: "defaultFocused",
-      children: "/"
-    }
-  );
-};
-const navigationSection = "/structures";
-const structuresListPath = navigationSection;
-var MenuListUrlSortField = /* @__PURE__ */ ((MenuListUrlSortField2) => {
-  MenuListUrlSortField2["name"] = "name";
-  MenuListUrlSortField2["items"] = "items";
-  return MenuListUrlSortField2;
-})(MenuListUrlSortField || {});
-const menuListUrl = (params) => structuresListPath + "?" + stringifyQs(params);
-const menuPath = (id) => urlJoin(navigationSection, id);
-const menuUrl = (id, params) => menuPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
-const mapToExtensionsItems = (extensions, header) => {
-  const items = extensions.map(({ label, id, app, url, permissions, open: open2 }) => ({
-    id: `extension-${id}`,
-    label,
-    url: ExtensionsUrls.resolveDashboardUrlFromAppCompleteUrl(url, app.appUrl, app.id),
-    permissions,
-    onClick: open2,
-    type: "item"
-  }));
-  if (items.length) {
-    items.unshift(header);
-  }
-  return items;
-};
-function isMenuActive(location2, menuItem) {
-  const menuUrlsToCheck = [...menuItem.matchUrls || [], menuItem.url].filter(Boolean).map((item) => item.split("?")[0]);
-  if (menuUrlsToCheck.length === 0) {
-    return false;
-  }
-  const activeUrl = getPureUrl(location2.split("?")[0]);
-  if (isMenuItemExtension(menuItem)) {
-    return false;
-  }
-  if (activeUrl === orderDraftListUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === orderListUrl().split("?")[0])) {
-    return false;
-  }
-  if (activeUrl === productReviewPublishedUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === productReviewListUrl().split("?")[0])) {
-    return false;
-  }
-  if (activeUrl === productReviewListUrl().split("?")[0] && menuUrlsToCheck.some((url) => url === productReviewPublishedUrl().split("?")[0])) {
-    return false;
-  }
-  return menuUrlsToCheck.some((menuItemUrl) => {
-    return !!matchPath(activeUrl, {
-      exact: menuItemUrl === "/",
-      path: menuItemUrl
-    });
-  });
-}
-const getPureUrl = (url) => {
-  if (url.includes("/dashboard")) {
-    return url.split("/dashboard")[1];
-  }
-  return url;
-};
-const isMenuItemExtension = (menuItem) => menuItem.id.startsWith("extension-");
-const getMenuItemExtension = (extensions, id) => {
-  const extensionsList = Object.values(extensions).reduce(
-    (list, extensions2) => list.concat(extensions2),
-    []
-  );
-  const extension = extensionsList.find((extension2) => id === `extension-${extension2.id}`);
-  return extension;
-};
-function useMenuStructure() {
-  const { handleAppsListItemClick, hasNewFailedAttempts } = useAppsAlert();
-  const extensions = useExtensions(extensionMountPoints.NAVIGATION_SIDEBAR);
-  const intl = useIntl();
-  const { user } = useUser();
-  const appExtensionsHeaderItem = {
-    id: "extensions",
-    label: intl.formatMessage(sectionNames.appExtensions),
-    type: "divider",
-    paddingY: 1.5
-  };
-  const getExtensionsSection = () => ({
-    icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(MarketplaceIcon, {})),
-    label: intl.formatMessage(sectionNames.extensions),
-    permissions: [],
-    id: "installed-extensions",
-    url: ExtensionsPaths.installedExtensions,
-    type: "itemGroup",
-    endAdornment: /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarAppAlert, { hasNewFailedAttempts }),
-    onClick: () => handleAppsListItemClick((/* @__PURE__ */ new Date()).toISOString()),
-    children: [
-      {
-        label: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", gap: 3, children: [
-          intl.formatMessage(sectionNames.installedExtensions),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(SidebarAppAlert, { hasNewFailedAttempts, small: true })
-        ] }),
-        id: "installed-extensions",
-        url: ExtensionsPaths.installedExtensions,
-        matchUrls: [
-          ExtensionsPaths.installedExtensions,
-          extensionsCustomSection,
-          extensionsAppSection,
-          extensionsPluginSection
-        ],
-        permissions: [],
-        type: "item"
-      },
-      {
-        label: intl.formatMessage(sectionNames.exploreExtensions),
-        id: "explore-extensions",
-        url: ExtensionsPaths.exploreExtensions,
-        permissions: [],
-        type: "item"
-      }
-    ]
-  });
-  const menuItems = [
-    {
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(HomeIcon, {})),
-      label: intl.formatMessage(sectionNames.home),
-      id: "home",
-      url: "/",
-      type: "item"
-    },
-    {
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(cp, {})),
-      label: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", gap: 2, children: [
-        intl.formatMessage(sectionNames.search),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(SearchShortcut, {})
-      ] }),
-      id: "search",
-      url: "/search",
-      permissions: [
-        PermissionEnum.MANAGE_PRODUCTS,
-        PermissionEnum.MANAGE_PAGES,
-        PermissionEnum.MANAGE_PAGE_TYPES_AND_ATTRIBUTES,
-        PermissionEnum.MANAGE_ORDERS
-      ],
-      type: "item"
-    },
-    {
-      children: [
-        {
-          label: intl.formatMessage(sectionNames.products),
-          id: "products",
-          url: productListUrl(),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.categories),
-          id: "categories",
-          url: categoryListUrl(),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.collections),
-          id: "collections",
-          url: collectionListUrl(),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.giftCards),
-          id: "giftCards",
-          url: giftCardListUrl(),
-          permissions: [PermissionEnum.MANAGE_GIFT_CARD],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage({
-            id: "productReviews.title",
-            defaultMessage: "Отзывы на модерацию"
-          }),
-          id: "productReviews",
-          url: productReviewListUrl(),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage({
-            id: "productReviews.published.title",
-            defaultMessage: "Опубликованные отзывы"
-          }),
-          id: "productReviewsPublished",
-          url: productReviewPublishedUrl(),
-          permissions: [PermissionEnum.MANAGE_PRODUCTS],
-          type: "item"
-        },
-        ...mapToExtensionsItems(extensions.NAVIGATION_CATALOG, appExtensionsHeaderItem)
-      ],
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(ProductsIcon, {})),
-      url: productListUrl(),
-      label: intl.formatMessage(sectionNames.catalog),
-      permissions: [PermissionEnum.MANAGE_GIFT_CARD, PermissionEnum.MANAGE_PRODUCTS],
-      id: "products",
-      type: "itemGroup"
-    },
-    {
-      children: [
-        {
-          label: intl.formatMessage(sectionNames.orders),
-          permissions: [PermissionEnum.MANAGE_ORDERS],
-          id: "orders",
-          url: orderListUrl(),
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.draftOrders),
-          permissions: [PermissionEnum.MANAGE_ORDERS],
-          id: "order-drafts",
-          url: orderDraftListUrl(),
-          type: "item"
-        },
-        ...mapToExtensionsItems(extensions.NAVIGATION_ORDERS, appExtensionsHeaderItem)
-      ],
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(OrdersIcon, {})),
-      label: intl.formatMessage(sectionNames.fulfillment),
-      permissions: [PermissionEnum.MANAGE_ORDERS],
-      id: "orders",
-      url: orderListUrl(),
-      type: "itemGroup"
-    },
-    {
-      children: !isEmpty(extensions.NAVIGATION_CUSTOMERS) ? [
-        {
-          label: intl.formatMessage(sectionNames.customers),
-          permissions: [PermissionEnum.MANAGE_USERS],
-          id: "customers",
-          url: customerListUrl(),
-          type: "item"
-        },
-        ...mapToExtensionsItems(extensions.NAVIGATION_CUSTOMERS, appExtensionsHeaderItem)
-      ] : void 0,
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(CustomersIcon, {})),
-      label: intl.formatMessage(sectionNames.customers),
-      permissions: [PermissionEnum.MANAGE_USERS],
-      id: "customers",
-      url: customerListUrl(),
-      type: !isEmpty(extensions.NAVIGATION_CUSTOMERS) ? "itemGroup" : "item"
-    },
-    {
-      children: [
-        {
-          label: intl.formatMessage(sectionNames.promotions),
-          id: "promotions",
-          url: saleListUrl(),
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.vouchers),
-          id: "vouchers",
-          url: voucherListUrl(),
-          type: "item"
-        },
-        ...mapToExtensionsItems(extensions.NAVIGATION_DISCOUNTS, appExtensionsHeaderItem)
-      ],
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(DiscountsIcon, {})),
-      label: intl.formatMessage(commonMessages.discounts),
-      permissions: [PermissionEnum.MANAGE_DISCOUNTS],
-      url: saleListUrl(),
-      id: "discounts",
-      type: "itemGroup"
-    },
-    {
-      children: [
-        {
-          label: intl.formatMessage(sectionNames.models),
-          id: "models",
-          url: pageListPath,
-          permissions: [PermissionEnum.MANAGE_PAGES],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.modelTypes),
-          id: "model-types",
-          url: pageTypeListUrl(),
-          permissions: [
-            PermissionEnum.MANAGE_PAGES,
-            PermissionEnum.MANAGE_PAGE_TYPES_AND_ATTRIBUTES
-          ],
-          type: "item"
-        },
-        {
-          label: intl.formatMessage(sectionNames.structures),
-          id: "structures",
-          url: menuListUrl(),
-          permissions: [PermissionEnum.MANAGE_MENUS],
-          type: "item"
-        },
-        ...mapToExtensionsItems(extensions.NAVIGATION_PAGES, appExtensionsHeaderItem)
-      ],
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(ModelingIcon, {})),
-      label: intl.formatMessage(sectionNames.modeling),
-      permissions: [PermissionEnum.MANAGE_PAGES, PermissionEnum.MANAGE_MENUS],
-      id: "modeling",
-      url: pageListPath,
-      endAdornment: /* @__PURE__ */ jsxRuntimeExports.jsx(Ripple, { model: ripplePagesAreModels }),
-      type: "itemGroup"
-    },
-    // {
-    //   children: !isEmpty(extensions.NAVIGATION_TRANSLATIONS)
-    //     ? [...mapToExtensionsItems(extensions.NAVIGATION_TRANSLATIONS, appExtensionsHeaderItem)]
-    //     : undefined,
-    //   icon: renderIcon(<TranslationsIcon />),
-    //   label: intl.formatMessage(sectionNames.translations),
-    //   permissions: [PermissionEnum.MANAGE_TRANSLATIONS],
-    //   id: "translations",
-    //   url: languageListUrl,
-    //   type: !isEmpty(extensions.NAVIGATION_TRANSLATIONS) ? "itemGroup" : "item",
-    // },
-    getExtensionsSection(),
-    {
-      icon: renderIcon(/* @__PURE__ */ jsxRuntimeExports.jsx(ConfigurationIcon, {})),
-      label: intl.formatMessage(sectionNames.configuration),
-      permissions: getConfigMenuItemsPermissions(intl),
-      id: "configure",
-      url: configurationMenuUrl,
-      type: "item"
-    }
-  ];
-  const isMenuItemPermitted = (menuItem) => {
-    var _a;
-    const userPermissions = ((user == null ? void 0 : user.userPermissions) || []).map((permission) => permission.code);
-    if (!(menuItem == null ? void 0 : menuItem.permissions) || ((_a = menuItem == null ? void 0 : menuItem.permissions) == null ? void 0 : _a.length) < 1) {
-      return true;
-    }
-    return menuItem.permissions.some((permission) => userPermissions.includes(permission));
-  };
-  const getFilteredMenuItems = (menuItems2) => menuItems2.filter(isMenuItemPermitted);
-  return menuItems.reduce((resultItems, menuItem) => {
-    if (!isMenuItemPermitted(menuItem)) {
-      return resultItems;
-    }
-    const { children } = menuItem;
-    const filteredChildren = children ? getFilteredMenuItems(children) : void 0;
-    return [...resultItems, { ...menuItem, children: filteredChildren }];
-  }, []);
-}
-function renderIcon(icon) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(J, { color: "default2", __width: 20, __height: 20, children: icon });
-}
-const Divider$1 = ({ menuItem }) => /* @__PURE__ */ jsxRuntimeExports.jsx(Gs.Divider, { paddingY: menuItem.paddingY ?? 1.5, paddingX: 1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 1, color: "default2", children: menuItem.label }) });
-const ItemGroup = ({ menuItem }) => {
-  var _a;
-  const hasSubmenuActive = menuItem == null ? void 0 : menuItem.children.some((item) => isMenuActive(location.pathname, item));
-  const isActive2 = isMenuActive(location.pathname, menuItem) && !hasSubmenuActive;
-  const isExpanded = isActive2 || hasSubmenuActive;
-  const handleMenuGroupClick = () => {
-    if (menuItem.onClick) {
-      menuItem.onClick();
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Gs.ItemGroup, { defaultExpanded: isExpanded, "data-test-id": `menu-list-item`, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Gs.ItemGroup.Trigger,
-      {
-        paddingX: 2,
-        paddingRight: 1,
-        borderRadius: 3,
-        size: "small",
-        active: isActive2,
-        justifyContent: "space-between",
-        "data-test-id": `menu-item-label-${menuItem.id}`,
-        position: "relative",
-        onClick: handleMenuGroupClick,
-        className: "sidebar-item-group-trigger",
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Link$1,
-          {
-            replace: isActive2,
-            to: (menuItem == null ? void 0 : menuItem.url) ?? "",
-            className: ae({
-              width: "100%",
-              display: "block"
-            }),
-            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", gap: 3, paddingY: 1.5, borderRadius: 3, children: [
-              menuItem.icon,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, fontWeight: "medium", children: menuItem.label }),
-              menuItem.endAdornment && /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: menuItem.endAdornment })
-            ] })
-          }
-        )
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Gs.ItemGroup.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      J,
-      {
-        borderLeftWidth: 1,
-        borderLeftStyle: "solid",
-        borderColor: "default1",
-        paddingLeft: 4,
-        marginLeft: 4,
-        display: "flex",
-        flexDirection: "column",
-        marginBottom: 2,
-        marginTop: 1,
-        gap: "px",
-        children: (_a = menuItem.children) == null ? void 0 : _a.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(MenuItem, { menuItem: child }, child.id))
-      }
-    ) })
-  ] });
-};
 const SingleItem = ({ menuItem }) => {
   const extensions = useExtensions(extensionMountPoints.NAVIGATION_SIDEBAR);
   const active = isMenuActive(location.pathname, menuItem);
@@ -25690,7 +23722,7 @@ const MenuItem = (props) => {
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Divider$1, { menuItem });
   }
 };
-const Menu = () => {
+const Menu$1 = () => {
   const menuStructure = useMenuStructure();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     J,
@@ -25845,7 +23877,7 @@ const ToggleButton = ({ isEnabled, flagSlug }) => {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { variant: "secondary", size: "small", onClick: handleToggleClick, children: isEnabled ? "Disable" : "Enable" });
 };
-const Content$1 = ({ flagName, flagSlug, component, isEnabled }) => {
+const Content$2 = ({ flagName, flagSlug, component, isEnabled }) => {
   const TabComponent = component;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     J,
@@ -25965,7 +23997,7 @@ const FeatureFlagsModal = ({ open: open2, onChange }) => {
         /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "flex", backgroundColor: "default1", height: "100%", children: hasNoFlags ? /* @__PURE__ */ jsxRuntimeExports.jsx(NoFlags, {}) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(FlagList, { selectedName: selectedFlag.name, onItemClick: handleTabClick }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Content$1,
+            Content$2,
             {
               flagName: selectedFlag.displayName,
               flagSlug: selectedFlag.name,
@@ -26150,7 +24182,7 @@ const SidebarContent = () => {
       __gridTemplateRows: "auto 1fr auto",
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(MountingPoint, {}),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Menu, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Menu$1, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { children: [
           isAuthenticatedViaCloud && /* @__PURE__ */ jsxRuntimeExports.jsx(J, { paddingX: 5, paddingBottom: 2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(EnvironmentLink, {}) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(UserInfo, {})
@@ -26260,7 +24292,12 @@ const Sidebar = () => {
     ] }) })
   ] });
 };
-const useStyles$2G = f(
+const topBarHeight = "77px";
+const topBarHeightSubtitle = "120px";
+const appLoaderHeight = 2;
+const savebarHeight = "64px";
+const borderHeight = "1px";
+const useStyles$2I = f(
   (theme) => ({
     appAction: {
       [theme.breakpoints.down("sm")]: {
@@ -26342,7 +24379,7 @@ const useStyles$2G = f(
   { name: "AppLayout" }
 );
 const AppLayout = ({ children }) => {
-  const classes2 = useStyles$2G();
+  const classes2 = useStyles$2I();
   const { setAnchor } = useSavebarRef();
   const [appState] = useAppState();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(SidebarProvider, { children: [
@@ -26387,7 +24424,272 @@ const AppLayout = ({ children }) => {
     ] })
   ] });
 };
-const useStyles$2F = f(
+const Menu = ({ items, dataTestId }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Ev, { "data-test-id": dataTestId, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Trigger, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { icon: /* @__PURE__ */ jsxRuntimeExports.jsx(P2, {}), variant: "secondary", "data-test-id": "show-more-button" }) }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Content, { align: "end", children: /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Gs, { padding: 2, borderRadius: 4, boxShadow: "defaultOverlay", backgroundColor: "default1", children: items.map((item) => /* @__PURE__ */ jsxRuntimeExports.jsx(Ev.Item, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    Gs.Item,
+    {
+      borderRadius: 4,
+      paddingX: 1.5,
+      paddingY: 2,
+      onClick: item.onSelect,
+      "data-test-id": item.testId,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: item.label })
+    }
+  ) }, item.label)) }) }) })
+] });
+const AppChannelContext = reactExports.createContext({
+  availableChannels: [],
+  channel: void 0,
+  isPickerActive: false,
+  refreshChannels: () => void 0,
+  setChannel: () => void 0,
+  setPickerActive: () => void 0
+});
+const isValidChannel = (channelId, channelList) => {
+  if (!channelId) {
+    return false;
+  }
+  return channelList == null ? void 0 : channelList.some(getById(channelId));
+};
+const AppChannelProvider = ({ children }) => {
+  const { setChannel } = useSaleorConfig();
+  const { authenticated, user } = useUser();
+  const [selectedChannel, setSelectedChannel] = useLocalStorage("channel", "");
+  const { data: channelData, refetch } = useBaseChannelsQuery({
+    skip: !authenticated || !user
+  });
+  const [isPickerActive, setPickerActive] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const channels = (user == null ? void 0 : user.accessibleChannels) ?? [];
+    const isValid = isValidChannel(selectedChannel, channels);
+    if (!isValid && (channels == null ? void 0 : channels.length) > 0) {
+      setSelectedChannel(channels[0].id);
+    }
+    if (!isValid && selectedChannel !== "") {
+      setSelectedChannel("");
+    }
+  }, [selectedChannel, setSelectedChannel, user]);
+  reactExports.useEffect(() => {
+    setChannel(selectedChannel);
+  }, [selectedChannel]);
+  const availableChannels = (channelData == null ? void 0 : channelData.channels) || [];
+  const channel = channelData && (availableChannels.find(getById(selectedChannel)) || null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    AppChannelContext.Provider,
+    {
+      value: {
+        availableChannels,
+        channel,
+        isPickerActive,
+        refreshChannels: refetch,
+        setChannel: setSelectedChannel,
+        setPickerActive
+      },
+      children
+    }
+  );
+};
+AppChannelProvider.displayName = "AppChannelProvider";
+function useAppChannel(enablePicker = true) {
+  const { setPickerActive, ...data } = reactExports.useContext(AppChannelContext);
+  reactExports.useEffect(() => {
+    if (enablePicker) {
+      setPickerActive(true);
+    }
+    return () => setPickerActive(false);
+  }, [enablePicker]);
+  return data;
+}
+const Select = ({
+  onChange,
+  ...props
+}) => {
+  const handleOnChange = (value) => {
+    onChange({
+      target: {
+        value: typeof value === "string" ? value : value == null ? void 0 : value.value,
+        name: props.name ?? ""
+      }
+    });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Mv, { ...props, onChange: handleOnChange });
+};
+const AppChannelSelect = ({
+  channels,
+  onChannelSelect,
+  selectedChannelId
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(J, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    Select,
+    {
+      __width: 130,
+      "data-test-id": "app-channel-select",
+      size: "large",
+      onChange: ({ target }) => onChannelSelect(target.value),
+      value: selectedChannelId,
+      options: mapNodeToChoice(channels)
+    }
+  ) });
+};
+AppChannelSelect.displayName = "AppChannelSelect";
+const TopNavLink = ({ to, variant = "secondary" }) => /* @__PURE__ */ jsxRuntimeExports.jsx(Link$1, { to, className: ae({ marginRight: 2 }), children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+  oo,
+  {
+    icon: /* @__PURE__ */ jsxRuntimeExports.jsx(C2, {}),
+    variant,
+    size: "large",
+    "data-test-id": "app-header-back-button"
+  }
+) });
+const TopNavWrapper = ({
+  children,
+  withoutBorder,
+  hasSubtitle,
+  ...props
+}) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  J,
+  {
+    display: hasSubtitle ? "block" : "flex",
+    alignItems: "center",
+    paddingX: 6,
+    paddingY: 5,
+    borderBottomWidth: withoutBorder ? 0 : 1,
+    borderBottomStyle: "solid",
+    borderColor: "default1",
+    position: "relative",
+    "data-test-id": "page-header",
+    __height: hasSubtitle ? topBarHeightSubtitle : topBarHeight,
+    gridColumn: "8",
+    gridRowStart: "1",
+    backgroundColor: "default1",
+    ...props,
+    children
+  }
+);
+const Root$2 = ({
+  title,
+  subtitle,
+  href,
+  withoutBorder = false,
+  isAlignToRight = true,
+  children,
+  ...wrapperProps
+}) => {
+  var _a;
+  const { channel, isPickerActive, setChannel } = useAppChannel(false);
+  const user = useUser();
+  const channels = ((_a = user == null ? void 0 : user.user) == null ? void 0 : _a.accessibleChannels) ?? [];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(TopNavWrapper, { withoutBorder, hasSubtitle: !!subtitle, ...wrapperProps, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", alignItems: "center", width: "100%", children: [
+      href && /* @__PURE__ */ jsxRuntimeExports.jsx(TopNavLink, { to: href }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(J, { __flex: isAlignToRight ? 1 : 0, __minWidth: "max-content", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 6, children: title }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", flexWrap: "nowrap", height: "100%", __flex: isAlignToRight ? "initial" : 1, children: [
+        isPickerActive && channels.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          AppChannelSelect,
+          {
+            channels,
+            selectedChannelId: channel == null ? void 0 : channel.id,
+            onChannelSelect: setChannel
+          }
+        ),
+        children
+      ] })
+    ] }),
+    subtitle ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ContextualLine,
+      {
+        gridColumn: "8",
+        marginLeft: href ? 12 : 0,
+        __marginTop: href ? "-0.6rem" : 0,
+        children: subtitle
+      }
+    ) : null
+  ] });
+};
+const TopNav = Object.assign(Root$2, {
+  Menu
+});
+const Content$1 = ({
+  children,
+  hideScrollbar = true,
+  ...rest
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    J,
+    {
+      height: "100%",
+      overflowY: "auto",
+      className: hideScrollbar ? "hide-scrollbar" : "",
+      gridColumn: "8",
+      gridRow: { mobile: "6", tablet: "12", desktop: "12" },
+      ...rest,
+      children
+    }
+  );
+};
+const RightSidebar = ({ children, ...props }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  J,
+  {
+    borderLeftStyle: "solid",
+    borderColor: "default1",
+    height: "100%",
+    overflowY: "auto",
+    className: "hide-scrollbar",
+    borderLeftWidth: 1,
+    gridColumn: "8",
+    gridRow: { mobile: "6", tablet: "full", desktop: "full" },
+    paddingBottom: 6,
+    ...props,
+    children
+  }
+);
+const contentWithSidebarHeight = `calc(100vh - ${savebarHeight} - ${borderHeight} * 2)`;
+const contentWithoutSidebarHeight = `calc(100vh - ${borderHeight}`;
+const RootLayout = ({
+  children,
+  gridTemplateColumns = 12,
+  withSavebar = true,
+  testId,
+  ...props
+}) => {
+  const gridTemplateColumnsValue = reactExports.useMemo(() => {
+    if (gridTemplateColumns instanceof Object) {
+      return {
+        mobile: gridTemplateColumns.mobile ?? 1,
+        tablet: gridTemplateColumns.tablet,
+        ...gridTemplateColumns
+      };
+    }
+    return {
+      mobile: 1,
+      tablet: gridTemplateColumns,
+      desktop: gridTemplateColumns
+    };
+  }, [gridTemplateColumns]);
+  const heightValue = reactExports.useMemo(() => {
+    return withSavebar ? contentWithSidebarHeight : contentWithoutSidebarHeight;
+  }, [withSavebar]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    J,
+    {
+      className: "mobile-full-height",
+      display: "grid",
+      gridTemplateColumns: gridTemplateColumnsValue,
+      __gridTemplateRows: "auto 1fr",
+      __height: heightValue,
+      "data-test-id": testId,
+      ...props,
+      children
+    }
+  );
+};
+const DetailPageLayout = Object.assign(RootLayout, {
+  Content: Content$1,
+  RightSidebar
+});
+const ListPageLayout = ({ children }) => /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "grid", __gridTemplateColumns: "1fr", __gridTemplateRows: "auto 1fr", height: "100%", children });
+const useStyles$2H = f(
   (theme) => ({
     container: ({ spacing }) => ({
       height: theme.spacing(spacing)
@@ -26396,7 +24698,7 @@ const useStyles$2F = f(
   { name: "VerticalSpacer" }
 );
 const VerticalSpacer = ({ spacing = 1 }) => {
-  const classes2 = useStyles$2F({ spacing });
+  const classes2 = useStyles$2H({ spacing });
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.container });
 };
 const PageSectionHeader = (props) => {
@@ -26557,6 +24859,570 @@ const Savebar = Object.assign(SavebarRoot, {
   ConfirmButton: ConfirmButton$1,
   CancelButton
 });
+const AttributesIcons = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M29 3C29.5523 3 30 3.44772 30 4V8C30 8.55229 29.5523 9 29 9C28.4477 9 28 8.55229 28 8V7L12 7V8C12 8.55229 11.5523 9 11 9C10.4477 9 10 8.55229 10 8V4C10 3.44772 10.4477 3 11 3C11.5523 3 12 3.44772 12 4V5L28 5V4C28 3.44772 28.4477 3 29 3ZM2 12C2 11.4477 2.44772 11 3 11H7C7.55228 11 8 11.4477 8 12C8 12.5523 7.55228 13 7 13H6V27H7C7.55228 27 8 27.4477 8 28C8 28.5523 7.55228 29 7 29H3C2.44772 29 2 28.5523 2 28C2 27.4477 2.44772 27 3 27H4V13H3C2.44772 13 2 12.5523 2 12ZM14.2997 11C13.1142 11 12.0398 11.6982 11.5583 12.7816L10.0862 16.0939C10.0294 16.2217 10 16.3601 10 16.5V26C10 27.6569 11.3431 29 13 29H27C28.6569 29 30 27.6569 30 26V16.5C30 16.3601 29.9706 16.2217 29.9138 16.0939L28.4417 12.7816C27.9602 11.6982 26.8858 11 25.7003 11H14.2997ZM13.3859 13.5939C13.5464 13.2327 13.9046 13 14.2997 13H25.7003C26.0954 13 26.4536 13.2327 26.6141 13.5939L27.4612 15.5H12.5388L13.3859 13.5939ZM23.5 17.5H28V26C28 26.5523 27.5523 27 27 27H13C12.4477 27 12 26.5523 12 26V17.5H16.5V23C16.5 23.3603 16.6938 23.6927 17.0073 23.8702C17.3208 24.0477 17.7056 24.0429 18.0145 23.8575L20 22.6662L21.9855 23.8575C22.2944 24.0429 22.6792 24.0477 22.9927 23.8702C23.3062 23.6927 23.5 23.3603 23.5 23V17.5ZM18.5 21.2338V17.5H21.5V21.2338L20.5145 20.6425C20.1978 20.4525 19.8022 20.4525 19.4855 20.6425L18.5 21.2338Z",
+      fill: "currentColor"
+    }
+  )
+);
+function Attributes$1(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AttributesIcons, { ...props, viewBox: "0 0 32 32" });
+}
+const ChannelsIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M22.2066 26.2723C20.3957 27.3688 18.2716 28 16 28C13.7284 28 11.6043 27.3688 9.7934 26.2723C9.9274 25.8726 10 25.4448 10 25C10 22.7909 8.20914 21 6 21C5.7019 21 5.41143 21.0326 5.13194 21.0945C4.4058 19.5481 4 17.8214 4 16C4 14.1786 4.4058 12.4519 5.13194 10.9055C5.41143 10.9674 5.7019 11 6 11C8.20914 11 10 9.20914 10 7C10 6.5552 9.9274 6.12736 9.7934 5.72768C11.6043 4.63116 13.7284 4 16 4C18.2716 4 20.3957 4.63116 22.2066 5.72768C22.0726 6.12736 22 6.5552 22 7C22 9.20914 23.7909 11 26 11C26.2981 11 26.5886 10.9674 26.8681 10.9055C27.5942 12.4519 28 14.1786 28 16C28 17.8214 27.5942 19.5481 26.8681 21.0945C26.5886 21.0326 26.2981 21 26 21C23.7909 21 22 22.7909 22 25C22 25.4448 22.0726 25.8726 22.2066 26.2723ZM23.2982 27.9496C21.173 29.2503 18.6741 30 16 30C13.3259 30 10.827 29.2503 8.70185 27.9496C7.9901 28.6019 7.04154 29 6 29C3.79086 29 2 27.2091 2 25C2 23.8076 2.52171 22.7371 3.34931 22.0043C2.48415 20.1847 2 18.1489 2 16C2 13.8511 2.48415 11.8153 3.34931 9.9957C2.52171 9.26286 2 8.19236 2 7C2 4.79086 3.79086 3 6 3C7.04154 3 7.99011 3.39808 8.70185 4.05039C10.827 2.7497 13.3259 2 16 2C18.6741 2 21.173 2.74971 23.2982 4.05039C24.0099 3.39808 24.9585 3 26 3C28.2091 3 30 4.79086 30 7C30 8.19236 29.4783 9.26286 28.6507 9.99569C29.5159 11.8153 30 13.8511 30 16C30 18.1489 29.5159 20.1847 28.6507 22.0043C29.4783 22.7371 30 23.8076 30 25C30 27.2091 28.2091 29 26 29C24.9585 29 24.0099 28.6019 23.2982 27.9496ZM6 9C7.10457 9 8 8.10457 8 7C8 5.89543 7.10457 5 6 5C4.89543 5 4 5.89543 4 7C4 8.10457 4.89543 9 6 9ZM26 9C27.1046 9 28 8.10457 28 7C28 5.89543 27.1046 5 26 5C24.8954 5 24 5.89543 24 7C24 8.10457 24.8954 9 26 9ZM28 25C28 26.1046 27.1046 27 26 27C24.8954 27 24 26.1046 24 25C24 23.8954 24.8954 23 26 23C27.1046 23 28 23.8954 28 25ZM6 27C7.10457 27 8 26.1046 8 25C8 23.8954 7.10457 23 6 23C4.89543 23 4 23.8954 4 25C4 26.1046 4.89543 27 6 27ZM17.6882 15C17.5151 13.5884 16.9729 12.0742 16 10.1898C15.0271 12.0742 14.4849 13.5884 14.3118 15H17.6882ZM18.3698 10.4862C20.2107 11.2784 21.5757 12.9657 21.917 15H19.7003C19.556 13.5436 19.1004 12.0837 18.3698 10.4862ZM19.7003 17H21.917C21.5757 19.0344 20.2107 20.7216 18.3697 21.5139C19.1003 19.9163 19.556 18.4564 19.7003 17ZM16 21.81C16.9729 19.9257 17.515 18.4115 17.6882 17H14.3118C14.485 18.4115 15.0271 19.9257 16 21.81ZM13.6302 10.4862C12.8996 12.0837 12.444 13.5436 12.2997 15H10.083C10.4243 12.9657 11.7893 11.2784 13.6302 10.4862ZM13.6303 21.5139C12.8997 19.9163 12.444 18.4564 12.2997 17H10.083C10.4243 19.0344 11.7893 20.7216 13.6303 21.5139ZM16 24C20.4183 24 24 20.4183 24 16C24 11.5817 20.4183 8 16 8C11.5817 8 8 11.5817 8 16C8 20.4183 11.5817 24 16 24Z",
+      fill: "currentColor"
+    }
+  )
+);
+function Channels(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ChannelsIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const PermissionGroupsIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M16 4C13.7909 4 12 5.79086 12 8V11.9355C13.205 11.3367 14.5632 11 16 11C17.4368 11 18.795 11.3367 20 11.9355V8C20 5.79086 18.2091 4 16 4ZM22 13.2917V8C22 4.68629 19.3137 2 16 2C12.6863 2 10 4.68629 10 8V13.2917C8.15875 14.9396 7 17.3345 7 20C7 24.9706 11.0294 29 16 29C20.9706 29 25 24.9706 25 20C25 17.3345 23.8412 14.9396 22 13.2917ZM14 18C14 17.4477 14.4477 17 15 17H17C17.5523 17 18 17.4477 18 18C18 18.5523 17.5523 19 17 19V22C17 22.5523 16.5523 23 16 23C15.4477 23 15 22.5523 15 22V19C14.4477 19 14 18.5523 14 18ZM23 20C23 23.866 19.866 27 16 27C12.134 27 9 23.866 9 20C9 16.134 12.134 13 16 13C19.866 13 23 16.134 23 20Z",
+      fill: "currentColor"
+    }
+  )
+);
+function PermissionGroups(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PermissionGroupsIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const ProductTypesIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M0 6.5V33L20 40L40 33V6.5L20 0L0 6.5ZM2.5 8.69935V31.2263L18.75 36.9138V14.3869L2.5 8.69935ZM21.25 14.3869V36.9138L37.5 31.2263V8.69935L21.25 14.3869ZM34.1436 7.22539L20 2.62872L5.8564 7.22539L20 12.1756L34.1436 7.22539Z",
+      fill: "currentColor"
+    }
+  ) })
+);
+function ProductTypes(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ProductTypesIcon, { ...props, viewBox: "0 0 44 44" });
+}
+const ShippingMethodsIcons = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M12.4476 8.88049C12.5081 8.37806 12.9344 8 13.4405 8H15.8867L15.4413 10.467C15.109 12.3074 16.5233 14 18.3936 14H20.8289C22.2801 14 23.5233 12.9612 23.7812 11.533L24.4191 8H26.7449C27.3446 8 27.8094 8.52414 27.7378 9.11951L26.0526 23.1195C25.9921 23.6219 25.5658 24 25.0598 24H11.7553C11.1556 24 10.6908 23.4759 10.7625 22.8805L12.4476 8.88049ZM17.4095 10.8223L17.9191 8H22.3867L21.813 11.1777C21.727 11.6537 21.3126 12 20.8289 12H18.3936C17.7702 12 17.2987 11.4358 17.4095 10.8223ZM13.4405 6C11.9223 6 10.6434 7.13417 10.462 8.64148L8.7768 22.6415C8.5618 24.4276 9.95629 26 11.7553 26H25.0598C26.5779 26 27.8568 24.8658 28.0383 23.3585L29.7234 9.35852C29.9384 7.57241 28.5439 6 26.7449 6H13.4405ZM3 9.78943C2.44772 9.78943 2 10.2371 2 10.7894C2 11.3417 2.44772 11.7894 3 11.7894H8.57143C9.12371 11.7894 9.57143 11.3417 9.57143 10.7894C9.57143 10.2371 9.12371 9.78943 8.57143 9.78943H3ZM2 15.5264C2 14.9741 2.44772 14.5264 3 14.5264H7.64286C8.19514 14.5264 8.64286 14.9741 8.64286 15.5264C8.64286 16.0787 8.19514 16.5264 7.64286 16.5264H3C2.44772 16.5264 2 16.0787 2 15.5264ZM3 19.2632C2.44772 19.2632 2 19.7109 2 20.2632C2 20.8155 2.44772 21.2632 3 21.2632H6.71429C7.26657 21.2632 7.71429 20.8155 7.71429 20.2632C7.71429 19.7109 7.26657 19.2632 6.71429 19.2632H3Z",
+      fill: "currentColor"
+    }
+  )
+);
+function ShippingMethods(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ShippingMethodsIcons, { ...props, viewBox: "0 0 32 32" });
+}
+const SiteSettingsIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        clipRule: "evenodd",
+        d: "M14.5569 1.99987C14.5633 1.99994 14.5687 2 14.5732 2H17.3059C17.3105 2 17.3159 1.99994 17.3223 1.99987C17.4196 1.9988 17.7281 1.9954 18.0457 2.16599C18.3621 2.33595 18.568 2.60603 18.7172 2.84313C19.0113 3.31075 19.3827 4.15404 19.9745 5.63276C20.0129 5.7286 20.0876 5.80239 20.1755 5.83857C20.2665 5.87602 20.3735 5.87516 20.4702 5.83113C21.7035 5.26978 22.4275 4.97615 22.8699 4.82166C23.3214 4.66397 23.5477 4.62638 23.7607 4.62638C24.1447 4.62638 24.516 4.76407 24.8072 5.01445L24.8573 5.05748L26.8264 7.02071L26.8321 7.0266C26.8354 7.02999 26.8394 7.03403 26.8441 7.03872C26.914 7.10928 27.1285 7.3257 27.2303 7.66631C27.333 8.00963 27.2893 8.34564 27.2265 8.62294C27.1034 9.16609 26.7678 10.0291 26.1382 11.4982C26.0995 11.5884 26.1 11.688 26.1343 11.771C26.17 11.8573 26.2436 11.9299 26.339 11.9651C27.8172 12.5108 28.6684 12.8602 29.1436 13.1493C29.3878 13.2978 29.665 13.5062 29.8374 13.8331C30.0045 14.1502 30.0012 14.4607 30.0001 14.5585C30 14.5652 30 14.5709 30 14.5755V17.3077C30 17.3124 30.0001 17.318 30.0001 17.3245C30.0012 17.4229 30.0046 17.7311 29.8361 18.0485C29.6668 18.3676 29.3963 18.5758 29.1565 18.7273C28.6855 19.0249 27.8367 19.3984 26.3501 19.992C26.2595 20.0281 26.19 20.0987 26.1562 20.1812C26.1215 20.2658 26.1224 20.3671 26.164 20.4577C26.8211 21.8881 27.1744 22.7356 27.3062 23.2749C27.374 23.5522 27.4225 23.8923 27.3174 24.2424C27.2153 24.5829 26.9987 24.8009 26.9297 24.8703C26.925 24.8751 26.921 24.8791 26.9177 24.8825L26.9124 24.8879L24.9915 26.807C24.6928 27.1054 24.2913 27.2783 23.8693 27.2905L23.8405 26.2909V27.2909C23.6183 27.2909 23.3858 27.2317 23.2246 27.1862C23.033 27.1321 22.8055 27.056 22.549 26.9628C22.0343 26.7757 21.3525 26.5011 20.513 26.1445C20.4183 26.1042 20.3147 26.1046 20.2255 26.1414C20.134 26.1791 20.0576 26.2567 20.0203 26.357C19.4731 27.8282 19.124 28.6735 18.838 29.1449C18.6918 29.3856 18.4862 29.662 18.1631 29.8349C17.8454 30.005 17.5345 30.0013 17.4381 30.0001C17.4316 30.0001 17.4261 30 17.4216 30H14.6884C14.6839 30 14.6784 30.0001 14.6719 30.0001C14.5749 30.0012 14.2665 30.0047 13.949 29.8347C13.6321 29.6649 13.4258 29.3948 13.2763 29.1574C12.9817 28.6896 12.6099 27.8457 12.0175 26.366C11.9793 26.2707 11.9052 26.1973 11.818 26.1611C11.727 26.1233 11.6197 26.124 11.5229 26.1681C10.289 26.7303 9.56587 27.0242 9.12494 27.1788C8.67577 27.3363 8.44992 27.3747 8.23624 27.3747C7.84824 27.3747 7.47347 27.2336 7.18179 26.9778L7.13438 26.9362L5.16666 24.972C5.16337 24.9686 5.15942 24.9646 5.15478 24.9599C5.0846 24.8898 4.86835 24.6737 4.76541 24.3321C4.66184 23.9883 4.70551 23.6517 4.76815 23.3746C4.89096 22.8313 5.22649 21.9679 5.85632 20.4988C5.89444 20.4099 5.89387 20.3116 5.86007 20.23C5.82504 20.1454 5.75279 20.074 5.65904 20.0393C4.18074 19.491 3.32977 19.1401 2.85487 18.8502C2.61094 18.7013 2.33422 18.4928 2.16222 18.1663C1.99509 17.849 1.99871 17.5386 1.99985 17.4408C1.99992 17.4341 1.99999 17.4285 1.99999 17.4238V14.6895C1.99999 14.6848 1.99993 14.6791 1.99985 14.6724C1.99874 14.5736 1.99524 14.2642 2.16284 13.9468C2.33284 13.6248 2.60536 13.4163 2.84509 13.2656C3.31517 12.9702 4.16344 12.5995 5.64698 12.0074C5.73702 11.9714 5.80635 11.9013 5.84029 11.8192C5.87534 11.7344 5.87461 11.6326 5.8327 11.5414C5.1727 10.1062 4.81717 9.25205 4.68784 8.70729C4.62117 8.42646 4.57457 8.07733 4.69254 7.71996C4.80574 7.37703 5.03525 7.16207 5.10707 7.0948C5.10944 7.09257 5.11164 7.09051 5.11366 7.08861L7.0056 5.19568C7.30278 4.89835 7.70209 4.72542 8.12227 4.71211L8.15395 5.7116V4.7116C8.37565 4.7116 8.60784 4.77026 8.77018 4.81582C8.96241 4.86977 9.19061 4.94573 9.44798 5.03891C9.9644 5.22588 10.6481 5.50041 11.4896 5.85727C11.5829 5.89683 11.6849 5.89633 11.7723 5.86009C11.8619 5.82297 11.9371 5.74672 11.9737 5.64785C12.5208 4.17297 12.8719 3.32652 13.16 2.85389C13.307 2.61271 13.5125 2.33806 13.8335 2.16572C14.1511 1.99518 14.461 1.99876 14.5569 1.99987ZM8.27526 6.75452L6.66608 8.36455C6.77144 8.71717 7.04331 9.38697 7.64979 10.7059C7.92061 11.2948 7.9395 11.9761 7.68866 12.5831C7.4454 13.1717 6.97234 13.6318 6.38834 13.8649C4.99859 14.4196 4.32571 14.7205 3.99999 14.9051V17.2019C4.32437 17.3767 4.99072 17.6583 6.35448 18.1641C6.96227 18.3895 7.45687 18.8583 7.70801 19.4651C7.95107 20.0523 7.94163 20.7105 7.69451 21.2869C7.10208 22.6688 6.84085 23.3592 6.74298 23.7196L8.35461 25.3283C8.38591 25.3181 8.42192 25.3059 8.46313 25.2915C8.81825 25.167 9.47667 24.9026 10.6937 24.3481C11.2885 24.0772 11.9737 24.0603 12.5846 24.3138C13.1764 24.5595 13.639 25.0353 13.8742 25.6226C14.4272 27.0038 14.7294 27.6748 14.9141 28H17.1889C17.363 27.6747 17.6434 27.0105 18.1457 25.6598C18.3743 25.0452 18.849 24.5458 19.4626 24.2926C20.053 24.049 20.7131 24.0565 21.2949 24.3037C22.122 24.655 22.7664 24.9138 23.2323 25.0831C23.4389 25.1582 23.6007 25.2122 23.722 25.2481L25.3329 23.6388C25.2272 23.2864 24.9549 22.6168 24.3466 21.2926C24.0771 20.7058 24.0576 20.0275 24.3057 19.4223C24.5483 18.8309 25.0226 18.3685 25.6085 18.1346C27.0016 17.5783 27.6751 17.2749 28 17.0893V14.7987C27.6754 14.6246 27.0092 14.3444 25.6464 13.8414C25.0353 13.6157 24.538 13.1447 24.286 12.535C24.0429 11.9468 24.0524 11.2877 24.2999 10.7103C24.8931 9.32619 25.1545 8.63573 25.2523 8.27547L23.6433 6.67135C23.6107 6.6819 23.5729 6.69459 23.5293 6.70982C23.1736 6.83405 22.5149 7.09788 21.2988 7.65142C20.7062 7.92117 20.0239 7.93887 19.4145 7.68813C18.8193 7.44325 18.3539 6.96588 18.1177 6.37596C17.5655 4.9962 17.2635 4.32536 17.079 4H14.8078C14.6332 4.32454 14.3511 4.98941 13.8489 6.34343C13.6216 6.956 13.1493 7.45446 12.5379 7.70778C11.9488 7.95184 11.2897 7.94488 10.7088 7.69857C9.88024 7.34721 9.23429 7.08859 8.76713 6.91946C8.55969 6.84435 8.39715 6.79042 8.27526 6.75452ZM25.3793 23.831C25.3793 23.831 25.3791 23.8298 25.379 23.8276Z",
+        fill: "currentColor"
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "path",
+      {
+        fillRule: "evenodd",
+        clipRule: "evenodd",
+        d: "M16 18C17.1046 18 18 17.1046 18 16C18 14.8954 17.1046 14 16 14C14.8954 14 14 14.8954 14 16C14 17.1046 14.8954 18 16 18ZM16 20C18.2091 20 20 18.2091 20 16C20 13.7909 18.2091 12 16 12C13.7909 12 12 13.7909 12 16C12 18.2091 13.7909 20 16 20Z",
+        fill: "currentColor"
+      }
+    )
+  ] })
+);
+function SiteSettings$2(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(SiteSettingsIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const StaffMembersIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M10 4C10 2.89543 10.8954 2 12 2H14C15.1046 2 16 2.89543 16 4V5.5H19C20.6569 5.5 22 6.84315 22 8.5V27C22 28.6569 20.6569 30 19 30H7C5.34315 30 4 28.6569 4 27V8.5C4 6.84315 5.34315 5.5 7 5.5H10V4ZM10 7.5H7C6.44772 7.5 6 7.94772 6 8.5V27C6 27.5523 6.44772 28 7 28H19C19.5523 28 20 27.5523 20 27V8.5C20 7.94772 19.5523 7.5 19 7.5H16V7.57143C16 8.676 15.1046 9.57143 14 9.57143H12C10.8954 9.57143 10 8.676 10 7.57143V7.5ZM14 4H12V7.57143L14 7.57143V4ZM8.5835 18.4762C8.5835 16.5563 10.1398 15 12.0597 15H14.4406C16.3605 15 17.9168 16.5563 17.9168 18.4762C17.9168 19.7123 16.9148 20.7143 15.6787 20.7143H10.8216C9.58553 20.7143 8.5835 19.7123 8.5835 18.4762ZM12.0597 17C11.2444 17 10.5835 17.6609 10.5835 18.4762C10.5835 18.6077 10.6901 18.7143 10.8216 18.7143H15.6787C15.8102 18.7143 15.9168 18.6077 15.9168 18.4762C15.9168 17.6609 15.2559 17 14.4406 17H12.0597ZM8.66675 21.5C8.11446 21.5 7.66675 21.9477 7.66675 22.5C7.66675 23.0523 8.11446 23.5 8.66675 23.5H17.8334C18.3857 23.5 18.8334 23.0523 18.8334 22.5C18.8334 21.9477 18.3857 21.5 17.8334 21.5H8.66675ZM7.66675 25.2858C7.66675 24.7335 8.11446 24.2858 8.66675 24.2858H11.4167C11.969 24.2858 12.4167 24.7335 12.4167 25.2858C12.4167 25.8381 11.969 26.2858 11.4167 26.2858H8.66675C8.11446 26.2858 7.66675 25.8381 7.66675 25.2858ZM16.0002 24.2858C15.448 24.2858 15.0002 24.7335 15.0002 25.2858C15.0002 25.8381 15.448 26.2858 16.0002 26.2858H17.8336C18.3859 26.2858 18.8336 25.8381 18.8336 25.2858C18.8336 24.7335 18.3859 24.2858 17.8336 24.2858H16.0002ZM15.0834 12.2857C15.0834 13.3114 14.2626 14.1429 13.2501 14.1429C12.2376 14.1429 11.4167 13.3114 11.4167 12.2857C11.4167 11.2601 12.2376 10.4286 13.2501 10.4286C14.2626 10.4286 15.0834 11.2601 15.0834 12.2857ZM21 2C20.4477 2 20 2.44772 20 3C20 3.55228 20.4477 4 21 4H25C25.5523 4 26 4.44772 26 5V25C26 25.5523 25.5523 26 25 26H24.4285C23.8763 26 23.4285 26.4477 23.4285 27C23.4285 27.5523 23.8763 28 24.4285 28H25C26.6569 28 28 26.6569 28 25V5C28 3.34314 26.6569 2 25 2H21Z",
+      fill: "currentColor"
+    }
+  )
+);
+function StaffMembers(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(StaffMembersIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const TaxesIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M8 4C7.44772 4 7 4.44772 7 5V27C7 27.5523 7.44772 28 8 28H24C24.5523 28 25 27.5523 25 27V5C25 4.44772 24.5523 4 24 4H8ZM5 5C5 3.34315 6.34315 2 8 2H24C25.6569 2 27 3.34315 27 5V27C27 28.6569 25.6569 30 24 30H8C6.34315 30 5 28.6569 5 27V5ZM9 9C9 7.89543 9.89543 7 11 7L21 7C22.1046 7 23 7.89543 23 9V11C23 12.1046 22.1046 13 21 13H11C9.89543 13 9 12.1046 9 11V9ZM21 9L11 9V11H21V9ZM12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17ZM17 16C17 16.5523 16.5523 17 16 17C15.4477 17 15 16.5523 15 16C15 15.4477 15.4477 15 16 15C16.5523 15 17 15.4477 17 16ZM20 17C20.5523 17 21 16.5523 21 16C21 15.4477 20.5523 15 20 15C19.4477 15 19 15.4477 19 16C19 16.5523 19.4477 17 20 17ZM13 20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20C11 19.4477 11.4477 19 12 19C12.5523 19 13 19.4477 13 20ZM16 21C16.5523 21 17 20.5523 17 20C17 19.4477 16.5523 19 16 19C15.4477 19 15 19.4477 15 20C15 20.5523 15.4477 21 16 21ZM21 20C21 20.5523 20.5523 21 20 21C19.4477 21 19 20.5523 19 20C19 19.4477 19.4477 19 20 19C20.5523 19 21 19.4477 21 20ZM16 25C16.5523 25 17 24.5523 17 24C17 23.4477 16.5523 23 16 23C15.4477 23 15 23.4477 15 24C15 24.5523 15.4477 25 16 25Z",
+      fill: "currentColor"
+    }
+  )
+);
+function Taxes(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(TaxesIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const WarehousesIcon = createSvgIcon(
+  /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "path",
+    {
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      d: "M10.5 5C10.5 4.44772 10.9477 4 11.5 4H13.1429V6.64286C13.1429 7.74743 14.0383 8.64286 15.1429 8.64286H16.8571C17.9617 8.64286 18.8571 7.74743 18.8571 6.64286V4H20.5C21.0523 4 21.5 4.44772 21.5 5V14C21.5 14.5523 21.0523 15 20.5 15H18H14H11.5C10.9477 15 10.5 14.5523 10.5 14V5ZM8.67071 15C8.56015 14.6872 8.5 14.3506 8.5 14V5C8.5 3.34315 9.84314 2 11.5 2H20.5C22.1569 2 23.5 3.34315 23.5 5V14C23.5 14.3506 23.4398 14.6872 23.3293 15H27C28.6569 15 30 16.3431 30 18V27C30 28.6569 28.6569 30 27 30H18C17.2316 30 16.5308 29.7111 16 29.2361C15.4692 29.7111 14.7684 30 14 30H5C3.34315 30 2 28.6569 2 27V18C2 16.3431 3.34315 15 5 15H8.67071ZM12.3571 17V19.6429C12.3571 20.7474 11.4617 21.6429 10.3571 21.6429H8.64286C7.53829 21.6429 6.64286 20.7474 6.64286 19.6429V17H5C4.44772 17 4 17.4477 4 18V27C4 27.5523 4.44772 28 5 28H14C14.5523 28 15 27.5523 15 27V18C15 17.4477 14.5523 17 14 17H12.3571ZM18 17C17.4477 17 17 17.4477 17 18V27C17 27.5523 17.4477 28 18 28H27C27.5523 28 28 27.5523 28 27V18C28 17.4477 27.5523 17 27 17H25.3571V19.6429C25.3571 20.7474 24.4617 21.6429 23.3571 21.6429H21.6429C20.5383 21.6429 19.6429 20.7474 19.6429 19.6429V17H18ZM15.1429 6.64286V4H16.8571V6.64286L15.1429 6.64286ZM8.64286 17V19.6429H10.3571V17H8.64286ZM21.6429 17V19.6429H23.3571V17H21.6429Z",
+      fill: "currentColor"
+    }
+  )
+);
+function Warehouses$1(props) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(WarehousesIcon, { ...props, viewBox: "0 0 32 32" });
+}
+const permissionGroupSection = "/permission-groups/";
+const permissionGroupListPath = permissionGroupSection;
+var PermissionGroupListUrlSortField = /* @__PURE__ */ ((PermissionGroupListUrlSortField2) => {
+  PermissionGroupListUrlSortField2["name"] = "name";
+  return PermissionGroupListUrlSortField2;
+})(PermissionGroupListUrlSortField || {});
+const permissionGroupListUrl = (params) => permissionGroupListPath + "?" + stringifyQs(params);
+const permissionGroupAddPath = urlJoin(permissionGroupSection, "add");
+const permissionGroupAddUrl = permissionGroupAddPath;
+var MembersListUrlSortField = /* @__PURE__ */ ((MembersListUrlSortField2) => {
+  MembersListUrlSortField2["name"] = "name";
+  MembersListUrlSortField2["email"] = "email";
+  return MembersListUrlSortField2;
+})(MembersListUrlSortField || {});
+const permissionGroupDetailsPath = (id) => urlJoin(permissionGroupSection, id);
+const permissionGroupDetailsUrl = (id, params) => permissionGroupDetailsPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
+const productTypeSection = "/product-types/";
+const productTypeListPath = productTypeSection;
+var ProductTypeListUrlFiltersEnum = /* @__PURE__ */ ((ProductTypeListUrlFiltersEnum2) => {
+  ProductTypeListUrlFiltersEnum2["configurable"] = "configurable";
+  ProductTypeListUrlFiltersEnum2["type"] = "type";
+  ProductTypeListUrlFiltersEnum2["query"] = "query";
+  return ProductTypeListUrlFiltersEnum2;
+})(ProductTypeListUrlFiltersEnum || {});
+var ProductTypeListUrlSortField = /* @__PURE__ */ ((ProductTypeListUrlSortField2) => {
+  ProductTypeListUrlSortField2["name"] = "name";
+  ProductTypeListUrlSortField2["digital"] = "digital";
+  return ProductTypeListUrlSortField2;
+})(ProductTypeListUrlSortField || {});
+const productTypeListUrl = (params) => productTypeListPath + "?" + stringifyQs(params);
+const productTypeAddPath = urlJoin(productTypeSection, "add");
+const productTypeAddUrl = (params) => productTypeAddPath + "?" + stringifyQs(params);
+const productTypePath = (id) => urlJoin(productTypeSection, id);
+const productTypeUrl = (id, params) => productTypePath(encodeURIComponent(id)) + "?" + stringifyQs(params);
+const siteSettingsSection = "/site-settings";
+const siteSettingsPath = siteSettingsSection;
+const siteSettingsUrl = (params) => `${siteSettingsPath}?${stringifyQs(params)}`;
+const encodeURIComponentOptional = (uriComponent) => uriComponent ? encodeURIComponent(uriComponent) : void 0;
+const mapUndefinedTaxRatesToCountries = (taxConfigurations, taxClasses) => taxConfigurations.map((config) => {
+  if (config.taxClassCountryRates.length === taxClasses.length + 1) {
+    return {
+      ...config,
+      taxClassCountryRates: [...config.taxClassCountryRates].sort(
+        (rate) => rate.taxClass ? 1 : -1
+      )
+    };
+  } else {
+    const taxClassCountryRates = uniqBy(
+      [
+        ...config.taxClassCountryRates,
+        ...taxClasses.map((taxClass) => ({
+          taxClass,
+          rate: void 0,
+          __typename: "TaxClassCountryRate"
+        }))
+      ],
+      "taxClass.id"
+    );
+    const defaultRate = taxClassCountryRates.find((rate) => rate.taxClass === null);
+    const parsedCountryRates = taxClassCountryRates.filter((rate) => rate.taxClass !== null);
+    parsedCountryRates.unshift(
+      defaultRate ?? {
+        rate: void 0,
+        taxClass: null,
+        __typename: "TaxClassCountryRate"
+      }
+    );
+    return {
+      ...config,
+      taxClassCountryRates: parsedCountryRates
+    };
+  }
+}).sort((a, b) => a.country.country.localeCompare(b.country.country));
+const mapUndefinedCountriesToTaxClasses = (taxConfigurations, taxClasses) => taxClasses.map((taxClass) => ({
+  ...taxClass,
+  countries: uniqBy(
+    [
+      ...taxClass.countries,
+      ...taxConfigurations.map(({ country }) => ({
+        __typename: "TaxClassCountryRate",
+        rate: void 0,
+        country
+      }))
+    ],
+    "country.code"
+  )
+}));
+const isLastElement = (arr, index) => index === arr.length - 1;
+const excludeExistingCountries = (allCountries, existingCountries) => allCountries.filter(
+  (dialogCountry) => !(existingCountries == null ? void 0 : existingCountries.some(
+    (existingCountry) => existingCountry.country.code === dialogCountry.code
+  ))
+);
+const taxSection = "/taxes/";
+const taxTabPath = (tab) => urlJoin(taxSection, tab);
+const taxConfigurationListPath = (id) => id ? urlJoin(taxTabPath("channels"), id) : taxTabPath("channels");
+const taxConfigurationListUrl = (id, params) => taxConfigurationListPath(encodeURIComponentOptional(id)) + "?" + stringifyQs(params);
+const taxCountriesListPath = (id) => id ? urlJoin(taxTabPath("countries"), id) : taxTabPath("countries");
+const taxCountriesListUrl = (id, params) => taxCountriesListPath(encodeURIComponentOptional(id)) + "?" + stringifyQs(params);
+const taxClassesListUrl = (id) => id ? urlJoin(taxTabPath("tax-classes"), id) : taxTabPath("tax-classes");
+const useStyles$2G = f(
+  (theme) => ({
+    container: {
+      display: "flex",
+      justifyContent: "flex-end"
+    },
+    versionItem: {
+      [theme.breakpoints.down("md")]: {
+        fontSize: theme.spacing(1.75)
+      },
+      [theme.breakpoints.up("md")]: {
+        fontSize: theme.spacing(2)
+      },
+      color: theme.palette.saleor.main[3],
+      lineHeight: theme.spacing(3.2),
+      fontSize: theme.spacing(2),
+      marginLeft: theme.spacing(1.5),
+      letterSpacing: "0.02em"
+    }
+  }),
+  {
+    name: "VersionInfo"
+  }
+);
+const VersionInfo = ({ dashboardVersion, coreVersion }) => {
+  const classes2 = useStyles$2G({});
+  if (!dashboardVersion || !coreVersion) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 2, fontWeight: "light", className: classes2.container, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.versionItem, children: `dashboard ${dashboardVersion}` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.versionItem, children: `core v${coreVersion}` })
+  ] });
+};
+VersionInfo.displayName = "VersionInfo";
+const useStyles$2F = f(
+  (theme) => ({
+    configurationCategory: {
+      [theme.breakpoints.down("md")]: {
+        gridTemplateColumns: "1fr"
+      },
+      display: "grid",
+      gap: theme.spacing(4),
+      gridTemplateColumns: "1fr 3fr",
+      padding: theme.spacing(4, 0)
+    },
+    configurationItem: {
+      display: "grid",
+      gap: theme.spacing(4),
+      gridTemplateColumns: "1fr 1fr"
+    },
+    configurationLabel: {
+      paddingBottom: 20
+    },
+    link: {
+      display: "contents",
+      marginBottom: theme.spacing(4)
+    },
+    icon: {
+      "& path": {
+        fill: theme.palette.primary.main
+      },
+      fontSize: 48
+    },
+    sectionDescription: {},
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: 600
+    },
+    navigationCard: {
+      border: `1px solid ${Wt.colors.border.default1}`,
+      height: 130,
+      boxShadow: "none !important",
+      "& .MuiCardContent-root": {
+        borderRadius: Wt.borderRadius[3]
+      }
+    }
+  }),
+  { name: "ConfigurationPage" }
+);
+const hasPermission = (permission, user) => {
+  var _a;
+  return (_a = user.userPermissions) == null ? void 0 : _a.map((perm) => perm.code).includes(permission);
+};
+const hasAnyPermissions = (permissions, user) => (permissions == null ? void 0 : permissions.some((permission) => hasPermission(permission, user))) || false;
+const hasAllPermissions = (permissions, user) => (permissions == null ? void 0 : permissions.every((permission) => hasPermission(permission, user))) || false;
+const getConfigMenuItemsPermissions = (intl) => createConfigurationMenu(intl).reduce(
+  (prev, { menuItems }) => [...prev, ...menuItems.map(({ permissions }) => permissions)],
+  []
+).flat();
+const hasUserMenuItemPermissions = (menuItem, user) => {
+  if (menuItem.permissions) {
+    if (menuItem.requireAllPermissions) {
+      return hasAllPermissions(menuItem.permissions, user);
+    }
+    return hasAnyPermissions(menuItem.permissions, user);
+  }
+  return true;
+};
+const ConfigurationPage = (props) => {
+  const {
+    menu: menus,
+    user,
+    versionInfo: { dashboardVersion, coreVersion }
+  } = props;
+  const classes2 = useStyles$2F(props);
+  const theme = useTheme$2();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+  const renderVersionInfo = /* @__PURE__ */ jsxRuntimeExports.jsx(VersionInfo, { dashboardVersion, coreVersion });
+  const intl = useIntl();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(DetailPageLayout, { gridTemplateColumns: 1, withSavebar: false, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(TopNav, { title: intl.formatMessage(sectionNames.configuration), children: isSmUp && renderVersionInfo }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(DetailPageLayout.Content, { "data-test-id": "configuration-menu", children: /* @__PURE__ */ jsxRuntimeExports.jsx(J, { paddingX: 6, __maxWidth: "1024px", margin: "auto", children: menus.filter(
+      (menu) => menu.menuItems.some((menuItem) => hasUserMenuItemPermissions(menuItem, user))
+    ).map((menu, menuIndex) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: classes2.configurationCategory, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.configurationLabel, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: menu.label }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: classes2.configurationItem, children: menu.menuItems.filter(
+        (menuItem) => hasUserMenuItemPermissions(menuItem, user) && !(menuItem == null ? void 0 : menuItem.hidden)
+      ).map((item, itemIndex) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Link$1,
+        {
+          className: classes2.link,
+          to: item.url,
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            PB,
+            {
+              className: classes2.navigationCard,
+              icon: item.icon,
+              title: item.title,
+              description: item.description,
+              "data-test-id": item.testId + "-settings-subsection-" + item.title.toLowerCase()
+            },
+            itemIndex
+          )
+        },
+        `${item.title}-${itemIndex}`
+      )) })
+    ] }, menuIndex)) }) })
+  ] });
+};
+ConfigurationPage.displayName = "ConfigurationPage";
+function createConfigurationMenu(intl) {
+  return [
+    {
+      label: intl.formatMessage({
+        id: "HP6m+q",
+        defaultMessage: "Attributes and Product Types"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "19/lwV",
+            defaultMessage: "Determine attributes used to create product types"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Attributes$1, {}),
+          requireAllPermissions: true,
+          permissions: [
+            PermissionEnum.MANAGE_PRODUCT_TYPES_AND_ATTRIBUTES,
+            PermissionEnum.MANAGE_PAGE_TYPES_AND_ATTRIBUTES
+          ],
+          title: intl.formatMessage(sectionNames.attributes),
+          url: attributeListUrl(),
+          testId: "configuration-menu-attributes"
+        },
+        {
+          description: intl.formatMessage({
+            id: "n0RwMK",
+            defaultMessage: "Define types of products you sell"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ProductTypes, {}),
+          permissions: [PermissionEnum.MANAGE_PRODUCT_TYPES_AND_ATTRIBUTES],
+          title: intl.formatMessage(sectionNames.productTypes),
+          url: productTypeListUrl(),
+          testId: "configuration-menu-product-types"
+        }
+      ]
+    },
+    {
+      label: intl.formatMessage({
+        id: "jFrdB5",
+        defaultMessage: "Product Settings"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "EIULpW",
+            defaultMessage: "Manage how your store charges tax"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Taxes, {}),
+          title: intl.formatMessage(sectionNames.taxes),
+          url: taxConfigurationListUrl(),
+          testId: "configuration-menu-taxes"
+        }
+      ]
+    },
+    {
+      label: intl.formatMessage({
+        id: "UN+yTt",
+        defaultMessage: "Staff Settings"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "RQUkVW",
+            defaultMessage: "Manage your employees and their permissions"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(StaffMembers, {}),
+          permissions: [PermissionEnum.MANAGE_STAFF],
+          title: intl.formatMessage(sectionNames.staff),
+          url: staffListUrl(),
+          testId: "configuration-menu-staff"
+        },
+        {
+          description: intl.formatMessage({
+            id: "ivJ1qt",
+            defaultMessage: "Manage your permission groups and their permissions"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PermissionGroups, {}),
+          permissions: [PermissionEnum.MANAGE_STAFF],
+          title: intl.formatMessage(sectionNames.permissionGroups),
+          url: permissionGroupListUrl(),
+          testId: "configuration-menu-permission-groups"
+        }
+      ]
+    },
+    {
+      label: intl.formatMessage({
+        id: "gTr0qE",
+        defaultMessage: "Shipping Settings"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "zxs6G3",
+            defaultMessage: "Manage how you ship out orders"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ShippingMethods, {}),
+          permissions: [PermissionEnum.MANAGE_SHIPPING],
+          title: intl.formatMessage(sectionNames.shipping),
+          url: shippingZonesListUrl(),
+          testId: "configurationMenuShipping"
+        },
+        {
+          description: intl.formatMessage({
+            id: "5RmuD+",
+            defaultMessage: "Manage and update your warehouse information"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Warehouses$1, {}),
+          permissions: [PermissionEnum.MANAGE_PRODUCTS],
+          title: intl.formatMessage(sectionNames.warehouses),
+          url: warehouseSection,
+          testId: "configuration-menu-warehouses"
+        }
+      ]
+    },
+    {
+      label: intl.formatMessage({
+        id: "MWSacl",
+        defaultMessage: "Multichannel"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "8vJCJ4",
+            defaultMessage: "Define and manage your sales channels"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Channels, {}),
+          permissions: [PermissionEnum.MANAGE_CHANNELS],
+          title: intl.formatMessage(sectionNames.channels),
+          url: channelsListUrl(),
+          testId: "configuration-menu-channels"
+        }
+      ]
+    },
+    {
+      label: intl.formatMessage({
+        id: "YZl6cv",
+        defaultMessage: "Miscellaneous"
+      }),
+      menuItems: [
+        {
+          description: intl.formatMessage({
+            id: "5BajZK",
+            defaultMessage: "View and update your site settings"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(SiteSettings$2, {}),
+          permissions: [PermissionEnum.MANAGE_SETTINGS],
+          title: intl.formatMessage(sectionNames.siteSettings),
+          url: siteSettingsUrl(),
+          testId: "configuration-menu-site-settings"
+        },
+        {
+          description: intl.formatMessage({
+            id: "rUnw7n",
+            defaultMessage: "Configure refunds behavior"
+          }),
+          icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PaymentOutlined, {}),
+          permissions: [PermissionEnum.MANAGE_SETTINGS],
+          title: intl.formatMessage(sectionNames.refundsSettings),
+          url: refundsSettingsPath,
+          testId: "configuration-menu-refunds-settings"
+        }
+      ]
+    }
+  ];
+}
+const configurationMenuUrl = "/configuration/";
+const ConfigurationSection = () => {
+  const shop = useShop();
+  const versions = {
+    dashboardVersion: APP_VERSION,
+    coreVersion: (shop == null ? void 0 : shop.version) ?? ""
+  };
+  const user = useUser();
+  const intl = useIntl();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.configuration) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ConfigurationPage,
+      {
+        menu: createConfigurationMenu(intl),
+        user: maybe(() => user.user),
+        versionInfo: versions
+      }
+    )
+  ] });
+};
 const refundsSettingsPageMessages = defineMessages({
   pageTitle: {
     defaultMessage: "Refunds settings",
@@ -26769,6 +25635,16 @@ const RefundsSettingsView = () => {
   ] });
 };
 const RefundsSettingsRoute = () => /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: refundsSettingsPath, component: RefundsSettingsView });
+const navigationSection = "/structures";
+const structuresListPath = navigationSection;
+var MenuListUrlSortField = /* @__PURE__ */ ((MenuListUrlSortField2) => {
+  MenuListUrlSortField2["name"] = "name";
+  MenuListUrlSortField2["items"] = "items";
+  return MenuListUrlSortField2;
+})(MenuListUrlSortField || {});
+const menuListUrl = (params) => structuresListPath + "?" + stringifyQs(params);
+const menuPath = (id) => urlJoin(navigationSection, id);
+const menuUrl = (id, params) => menuPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
 const ConditionalFilterContext = reactExports.createContext(null);
 const useConditionalFilterContext = () => {
   const context = reactExports.useContext(ConditionalFilterContext);
@@ -43125,7 +42001,7 @@ function canBeSorted$7(sort, isChannelSelected) {
       return false;
   }
 }
-function getSortQueryField$g(sort) {
+function getSortQueryField$h(sort) {
   switch (sort) {
     case ProductListUrlSortField.name:
       return ProductOrderField.NAME;
@@ -43145,7 +42021,7 @@ function getSortQueryField$g(sort) {
       return void 0;
   }
 }
-function getSortQueryVariables$g(params, isChannelSelected) {
+function getSortQueryVariables$h(params, isChannelSelected) {
   if (!canBeSorted$7(params.sort, isChannelSelected)) {
     return;
   }
@@ -43156,7 +42032,7 @@ function getSortQueryVariables$g(params, isChannelSelected) {
       direction
     };
   }
-  const field = getSortQueryField$g(params.sort);
+  const field = getSortQueryField$h(params.sort);
   return {
     direction,
     field
@@ -43919,7 +42795,7 @@ function createFilterTabUtils(key) {
   };
 }
 const PRODUCT_FILTERS_KEY = "productPresets";
-function getFilterQueryParam$a(filter, params) {
+function getFilterQueryParam$b(filter, params) {
   const { active, group, name, value } = filter;
   if (group) {
     const rest = params && params[group] ? params[group] : void 0;
@@ -43966,7 +42842,7 @@ function getFilterQueryParam$a(filter, params) {
       );
   }
 }
-const storageUtils$e = createFilterTabUtils(PRODUCT_FILTERS_KEY);
+const storageUtils$f = createFilterTabUtils(PRODUCT_FILTERS_KEY);
 const getFilterVariables$3 = ({
   filterContainer,
   queryParams
@@ -43980,7 +42856,7 @@ const getFilterVariables$3 = ({
   };
 };
 const LegacyFiltersPresetsAlert = () => {
-  const presets = storageUtils$e.getFilterTabs();
+  const presets = storageUtils$f.getFilterTabs();
   const { theme: currentTheme } = _2();
   const { formatMessage } = useIntl();
   const legacyPresets = presets.filter(
@@ -44378,7 +43254,7 @@ var AttributeFilterKeys = /* @__PURE__ */ ((AttributeFilterKeys2) => {
   return AttributeFilterKeys2;
 })(AttributeFilterKeys || {});
 const ATTRIBUTE_FILTERS_KEY = "attributeFilters";
-function getFilterOpts$7(params) {
+function getFilterOpts$8(params) {
   return {
     filterableInStorefront: {
       active: params.filterableInStorefront !== void 0,
@@ -44398,7 +43274,7 @@ function getFilterOpts$7(params) {
     }
   };
 }
-function getFilterQueryParam$9(filter) {
+function getFilterQueryParam$a(filter) {
   const { name } = filter;
   switch (name) {
     case AttributeFilterKeys.filterableInStorefront:
@@ -44411,7 +43287,7 @@ function getFilterQueryParam$9(filter) {
       return getSingleValueQueryParam(filter, AttributeListUrlFiltersEnum.visibleInStorefront);
   }
 }
-const storageUtils$d = createFilterTabUtils(ATTRIBUTE_FILTERS_KEY);
+const storageUtils$e = createFilterTabUtils(ATTRIBUTE_FILTERS_KEY);
 const DeleteFilterTabDialog = ({
   confirmButtonState,
   onClose,
@@ -44764,7 +43640,7 @@ const AttributeBulkDeleteDialog = ({
   );
 };
 AttributeBulkDeleteDialog.displayName = "AttributeBulkDeleteDialog";
-function getSortQueryField$f(sort) {
+function getSortQueryField$g(sort) {
   switch (sort) {
     case AttributeListUrlSortField.name:
       return AttributeSortField.NAME;
@@ -44778,7 +43654,7 @@ function getSortQueryField$f(sort) {
       return AttributeSortField.NAME;
   }
 }
-const getSortQueryVariables$f = createGetSortQueryVariables(getSortQueryField$f);
+const getSortQueryVariables$g = createGetSortQueryVariables(getSortQueryField$g);
 const AttributeList$1 = ({ params }) => {
   var _a;
   const navigate = useNavigator();
@@ -44796,7 +43672,7 @@ const AttributeList$1 = ({ params }) => {
         ...filters,
         search: params.query
       },
-      sort: getSortQueryVariables$f(params)
+      sort: getSortQueryVariables$g(params)
     }),
     [params, settings.rowNumber, valueProvider.value]
   );
@@ -44822,7 +43698,7 @@ const AttributeList$1 = ({ params }) => {
   } = useFilterPresets({
     getUrl: attributeListUrl,
     params,
-    storageUtils: storageUtils$d,
+    storageUtils: storageUtils$e,
     reset: clearRowSelection
   });
   const [attributeBulkDelete, attributeBulkDeleteOpts] = useAttributeBulkDeleteMutation({
@@ -44847,7 +43723,7 @@ const AttributeList$1 = ({ params }) => {
   const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
     cleanupFn: clearRowSelection,
     createUrl: attributeListUrl,
-    getFilterQueryParam: getFilterQueryParam$9,
+    getFilterQueryParam: getFilterQueryParam$a,
     navigate,
     params,
     keepActiveTab: true
@@ -44897,7 +43773,7 @@ const AttributeList$1 = ({ params }) => {
         filterPresets: presets.map((tab) => tab.name),
         attributes: attributes ?? [],
         disabled: loading || attributeBulkDeleteOpts.loading,
-        filterOpts: getFilterOpts$7(params),
+        filterOpts: getFilterOpts$8(params),
         initialSearch: params.query || "",
         onFilterChange: changeFilters,
         onSearchChange: handleSearchChange,
@@ -47618,9 +46494,9 @@ function getFilterVariables$2(params) {
     search: params.query
   };
 }
-const storageUtils$c = createFilterTabUtils(CATEGORY_FILTERS_KEY);
+const storageUtils$d = createFilterTabUtils(CATEGORY_FILTERS_KEY);
 const { getActiveFilters } = createFilterUtils(CategoryListUrlFiltersEnum);
-function getSortQueryField$e(sort) {
+function getSortQueryField$f(sort) {
   switch (sort) {
     case CategoryListUrlSortField.name:
       return CategorySortField.NAME;
@@ -47632,7 +46508,7 @@ function getSortQueryField$e(sort) {
       return void 0;
   }
 }
-const getSortQueryVariables$e = createGetSortQueryVariables(getSortQueryField$e);
+const getSortQueryVariables$f = createGetSortQueryVariables(getSortQueryField$f);
 const CategoryList$1 = ({ params }) => {
   var _a, _b2, _c;
   const navigate = useNavigator();
@@ -47657,7 +46533,7 @@ const CategoryList$1 = ({ params }) => {
     setPresetIdToDelete
   } = useFilterPresets({
     params,
-    storageUtils: storageUtils$c,
+    storageUtils: storageUtils$d,
     getUrl: categoryListUrl,
     reset: clearRowSelection
   });
@@ -47668,7 +46544,7 @@ const CategoryList$1 = ({ params }) => {
     () => ({
       ...paginationState,
       filter: getFilterVariables$2(params),
-      sort: getSortQueryVariables$e(params)
+      sort: getSortQueryVariables$f(params)
     }),
     [paginationState, params]
   );
@@ -47837,7 +46713,7 @@ const CategoryList = ({ location: location2 }) => {
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryList$1, { params });
 };
-const Component$a = () => {
+const Component$c = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.categories) }),
@@ -48319,6 +47195,10 @@ const validateChannelFormData = (data) => {
     errors = [...errors, createEmptyRequiredError$2("defaultCountry")];
   }
   return errors;
+};
+const useUserPermissions = () => {
+  var _a;
+  return (_a = useUser().user) == null ? void 0 : _a.userPermissions;
 };
 const findPerm = (permList, perm) => permList.find((userPerm) => userPerm.code === perm);
 function hasPermissions(userPermissions, requiredPermissions) {
@@ -54171,7 +53051,7 @@ function canBeSorted$6(sort, isChannelSelected) {
       return false;
   }
 }
-function getSortQueryField$d(sort) {
+function getSortQueryField$e(sort) {
   switch (sort) {
     case CollectionListUrlSortField.name:
       return CollectionSortField.NAME;
@@ -54183,7 +53063,7 @@ function getSortQueryField$d(sort) {
       return void 0;
   }
 }
-const getSortQueryVariables$d = createGetSortQueryVariables(getSortQueryField$d);
+const getSortQueryVariables$e = createGetSortQueryVariables(getSortQueryField$e);
 const messages$1W = defineMessages({
   empty: {
     id: "Yw+9F7",
@@ -54616,7 +53496,7 @@ const CollectionListPage = ({
 };
 CollectionListPage.displayName = "CollectionListPage";
 const COLLECTION_FILTERS_KEY = "collectionFilters";
-function getFilterOpts$6(params, channels) {
+function getFilterOpts$7(params, channels) {
   return {
     channel: {
       active: (params == null ? void 0 : params.channel) !== void 0,
@@ -54629,7 +53509,7 @@ function getFilterOpts$6(params, channels) {
     }
   };
 }
-function getFilterQueryParam$8(filter) {
+function getFilterQueryParam$9(filter) {
   const { name } = filter;
   switch (name) {
     case CollectionFilterKeys.status:
@@ -54642,7 +53522,7 @@ function getFilterQueryParam$8(filter) {
       return getSingleValueQueryParam(filter, CollectionListUrlFiltersEnum.channel);
   }
 }
-const storageUtils$b = createFilterTabUtils(COLLECTION_FILTERS_KEY);
+const storageUtils$c = createFilterTabUtils(COLLECTION_FILTERS_KEY);
 const CollectionList$1 = ({ params }) => {
   const navigate = useNavigator();
   const intl = useIntl();
@@ -54659,7 +53539,7 @@ const CollectionList$1 = ({ params }) => {
   const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
     cleanupFn: clearRowSelection,
     createUrl: collectionListUrl,
-    getFilterQueryParam: getFilterQueryParam$8,
+    getFilterQueryParam: getFilterQueryParam$9,
     navigate,
     params,
     keepActiveTab: true
@@ -54680,7 +53560,7 @@ const CollectionList$1 = ({ params }) => {
     params,
     reset: clearRowSelection,
     getUrl: collectionListUrl,
-    storageUtils: storageUtils$b
+    storageUtils: storageUtils$c
   });
   const paginationState = createPaginationState(settings.rowNumber, params);
   const queryVariables = reactExports.useMemo(() => {
@@ -54691,7 +53571,7 @@ const CollectionList$1 = ({ params }) => {
         ...filter,
         search: params.query
       },
-      sort: getSortQueryVariables$d(params),
+      sort: getSortQueryVariables$e(params),
       channel: channel2
       // Saleor docs say 'channel' in filter is deprecated and should be moved to root
     };
@@ -54756,7 +53636,7 @@ const CollectionList$1 = ({ params }) => {
     });
     clearRowSelection();
   }, [selectedRowIds]);
-  const filterOpts = getFilterOpts$6(params, channelOpts);
+  const filterOpts = getFilterOpts$7(params, channelOpts);
   const selectedChannelId = selectedChannel == null ? void 0 : selectedChannel.id;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(PaginatorContext.Provider, { value: paginationValues, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -54858,7 +53738,7 @@ const CollectionCreate = ({ location: location2 }) => {
   const params = qs;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(CollectionCreate$1, { params });
 };
-const Component$9 = () => {
+const Component$b = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.collections) }),
@@ -55876,12 +54756,12 @@ function useAddressValidation(onSubmit, addressType) {
   };
   return {
     errors: validationErrors,
-    submit: (data) => {
+    submit: (data, skipValidation = false) => {
       try {
         setValidationErrors(
           remove(countryRequiredError, validationErrors, (a, b) => a.field === b.field)
         );
-        return onSubmit(transformFormToAddressInput(data));
+        return onSubmit(transformFormToAddressInput(data, skipValidation));
       } catch {
         const errors = add(countryRequiredError, validationErrors);
         setValidationErrors(errors);
@@ -56232,6 +55112,8 @@ const CustomerAddresses$1 = ({ id, params }) => {
   const shop = useShop();
   const intl = useIntl();
   const [openModal, closeModal] = createDialogActionHandlers(navigate, (params2) => customerAddressesUrl(id, params2), params);
+  const lastCreateInputRef = reactExports.useRef(null);
+  const lastUpdateInputRef = reactExports.useRef(null);
   const [setCustomerDefaultAddress] = useSetCustomerDefaultAddressMutation({
     onCompleted: (data) => {
       if (data.addressSetDefault.errors.length === 0) {
@@ -56247,6 +55129,25 @@ const CustomerAddresses$1 = ({ id, params }) => {
     onCompleted: (data) => {
       if (data.addressCreate.errors.length === 0) {
         closeModal();
+        lastCreateInputRef.current = null;
+      } else {
+        const hasValidationErrors = data.addressCreate.errors.some(
+          (error) => {
+            var _a2;
+            return error.code === "INVALID" && (error.field === "postalCode" || ((_a2 = error.field) == null ? void 0 : _a2.includes("Address")));
+          }
+        );
+        if (hasValidationErrors && lastCreateInputRef.current && !lastCreateInputRef.current.skipValidation) {
+          createCustomerAddress({
+            variables: {
+              id,
+              input: {
+                ...lastCreateInputRef.current,
+                skipValidation: true
+              }
+            }
+          });
+        }
       }
     }
   });
@@ -56258,6 +55159,25 @@ const CustomerAddresses$1 = ({ id, params }) => {
           status: "success",
           text: intl.formatMessage(commonMessages.savedChanges)
         });
+        lastUpdateInputRef.current = null;
+      } else {
+        const hasValidationErrors = data.addressUpdate.errors.some(
+          (error) => {
+            var _a2;
+            return error.code === "INVALID" && (error.field === "postalCode" || ((_a2 = error.field) == null ? void 0 : _a2.includes("Address")));
+          }
+        );
+        if (hasValidationErrors && lastUpdateInputRef.current && !lastUpdateInputRef.current.skipValidation) {
+          updateCustomerAddress({
+            variables: {
+              id: params.id,
+              input: {
+                ...lastUpdateInputRef.current,
+                skipValidation: true
+              }
+            }
+          });
+        }
       }
     }
   });
@@ -56308,12 +55228,15 @@ const CustomerAddresses$1 = ({ id, params }) => {
         open: params.action === "add",
         variant: "create",
         onClose: closeModal,
-        onConfirm: (input) => createCustomerAddress({
-          variables: {
-            id,
-            input
-          }
-        })
+        onConfirm: (input) => {
+          lastCreateInputRef.current = input;
+          createCustomerAddress({
+            variables: {
+              id,
+              input
+            }
+          });
+        }
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -56326,12 +55249,15 @@ const CustomerAddresses$1 = ({ id, params }) => {
         open: params.action === "edit",
         variant: "edit",
         onClose: closeModal,
-        onConfirm: (input) => updateCustomerAddress({
-          variables: {
-            id: params.id,
-            input
-          }
-        })
+        onConfirm: (input) => {
+          lastUpdateInputRef.current = input;
+          updateCustomerAddress({
+            variables: {
+              id: params.id,
+              input
+            }
+          });
+        }
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -57831,6 +56757,12 @@ function getExtendedGiftCard(giftCard) {
     isExpired: isGiftCardExpired(giftCard)
   };
 }
+const giftCardsSectionUrlName = "/gift-cards";
+const giftCardsListPath = `${giftCardsSectionUrlName}/`;
+const giftCardListUrl = (params) => giftCardsListPath + "?" + stringifyQs(params);
+const giftCardPath = (id) => urlJoin(giftCardsListPath, id);
+const giftCardUrl = (id, params) => giftCardPath(encodeURIComponent(id)) + "?" + stringifyQs(params);
+const giftCardSettingsUrl = urlJoin(giftCardsListPath, "settings");
 const giftCardDetails = gql`
   query GiftCardDetails($id: ID!, $canSeeApp: Boolean!, $canSeeUser: Boolean!) {
     giftCard(id: $id) {
@@ -59265,7 +58197,7 @@ var CustomerFilterKeys = /* @__PURE__ */ ((CustomerFilterKeys2) => {
   return CustomerFilterKeys2;
 })(CustomerFilterKeys || {});
 const CUSTOMER_FILTERS_KEY = "customerFilters";
-function getFilterOpts$5(params) {
+function getFilterOpts$6(params) {
   return {
     joined: {
       active: [params.joinedFrom, params.joinedTo].some((field) => field !== void 0) ?? false,
@@ -59283,7 +58215,7 @@ function getFilterOpts$5(params) {
     }
   };
 }
-function getFilterQueryParam$7(filter) {
+function getFilterQueryParam$8(filter) {
   const { name } = filter;
   switch (name) {
     case CustomerFilterKeys.joined:
@@ -59300,8 +58232,8 @@ function getFilterQueryParam$7(filter) {
       );
   }
 }
-const storageUtils$a = createFilterTabUtils(CUSTOMER_FILTERS_KEY);
-function getSortQueryField$c(sort) {
+const storageUtils$b = createFilterTabUtils(CUSTOMER_FILTERS_KEY);
+function getSortQueryField$d(sort) {
   switch (sort) {
     case CustomerListUrlSortField.email:
       return UserSortField.EMAIL;
@@ -59313,7 +58245,7 @@ function getSortQueryField$c(sort) {
       return void 0;
   }
 }
-const getSortQueryVariables$c = createGetSortQueryVariables(getSortQueryField$c);
+const getSortQueryVariables$d = createGetSortQueryVariables(getSortQueryField$d);
 const CustomerList = ({ params }) => {
   var _a;
   const navigate = useNavigator();
@@ -59343,7 +58275,7 @@ const CustomerList = ({ params }) => {
     params,
     reset: clearRowSelection,
     getUrl: customerListUrl,
-    storageUtils: storageUtils$a
+    storageUtils: storageUtils$b
   });
   const paginationState = createPaginationState(settings.rowNumber, params);
   const newQueryVariables = reactExports.useMemo(
@@ -59353,7 +58285,7 @@ const CustomerList = ({ params }) => {
         ...filter,
         search: params.query
       },
-      sort: getSortQueryVariables$c(params)
+      sort: getSortQueryVariables$d(params)
     }),
     [params, settings.rowNumber, valueProvider.value]
   );
@@ -59365,7 +58297,7 @@ const CustomerList = ({ params }) => {
   const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
     cleanupFn: clearRowSelection,
     createUrl: customerListUrl,
-    getFilterQueryParam: getFilterQueryParam$7,
+    getFilterQueryParam: getFilterQueryParam$8,
     navigate,
     params,
     keepActiveTab: true
@@ -59414,7 +58346,7 @@ const CustomerList = ({ params }) => {
       CustomerListPage,
       {
         selectedFilterPreset: selectedPreset,
-        filterOpts: getFilterOpts$5(params),
+        filterOpts: getFilterOpts$6(params),
         initialSearch: params.query || "",
         onSearchChange: handleSearchChange,
         onFilterChange: changeFilters,
@@ -63338,7 +62270,7 @@ function canBeSorted$5(sort) {
       return false;
   }
 }
-function getSortQueryField$b(sort) {
+function getSortQueryField$c(sort) {
   switch (sort) {
     case DiscountListUrlSortField.name:
       return PromotionSortField.NAME;
@@ -63350,7 +62282,7 @@ function getSortQueryField$b(sort) {
       return void 0;
   }
 }
-const getSortQueryVariables$b = createGetSortQueryVariables(getSortQueryField$b);
+const getSortQueryVariables$c = createGetSortQueryVariables(getSortQueryField$c);
 const columnsMessages$a = defineMessages({
   name: {
     id: "F56hOz",
@@ -63657,7 +62589,7 @@ const DiscountListPage = ({
 };
 DiscountListPage.displayName = "SaleListPage";
 const DISCOUNT_FILTERS_KEY = "saleFilters";
-const storageUtils$9 = createFilterTabUtils(DISCOUNT_FILTERS_KEY);
+const storageUtils$a = createFilterTabUtils(DISCOUNT_FILTERS_KEY);
 const DiscountList = ({ params }) => {
   var _a;
   const intl = useIntl();
@@ -63670,7 +62602,7 @@ const DiscountList = ({ params }) => {
   const queryVariables = reactExports.useMemo(
     () => ({
       ...paginationState,
-      sort: getSortQueryVariables$b(params),
+      sort: getSortQueryVariables$c(params),
       where: {
         ...where,
         ...(params == null ? void 0 : params.query) && {
@@ -63706,7 +62638,7 @@ const DiscountList = ({ params }) => {
   } = useFilterPresets({
     getUrl: discountListUrl,
     params,
-    storageUtils: storageUtils$9
+    storageUtils: storageUtils$a
   });
   reactExports.useEffect(() => {
     if (!canBeSorted$5(params == null ? void 0 : params.sort)) {
@@ -69044,7 +67976,7 @@ function canBeSorted$4(sort, isChannelSelected) {
       return false;
   }
 }
-function getSortQueryField$a(sort) {
+function getSortQueryField$b(sort) {
   switch (sort) {
     case VoucherListUrlSortField.code:
       return VoucherSortField.CODE;
@@ -69064,7 +67996,7 @@ function getSortQueryField$a(sort) {
       return void 0;
   }
 }
-const getSortQueryVariables$a = createGetSortQueryVariables(getSortQueryField$a);
+const getSortQueryVariables$b = createGetSortQueryVariables(getSortQueryField$b);
 const columnsMessages$8 = defineMessages({
   voucher: {
     id: "9BvYb9",
@@ -69424,7 +68356,7 @@ const VoucherListPage = ({
 };
 VoucherListPage.displayName = "VoucherListPage";
 const VOUCHER_FILTERS_KEY = "voucherFilters";
-function getFilterOpts$4(params, channels) {
+function getFilterOpts$5(params, channels) {
   var _a, _b2;
   return {
     channel: {
@@ -69466,7 +68398,7 @@ function getFilterOpts$4(params, channels) {
     }
   };
 }
-function getFilterQueryParam$6(filter) {
+function getFilterQueryParam$7(filter) {
   const { name } = filter;
   switch (name) {
     case VoucherFilterKeys.saleType:
@@ -69497,7 +68429,7 @@ function getFilterQueryParam$6(filter) {
       return getSingleValueQueryParam(filter, VoucherListUrlFiltersEnum.channel);
   }
 }
-const storageUtils$8 = createFilterTabUtils(VOUCHER_FILTERS_KEY);
+const storageUtils$9 = createFilterTabUtils(VOUCHER_FILTERS_KEY);
 const VoucherList = ({ params }) => {
   var _a;
   const navigate = useNavigator();
@@ -69519,7 +68451,7 @@ const VoucherList = ({ params }) => {
         ...filters,
         search: params.query
       },
-      sort: getSortQueryVariables$a(params),
+      sort: getSortQueryVariables$b(params),
       channel
     }),
     [params, settings.rowNumber, valueProvider.value, channel]
@@ -69547,13 +68479,13 @@ const VoucherList = ({ params }) => {
   } = useFilterPresets({
     getUrl: voucherListUrl,
     params,
-    storageUtils: storageUtils$8,
+    storageUtils: storageUtils$9,
     reset: clearRowSelection
   });
   const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
     cleanupFn: clearRowSelection,
     createUrl: voucherListUrl,
-    getFilterQueryParam: getFilterQueryParam$6,
+    getFilterQueryParam: getFilterQueryParam$7,
     navigate,
     params,
     keepActiveTab: true
@@ -69619,7 +68551,7 @@ const VoucherList = ({ params }) => {
       VoucherListPage,
       {
         onSelectVouchersIds: handleSelectVouchersIds,
-        filterOpts: getFilterOpts$4(params, channelOpts),
+        filterOpts: getFilterOpts$5(params, channelOpts),
         initialSearch: params.query || "",
         onSearchChange: handleSearchChange,
         onFilterChange: (filter) => changeFilters(filter),
@@ -69769,6 +68701,15 @@ const RequestExtensionsButton = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { variant: "secondary", target: "_blank", as: "a", href: CONST_TYPEFORM_URL, children: intl.formatMessage(messages$1Y.missingExtensionsButton) });
 };
+const useHasManagedAppsPermission = () => {
+  const permissions = useUserPermissions();
+  const hasManagedAppsPermission = !!(permissions == null ? void 0 : permissions.find(
+    ({ code }) => code === PermissionEnum.MANAGE_APPS
+  ));
+  return {
+    hasManagedAppsPermission
+  };
+};
 const ExploreExtensionsActions = () => {
   const intl = useIntl();
   const navigate = useNavigator();
@@ -69859,6 +68800,8 @@ const ExtensionAvatar = ({ children }) => {
   );
 };
 const CheckIcon = "data:image/svg+xml,%3csvg%20width='17'%20height='16'%20viewBox='0%200%2017%2016'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M13.5296%204L6.08841%2011.3333L2.70605%208'%20stroke='currentColor'%20stroke-width='1.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e";
+const WARNING_ICON_COLOR = "#FFB84E";
+const SUCCESS_ICON_COLOR = "#0ABF53";
 const InstalledBadge = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { __color: SUCCESS_ICON_COLOR, display: "flex", alignItems: "center", fontSize: 2, gap: 1, children: [
@@ -70618,6 +69561,55 @@ const ExternalLinkUnstyled = (props) => {
     }
   );
 };
+const ExclamationIcon = ({
+  width = "12",
+  height = "12",
+  viewBox = "0 0 12 12"
+}) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  "svg",
+  {
+    width,
+    height,
+    viewBox,
+    fill: "none",
+    xmlns: "http://www.w3.org/2000/svg",
+    children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("g", { clipPath: "url(#clip0_1226_7785)", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "path",
+          {
+            d: "M6 11C8.76142 11 11 8.76142 11 6C11 3.23858 8.76142 1 6 1C3.23858 1 1 3.23858 1 6C1 8.76142 3.23858 11 6 11Z",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "path",
+          {
+            d: "M6 4V6",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "path",
+          {
+            d: "M6 8H6.00429",
+            stroke: "currentColor",
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("defs", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("clipPath", { id: "clip0_1226_7785", children: /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { width: "12", height: "12", fill: "white" }) }) })
+    ]
+  }
+);
 const plusIcon = "data:image/svg+xml,%3csvg%20width='36'%20height='36'%20viewBox='0%200%2036%2036'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3ccircle%20cx='18'%20cy='18'%20r='17.5'%20fill='white'%20stroke='%23EAEAEA'/%3e%3cpath%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M19%2010H17V17H10V19H17V26H19V19H26V17H19V10Z'%20fill='currentColor'/%3e%3c/svg%3e";
 const getSaleorLogoUrl = (theme) => {
   switch (theme) {
@@ -71317,6 +70309,31 @@ const InstalledExtensionsList = ({
     }
   );
 };
+const toWebhookDeliveryWithMoment = (delivery) => delivery ? {
+  ...delivery,
+  createdAt: moment(delivery.createdAt)
+} : null;
+const getLatest = (a, b) => {
+  if (a && b) {
+    return a.createdAt.isAfter(b.createdAt) ? a : b;
+  }
+  return a ?? b;
+};
+const getLatestFailedAttemptFromWebhook = (webhook) => {
+  var _a, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
+  const failedEventDelivery = toWebhookDeliveryWithMoment((_c = (_b2 = (_a = webhook.failedDelivers) == null ? void 0 : _a.edges) == null ? void 0 : _b2[0]) == null ? void 0 : _c.node);
+  const fromFailedDeliveryAttempts = toWebhookDeliveryWithMoment(
+    (_j = (_i = (_h = (_g = (_f = (_e = (_d = webhook.failedDelivers) == null ? void 0 : _d.edges) == null ? void 0 : _e[0]) == null ? void 0 : _f.node) == null ? void 0 : _g.attempts) == null ? void 0 : _h.edges) == null ? void 0 : _i[0]) == null ? void 0 : _j.node
+  );
+  const fromFailedDelivers = getLatest(failedEventDelivery, fromFailedDeliveryAttempts);
+  const fromPendingDelivers = toWebhookDeliveryWithMoment(
+    (_o = (_n = (_m = (_l = (_k = webhook.pendingDelivers) == null ? void 0 : _k.edges) == null ? void 0 : _l[0]) == null ? void 0 : _m.node.attempts) == null ? void 0 : _n.edges.find(
+      ({ node: { status: status2 } }) => status2 === EventDeliveryStatusEnum.FAILED
+    )) == null ? void 0 : _o.node
+  );
+  return getLatest(fromFailedDelivers, fromPendingDelivers);
+};
+const getLatestFailedAttemptFromWebhooks = (webhooks) => webhooks.map(getLatestFailedAttemptFromWebhook).filter(Boolean).sort((a, b) => b == null ? void 0 : b.createdAt.diff(a == null ? void 0 : a.createdAt))[0] ?? null;
 const byActivePlugin = (plugin) => {
   var _a, _b2;
   return ((_a = plugin == null ? void 0 : plugin.globalConfiguration) == null ? void 0 : _a.active) === true || ((_b2 = plugin == null ? void 0 : plugin.channelConfigurations) == null ? void 0 : _b2.some((config) => config.active));
@@ -74038,7 +73055,7 @@ const useStyles$1y = f(
   }),
   { name: "WebhookSubscriptionQuery" }
 );
-var define_process_env_default = { API_URL: "http://localhost/graphql/" };
+var define_process_env_default = { API_URL: "http://miraflores-shop.com/graphql/" };
 const messages$1o = defineMessages({
   title: {
     id: "lEG/12",
@@ -78897,7 +77914,7 @@ var GiftCardListFilterKeys = /* @__PURE__ */ ((GiftCardListFilterKeys2) => {
   return GiftCardListFilterKeys2;
 })(GiftCardListFilterKeys || {});
 const GIFT_CARD_FILTERS_KEY = "giftCardFilters";
-function getFilterQueryParam$5(filter) {
+function getFilterQueryParam$6(filter) {
   const { name } = filter;
   const { initialBalanceAmount, currentBalanceAmount, tag, currency: currency2, usedBy, product, status: status2 } = GiftCardListFilterKeys;
   switch (name) {
@@ -78974,8 +77991,8 @@ const messages$1d = defineMessages({
     description: "current balance filter label"
   }
 });
-const storageUtils$7 = createFilterTabUtils(GIFT_CARD_FILTERS_KEY);
-const getSortQueryField$9 = (sort) => {
+const storageUtils$8 = createFilterTabUtils(GIFT_CARD_FILTERS_KEY);
+const getSortQueryField$a = (sort) => {
   switch (sort) {
     case GiftCardUrlSortField.balance:
       return GiftCardSortField.CURRENT_BALANCE;
@@ -78987,7 +78004,7 @@ const getSortQueryField$9 = (sort) => {
       return void 0;
   }
 };
-const getSortQueryVariables$9 = createGetSortQueryVariables(getSortQueryField$9);
+const getSortQueryVariables$a = createGetSortQueryVariables(getSortQueryField$a);
 const numberOfColumns$c = 7;
 const GiftCardsListContext = reactExports.createContext(null);
 const useGiftCardList = () => {
@@ -79009,11 +78026,11 @@ const GiftCardsListProvider = ({ children, params }) => {
     reset: clearRowSelection,
     params,
     getUrl: giftCardListUrl,
-    storageUtils: storageUtils$7
+    storageUtils: storageUtils$8
   });
   const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
     createUrl: giftCardListUrl,
-    getFilterQueryParam: getFilterQueryParam$5,
+    getFilterQueryParam: getFilterQueryParam$6,
     navigate,
     params,
     cleanupFn: clearRowSelection,
@@ -79032,7 +78049,7 @@ const GiftCardsListProvider = ({ children, params }) => {
         ...filters,
         code: params.query
       },
-      sort: getSortQueryVariables$9(params)
+      sort: getSortQueryVariables$a(params)
     }),
     [params, settings.rowNumber, valueProvider.value]
   );
@@ -81987,7 +81004,7 @@ const GiftCardList = () => {
   );
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ConditionalGiftCardsFilterProver, { locationSearch: location.search, children: /* @__PURE__ */ jsxRuntimeExports.jsx(GiftCardsList, { params }) });
 };
-const Component$8 = () => {
+const Component$a = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.giftCards) }),
@@ -82534,6 +81551,18 @@ const useLocationState = () => {
     isAppPath: isAppPath(location2.pathname)
   };
 };
+const articlesSection = "/articles/";
+const articleListPath = articlesSection;
+var ArticleListUrlSortField = /* @__PURE__ */ ((ArticleListUrlSortField2) => {
+  ArticleListUrlSortField2["title"] = "title";
+  ArticleListUrlSortField2["slug"] = "slug";
+  ArticleListUrlSortField2["contentType"] = "contentType";
+  ArticleListUrlSortField2["visible"] = "visible";
+  return ArticleListUrlSortField2;
+})(ArticleListUrlSortField || {});
+const articleListUrl = (params) => articleListPath + "?" + stringifyQs(params);
+const articlePath = (id) => urlJoin(articlesSection, id);
+const articleCreatePath = urlJoin(articlesSection, "add");
 function createAttributeChangeHandler(attributesFormData, triggerChange) {
   return (attributeId, value) => {
     var _a;
@@ -86024,6 +85053,403 @@ const PageListPage = ({
   ] });
 };
 PageListPage.displayName = "PageListPage";
+var ArticleListFilterKeys = /* @__PURE__ */ ((ArticleListFilterKeys2) => {
+  ArticleListFilterKeys2["pageTypes"] = "pageTypes";
+  return ArticleListFilterKeys2;
+})(ArticleListFilterKeys || {});
+const ARTICLES_FILTERS_KEY = "articlesFilters";
+const getFilterOpts$4 = ({
+  params,
+  pageTypes,
+  pageTypesProps
+}) => ({
+  pageType: {
+    active: !!(params == null ? void 0 : params.pageTypes),
+    value: params == null ? void 0 : params.pageTypes,
+    choices: mapNodeToChoice(pageTypes),
+    displayValues: mapSingleValueNodeToChoice(pageTypes),
+    initialSearch: "",
+    hasMore: pageTypesProps.hasMore,
+    loading: pageTypesProps.loading,
+    onFetchMore: pageTypesProps.onFetchMore,
+    onSearchChange: pageTypesProps.onSearchChange
+  }
+});
+function getFilterQueryParam$5(filter) {
+  const { name } = filter;
+  const { pageTypes } = ArticleListFilterKeys;
+  switch (name) {
+    case pageTypes:
+      return getMultipleValueQueryParam(filter, name);
+  }
+}
+const storageUtils$7 = createFilterTabUtils(ARTICLES_FILTERS_KEY);
+function getSortQueryField$9(sort) {
+  switch (sort) {
+    case ArticleListUrlSortField.title:
+      return PageSortField.TITLE;
+    case ArticleListUrlSortField.visible:
+      return PageSortField.VISIBILITY;
+    case ArticleListUrlSortField.slug:
+      return PageSortField.SLUG;
+    case ArticleListUrlSortField.contentType:
+      return void 0;
+    default:
+      return void 0;
+  }
+}
+const getSortQueryVariables$9 = createGetSortQueryVariables(getSortQueryField$9);
+const ArticleList$1 = ({ params }) => {
+  var _a, _b2, _c, _d, _e, _f;
+  const navigate = useNavigator();
+  const notify = useNotifier();
+  const intl = useIntl();
+  const { updateListSettings, settings } = useListSettings(ListViews.PAGES_LIST);
+  const { valueProvider } = useConditionalFilterContext();
+  const filter = createPageQueryVariables(valueProvider.value);
+  usePaginationReset(articleListUrl, params, settings.rowNumber);
+  const {
+    clearRowSelection,
+    selectedRowIds,
+    setClearDatagridRowSelectionCallback,
+    setSelectedRowIds
+  } = useRowSelection(params);
+  const [changeFilters, resetFilters, handleSearchChange] = createFilterHandlers({
+    cleanupFn: clearRowSelection,
+    createUrl: articleListUrl,
+    getFilterQueryParam: getFilterQueryParam$5,
+    navigate,
+    params,
+    keepActiveTab: true
+  });
+  const {
+    selectedPreset,
+    presets,
+    hasPresetsChanged,
+    onPresetChange,
+    onPresetDelete,
+    onPresetSave,
+    onPresetUpdate,
+    setPresetIdToDelete,
+    getPresetNameToDelete
+  } = useFilterPresets({
+    params,
+    reset: clearRowSelection,
+    getUrl: articleListUrl,
+    storageUtils: storageUtils$7
+  });
+  const paginationState = createPaginationState(settings.rowNumber, params);
+  const mergedFilter = reactExports.useMemo(() => {
+    const baseFilter = {
+      ...filter,
+      search: params.query
+    };
+    if (params.pageTypes && params.pageTypes.length > 0) {
+      return {
+        ...baseFilter,
+        pageTypes: params.pageTypes
+      };
+    }
+    return baseFilter;
+  }, [filter, params.query, params.pageTypes]);
+  const newQueryVariables = reactExports.useMemo(
+    () => ({
+      ...paginationState,
+      filter: mergedFilter,
+      sort: getSortQueryVariables$9(params)
+    }),
+    [params, settings.rowNumber, mergedFilter]
+  );
+  const { data, refetch } = usePageListQuery({
+    displayLoader: true,
+    variables: newQueryVariables
+  });
+  const pages = mapEdgesToItems(data == null ? void 0 : data.pages);
+  const paginationValues = usePaginator({
+    pageInfo: (_a = data == null ? void 0 : data.pages) == null ? void 0 : _a.pageInfo,
+    paginationState,
+    queryString: params
+  });
+  const [openModal, closeModal] = createDialogActionHandlers(navigate, articleListUrl, params);
+  const [bulkPageRemove, bulkPageRemoveOpts] = usePageBulkRemoveMutation({
+    onCompleted: (data2) => {
+      var _a2;
+      if (((_a2 = data2.pageBulkDelete) == null ? void 0 : _a2.errors.length) === 0) {
+        closeModal();
+        notify({
+          status: "success",
+          text: intl.formatMessage({
+            id: "vwA9Fq",
+            defaultMessage: "Selected articles were deleted.",
+            description: "notification"
+          })
+        });
+        clearRowSelection();
+        refetch();
+      }
+    }
+  });
+  const [bulkPagePublish, bulkPagePublishOpts] = usePageBulkPublishMutation({
+    onCompleted: (data2) => {
+      var _a2;
+      if (((_a2 = data2.pageBulkPublish) == null ? void 0 : _a2.errors.length) === 0) {
+        closeModal();
+        clearRowSelection();
+        refetch();
+      }
+    }
+  });
+  const handlePublish = async (selectedRowIds2) => {
+    await bulkPagePublish({
+      variables: {
+        ids: selectedRowIds2,
+        isPublished: true
+      }
+    });
+    notify({
+      status: "success",
+      text: intl.formatMessage({
+        id: "AUaL7R",
+        defaultMessage: "Selected articles were published.",
+        description: "notification"
+      })
+    });
+  };
+  const handleUnpublish = async (selectedRowIds2) => {
+    await bulkPagePublish({
+      variables: {
+        ids: selectedRowIds2,
+        isPublished: false
+      }
+    });
+    notify({
+      status: "success",
+      text: intl.formatMessage({
+        id: "bnMF4j",
+        defaultMessage: "Selected articles were unpublished.",
+        description: "notification"
+      })
+    });
+  };
+  const handleSort = createSortHandler(navigate, articleListUrl, params);
+  const {
+    loadMore: loadMoreDialogPageTypes,
+    search: searchDialogPageTypes,
+    result: searchDialogPageTypesOpts
+  } = usePageTypeSearch({
+    variables: DEFAULT_INITIAL_SEARCH_DATA
+  });
+  const fetchMoreDialogPageTypes = {
+    hasMore: (_d = (_c = (_b2 = searchDialogPageTypesOpts.data) == null ? void 0 : _b2.search) == null ? void 0 : _c.pageInfo) == null ? void 0 : _d.hasNextPage,
+    loading: searchDialogPageTypesOpts.loading,
+    onFetchMore: loadMoreDialogPageTypes
+  };
+  const filterOpts = getFilterOpts$4({
+    params,
+    pageTypes: mapEdgesToItems((_e = searchDialogPageTypesOpts == null ? void 0 : searchDialogPageTypesOpts.data) == null ? void 0 : _e.search),
+    pageTypesProps: {
+      ...getSearchFetchMoreProps(searchDialogPageTypesOpts, loadMoreDialogPageTypes),
+      onSearchChange: searchDialogPageTypes
+    }
+  });
+  const handleSetSelectedPageIds = reactExports.useCallback(
+    (rows, clearSelection) => {
+      if (!pages) {
+        return;
+      }
+      const rowsIds = rows.map((row) => pages[row].id);
+      const haveSaveValues = isEqual(rowsIds, selectedRowIds);
+      if (!haveSaveValues) {
+        setSelectedRowIds(rowsIds);
+      }
+      setClearDatagridRowSelectionCallback(clearSelection);
+    },
+    [pages, selectedRowIds, setClearDatagridRowSelectionCallback, setSelectedRowIds]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(PaginatorContext.Provider, { value: paginationValues, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      PageListPage,
+      {
+        disabled: !data,
+        loading: !data,
+        settings,
+        pages,
+        onUpdateListSettings: updateListSettings,
+        onPageCreate: () => openModal("create-page"),
+        onSort: handleSort,
+        sort: getSortParams(params),
+        selectedPageIds: selectedRowIds,
+        onPagesDelete: () => openModal("remove", { ids: selectedRowIds }),
+        onPagesPublish: () => openModal("publish", { ids: selectedRowIds }),
+        onPagesUnpublish: () => openModal("unpublish", { ids: selectedRowIds }),
+        onSelectPageIds: handleSetSelectedPageIds,
+        filterOpts,
+        onFilterChange: changeFilters,
+        initialSearch: (params == null ? void 0 : params.query) ?? "",
+        onSearchChange: handleSearchChange,
+        onFilterPresetChange: onPresetChange,
+        onFilterPresetDelete: (id) => {
+          setPresetIdToDelete(id);
+          openModal("delete-search");
+        },
+        onFilterPresetUpdate: onPresetUpdate,
+        onFilterPresetPresetSave: () => openModal("save-search"),
+        selectedFilterPreset: selectedPreset,
+        filterPresets: presets.map((preset) => preset.name),
+        hasPresetsChanged,
+        onFilterPresetsAll: resetFilters
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ActionDialog,
+      {
+        open: params.action === "publish",
+        onClose: closeModal,
+        confirmButtonState: bulkPagePublishOpts.status,
+        onConfirm: () => handlePublish(selectedRowIds),
+        title: intl.formatMessage({
+          id: "q/FMPM",
+          defaultMessage: "Publish articles",
+          description: "dialog header"
+        }),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          MemoizedFormattedMessage,
+          {
+            id: "8y4+0a",
+            defaultMessage: "{counter,plural,one{Are you sure you want to publish this article?} other{Are you sure you want to publish {displayQuantity} articles?}}",
+            description: "dialog content",
+            values: {
+              counter: selectedRowIds.length,
+              displayQuantity: /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: selectedRowIds.length })
+            }
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ActionDialog,
+      {
+        open: params.action === "unpublish",
+        onClose: closeModal,
+        confirmButtonState: bulkPagePublishOpts.status,
+        onConfirm: () => handleUnpublish(selectedRowIds),
+        title: intl.formatMessage({
+          id: "kG44rx",
+          defaultMessage: "Unpublish articles",
+          description: "dialog header"
+        }),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          MemoizedFormattedMessage,
+          {
+            id: "8LWaFr",
+            defaultMessage: "{counter,plural,one{Are you sure you want to unpublish this article?} other{Are you sure you want to unpublish {displayQuantity} articles?}}",
+            description: "dialog content",
+            values: {
+              counter: selectedRowIds.length,
+              displayQuantity: /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: selectedRowIds.length })
+            }
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ActionDialog,
+      {
+        open: params.action === "remove",
+        onClose: closeModal,
+        confirmButtonState: bulkPageRemoveOpts.status,
+        onConfirm: () => bulkPageRemove({
+          variables: {
+            ids: selectedRowIds
+          }
+        }),
+        variant: "delete",
+        title: intl.formatMessage({
+          id: "AgHhjW",
+          defaultMessage: "Delete articles",
+          description: "dialog header"
+        }),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          MemoizedFormattedMessage,
+          {
+            id: "8a4uf/",
+            defaultMessage: "{counter,plural,one{Are you sure you want to delete this article?} other{Are you sure you want to delete {displayQuantity} articles?}}",
+            description: "dialog content",
+            values: {
+              counter: selectedRowIds.length,
+              displayQuantity: /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: selectedRowIds.length })
+            }
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      PageTypePickerDialog,
+      {
+        confirmButtonState: "success",
+        open: params.action === "create-page",
+        pageTypes: mapNodeToChoice(mapEdgesToItems((_f = searchDialogPageTypesOpts == null ? void 0 : searchDialogPageTypesOpts.data) == null ? void 0 : _f.search)),
+        fetchPageTypes: searchDialogPageTypes,
+        fetchMorePageTypes: fetchMoreDialogPageTypes,
+        onClose: closeModal,
+        onConfirm: (pageTypeId) => navigate(
+          pageCreateUrl({
+            "page-type-id": pageTypeId
+          })
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SaveFilterTabDialog,
+      {
+        open: params.action === "save-search",
+        confirmButtonState: "default",
+        onClose: closeModal,
+        onSubmit: onPresetSave
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      DeleteFilterTabDialog,
+      {
+        open: params.action === "delete-search",
+        confirmButtonState: "default",
+        onClose: closeModal,
+        onSubmit: onPresetDelete,
+        tabName: getPresetNameToDelete()
+      }
+    )
+  ] });
+};
+const ArticleList = () => {
+  const qs = libExports.parse(location.search.substr(1));
+  const params = asSortParams(
+    qs,
+    ArticleListUrlSortField,
+    ArticleListUrlSortField.title
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ConditionalPageFilterProvider, { locationSearch: location.search, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArticleList$1, { params }) });
+};
+const ArticleCreate = ({ match }) => {
+  const qs = libExports.parse(location.search.substr(1));
+  const params = qs;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PageCreate$1, { id: decodeURIComponent(match.params.id), params });
+};
+const ArticleDetails = ({ match }) => {
+  const qs = libExports.parse(location.search.substr(1));
+  const params = qs;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(PageDetails$1, { id: decodeURIComponent(match.params.id), params });
+};
+const Component$9 = () => {
+  const intl = useIntl();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.articles) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Switch, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { exact: true, path: articleListPath, component: ArticleList }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { exact: true, path: articleCreatePath, component: ArticleCreate }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: articlePath(":id"), component: ArticleDetails })
+    ] })
+  ] });
+};
 var PageListFilterKeys = /* @__PURE__ */ ((PageListFilterKeys2) => {
   PageListFilterKeys2["pageTypes"] = "pageTypes";
   return PageListFilterKeys2;
@@ -86400,7 +85826,7 @@ const PageDetails = ({ match }) => {
   const params = qs;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(PageDetails$1, { id: decodeURIComponent(match.params.id), params });
 };
-const Component$7 = () => {
+const Component$8 = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.models) }),
@@ -99032,7 +98458,18 @@ const useOrderDetails = (id) => {
   const hasManageProducts = useHasManageProductsPermission();
   const { data, loading } = useOrderDetailsWithMetadataQuery({
     displayLoader: true,
-    variables: { id, hasManageProducts }
+    variables: { id, hasManageProducts },
+    // STRICT cache-first to prevent ANY automatic refetching
+    fetchPolicy: "cache-first",
+    nextFetchPolicy: "cache-first",
+    // Disable ALL automatic refetch triggers
+    notifyOnNetworkStatusChange: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    // Disable refetch on window focus
+    refetchOnWindowFocus: false,
+    // Skip the query if we have cached data
+    skip: false
   });
   return {
     data,
@@ -99046,7 +98483,7 @@ const OrderDetails$1 = ({ id, params }) => {
   const [updateMetadata, updateMetadataOpts] = useUpdateMetadataMutation({});
   const [updatePrivateMetadata, updatePrivateMetadataOpts] = useUpdatePrivateMetadataMutation({});
   const notify = useNotifier();
-  const apolloClient2 = useApolloClient();
+  useApolloClient();
   const [openModal, closeModal] = createDialogActionHandlers(
     navigate,
     (params2) => orderUrl(id, params2),
@@ -99134,9 +98571,6 @@ const OrderDetails$1 = ({ id, params }) => {
       onInvoiceSend: orderMessages2.handleInvoiceSend,
       onTransactionActionSend: orderMessages2.handleTransactionAction,
       onManualTransactionAdded: async (data2) => {
-        await apolloClient2.refetchQueries({
-          include: [OrderDetailsWithMetadataDocument]
-        });
         orderMessages2.handleAddManualTransaction(data2);
       },
       children: ({
@@ -107696,7 +107130,7 @@ const OrderTransactionRefundEdit = ({
 const OrderManualTransactionRefund = ({ match }) => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(OrderManualTransactionRefund$1, { orderId: decodeURIComponent(match.params.id ?? "") });
 };
-const Component$6 = () => {
+const Component$7 = () => {
   const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.orders) }),
@@ -107732,6 +107166,207 @@ const Component$6 = () => {
         }
       ),
       /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: orderPath(":id"), component: OrderDetails })
+    ] })
+  ] });
+};
+const CustomOrderDetails = ({ id }) => {
+  var _a, _b2, _c, _d, _e, _f, _g;
+  const navigate = useNavigator();
+  const notify = useNotifier();
+  const intl = useIntl();
+  const { data, loading } = useOrderDetailsWithMetadataQuery({
+    variables: { id, hasManageProducts: true },
+    fetchPolicy: "cache-first"
+  });
+  const [approveFulfillment, { loading: updating }] = useOrderFulfillmentApproveMutation({
+    refetchQueries: ["OrderDetailsWithMetadata"],
+    onCompleted: (data2) => {
+      var _a2, _b3;
+      if (((_a2 = data2.orderFulfillmentApprove) == null ? void 0 : _a2.errors.length) === 0) {
+        notify({
+          status: "success",
+          text: intl.formatMessage({
+            defaultMessage: "Заказ отмечен как доставленный",
+            id: "orderMarkedAsDelivered"
+          })
+        });
+      } else {
+        const error = (_b3 = data2.orderFulfillmentApprove) == null ? void 0 : _b3.errors[0];
+        notify({
+          status: "error",
+          text: (error == null ? void 0 : error.message) || intl.formatMessage({
+            defaultMessage: "Ошибка при обновлении статуса",
+            id: "orderStatusUpdateError"
+          })
+        });
+      }
+    }
+  });
+  const order = data == null ? void 0 : data.order;
+  const handleMarkAsDelivered = () => {
+    var _a2;
+    if (!order) return;
+    const unfulfilledFulfillment = (_a2 = order.fulfillments) == null ? void 0 : _a2.find(
+      (f2) => f2.status !== "FULFILLED" && f2.status !== "CANCELED"
+    );
+    if (!unfulfilledFulfillment) {
+      notify({
+        status: "error",
+        text: intl.formatMessage({
+          defaultMessage: "Нет fulfillment для одобрения. Сначала создайте fulfillment.",
+          id: "noFulfillmentToApprove"
+        })
+      });
+      return;
+    }
+    approveFulfillment({
+      variables: {
+        id: unfulfilledFulfillment.id,
+        notifyCustomer: false
+      }
+    });
+  };
+  if (loading) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(J, { padding: 6, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Загрузка...", id: "loading" }) }) });
+  }
+  if (!order) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { padding: 6, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Заказ не найден", id: "orderNotFound" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { onClick: () => navigate(customOrderListUrl()), marginTop: 4, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Назад к списку", id: "backToList" }) })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { padding: 6, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 8, fontWeight: "bold", children: [
+          "Заказ #",
+          order.number
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, color: "default2", children: order.created && new Date(order.created).toLocaleDateString("ru-RU") })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(oo, { onClick: () => navigate(customOrderListUrl()), variant: "secondary", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Назад", id: "back" }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "grid", gap: 4, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard.Content, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "bold", marginBottom: 2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Информация о заказе", id: "orderInfo" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "grid", gap: 2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, children: "Клиент:" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, fontWeight: "bold", children: order.userEmail || "Без клиента" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, children: "Статус:" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, fontWeight: "bold", children: order.status })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, children: "Сумма:" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 4, fontWeight: "bold", children: [
+              (_b2 = (_a = order.total) == null ? void 0 : _a.gross) == null ? void 0 : _b2.amount,
+              " ",
+              (_d = (_c = order.total) == null ? void 0 : _c.gross) == null ? void 0 : _d.currency
+            ] })
+          ] })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard.Content, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "bold", marginBottom: 2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Товары", id: "products" }) }),
+        (_e = order.lines) == null ? void 0 : _e.map((line) => {
+          var _a2, _b3, _c2, _d2;
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", paddingY: 2, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 4, children: [
+              line.productName,
+              " x",
+              line.quantity
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 4, fontWeight: "bold", children: [
+              (_b3 = (_a2 = line.totalPrice) == null ? void 0 : _a2.gross) == null ? void 0 : _b3.amount,
+              " ",
+              (_d2 = (_c2 = line.totalPrice) == null ? void 0 : _c2.gross) == null ? void 0 : _d2.currency
+            ] })
+          ] }, line.id);
+        })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "bold", marginBottom: 1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Статус доставки", id: "deliveryStatus" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, color: "default2", children: ((_f = order.fulfillments) == null ? void 0 : _f.length) > 0 ? order.fulfillments[0].status : "Не доставлено" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          oo,
+          {
+            onClick: handleMarkAsDelivered,
+            disabled: updating || ((_g = order.fulfillments) == null ? void 0 : _g.every((f2) => f2.status === "FULFILLED" || f2.status === "CANCELED")),
+            variant: "primary",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Отметить как доставлено", id: "markAsDelivered" })
+          }
+        )
+      ] }) }) })
+    ] })
+  ] });
+};
+const CustomOrderList = () => {
+  const navigate = useNavigator();
+  const { data, loading } = useOrderListQuery({
+    variables: {
+      first: 20,
+      // Простое ограничение, можно увеличить
+      after: null
+    }
+  });
+  const orders = mapEdgesToItems(data == null ? void 0 : data.orders);
+  const customOrders = (orders == null ? void 0 : orders.filter((order) => {
+    return true;
+  })) || [];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { padding: 6, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 8, fontWeight: "bold", children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Кастомные заказы", id: "customOrders.title" }) }) }),
+    loading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Загрузка...", id: "loading" }) }) : customOrders.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(MemoizedFormattedMessage, { defaultMessage: "Нет заказов", id: "noOrders" }) }) }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "grid", gap: 2, children: customOrders.map((order) => {
+      var _a, _b2, _c, _d, _e;
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DashboardCard,
+        {
+          onClick: () => navigate(customOrderUrl(order.id)),
+          style: { cursor: "pointer" },
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 5, fontWeight: "bold", children: [
+                "Заказ #",
+                order.number
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, color: "default2", children: order.created && new Date(order.created).toLocaleDateString("ru-RU") }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, color: "default2", children: ((_a = order.customer) == null ? void 0 : _a.email) || "Без клиента" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { textAlign: "right", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 5, fontWeight: "bold", children: [
+                (_c = (_b2 = order.total) == null ? void 0 : _b2.gross) == null ? void 0 : _c.amount,
+                " ",
+                (_e = (_d = order.total) == null ? void 0 : _d.gross) == null ? void 0 : _e.currency
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 3, color: "default2", children: [
+                "Статус: ",
+                order.status
+              ] })
+            ] })
+          ] }) })
+        },
+        order.id
+      );
+    }) })
+  ] });
+};
+const CustomOrderListRoute = () => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(CustomOrderList, {});
+};
+const CustomOrderDetailsRoute = ({ match }) => {
+  const id = match.params.id;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(CustomOrderDetails, { id: decodeURIComponent(id) });
+};
+const Component$6 = () => {
+  const intl = useIntl();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(WindowTitle, { title: intl.formatMessage(sectionNames.orders) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Switch, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { exact: true, path: customOrderListPath, component: CustomOrderListRoute }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Route, { path: customOrderPath(":id"), component: CustomOrderDetailsRoute })
     ] })
   ] });
 };
@@ -113189,7 +112824,7 @@ const ProductList$1 = ({ params }) => {
   } = useFilterPresets({
     params,
     getUrl: productListUrl,
-    storageUtils: storageUtils$e,
+    storageUtils: storageUtils$f,
     reset: clearRowSelection
   });
   const countAllProducts = useProductCountQuery({
@@ -113234,7 +112869,7 @@ const ProductList$1 = ({ params }) => {
   const [_, resetFilters, handleSearchChange] = useFilterHandlers({
     cleanupFn: clearRowSelection,
     createUrl: productListUrl,
-    getFilterQueryParam: getFilterQueryParam$a,
+    getFilterQueryParam: getFilterQueryParam$b,
     params,
     keepActiveTab: true,
     defaultSortField: DEFAULT_SORT_KEY$4,
@@ -113259,7 +112894,7 @@ const ProductList$1 = ({ params }) => {
     filterContainer: valueProvider.value,
     queryParams: params
   });
-  const sort = getSortQueryVariables$g(params, !!selectedChannel);
+  const sort = getSortQueryVariables$h(params, !!selectedChannel);
   const queryVariables = reactExports.useMemo(
     () => ({
       ...paginationState,
@@ -136444,12 +136079,17 @@ const WelcomePageActivities = () => {
   ] });
 };
 const welcomePageMessages = defineMessages({
+  storeInfoTitle: {
+    defaultMessage: "Информация о вашем магазине",
+    id: "x0wum5",
+    description: "home sidebar card title"
+  },
   salesCardTitle: {
-    defaultMessage: "Sales",
+    defaultMessage: "Продажи сегодня",
     id: "c8nvms"
   },
   outOfStockCardTitle: {
-    defaultMessage: "Out of stock",
+    defaultMessage: "Нет в наличии",
     id: "WHgdsk"
   }
 });
@@ -136510,7 +136150,7 @@ const WelcomePageSalesAnalytics = () => {
     {
       title: intl.formatMessage(welcomePageMessages.salesCardTitle),
       testId: "sales-analytics",
-      children: noChannel || hasError2 ? 0 : !loading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Money, { money: analytics.sales }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 10, height: 3 })
+      children: noChannel || hasError2 ? /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, color: "default2", children: "—" }) : !loading && analytics.sales ? /* @__PURE__ */ jsxRuntimeExports.jsx(Money, { money: analytics.sales }) : !loading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, color: "default2", children: "0" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 10, height: 3 })
     }
   );
 };
@@ -136543,148 +136183,9 @@ const WelcomePageStocksAnalytics = () => {
     {
       title: intl.formatMessage(welcomePageMessages.outOfStockCardTitle),
       testId: "out-of-stock-analytics",
-      children: hasNoChannels || hasError2 ? 0 : !loading ? analytics.productsOutOfStock : /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 16, height: 3 })
+      children: hasNoChannels || hasError2 ? /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, color: "default2", children: "—" }) : !loading ? analytics.productsOutOfStock : /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 16, height: 3 })
     }
   );
-};
-const useWelcomePageAbandonedCheckouts = (hoursThreshold = 24) => {
-  var _a, _b2;
-  const { channel } = useAppChannel();
-  const { data, loading, error } = useAbandonedCheckoutsQuery({
-    variables: {
-      channel: (channel == null ? void 0 : channel.slug) || ""
-    },
-    skip: !channel
-  });
-  const now = /* @__PURE__ */ new Date();
-  const thresholdDate = new Date(now.getTime() - hoursThreshold * 60 * 60 * 1e3);
-  const abandonedCheckouts = ((_b2 = (_a = data == null ? void 0 : data.checkouts) == null ? void 0 : _a.edges) == null ? void 0 : _b2.filter(({ node }) => {
-    const lastChange = new Date(node.lastChange);
-    const hasContact = node.email || node.user;
-    const hasItems = node.lines && node.lines.length > 0;
-    const isAbandoned = lastChange < thresholdDate;
-    return hasContact && hasItems && isAbandoned;
-  })) || [];
-  const potentialRevenue = abandonedCheckouts.reduce((sum, { node }) => {
-    var _a2, _b3;
-    return sum + (((_b3 = (_a2 = node.totalPrice) == null ? void 0 : _a2.gross) == null ? void 0 : _b3.amount) || 0);
-  }, 0);
-  const count = abandonedCheckouts.length;
-  return {
-    count,
-    potentialRevenue,
-    currency: (channel == null ? void 0 : channel.currencyCode) || "RUB",
-    loading,
-    hasError: !!error,
-    checkouts: abandonedCheckouts.slice(0, 5)
-    // Топ 5 для отображения
-  };
-};
-const PERIOD_OPTIONS = [
-  { value: 24, label: "24ч" },
-  { value: 72, label: "3д" },
-  { value: 168, label: "7д" },
-  { value: 720, label: "30д" }
-];
-const WelcomePageAbandonedCheckouts = () => {
-  useIntl();
-  const [hoursThreshold, setHoursThreshold] = reactExports.useState(24);
-  const { count, potentialRevenue, currency: currency2, loading, hasError: hasError2, checkouts } = useWelcomePageAbandonedCheckouts(hoursThreshold);
-  if (loading) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard, { borderRadius: 3, borderWidth: 1, borderStyle: "solid", borderColor: "default1", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Header, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Title, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 10, height: 2 }) }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Vv, { width: 8, height: 3 }) })
-    ] });
-  }
-  if (hasError2) {
-    return null;
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard, { borderRadius: 3, borderWidth: 1, borderStyle: "solid", borderColor: "default1", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Header, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Title, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 6, fontWeight: "bold", children: "🛒 Брошенные корзины" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "flex", gap: 2, children: PERIOD_OPTIONS.map(({ value, label }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-        oo,
-        {
-          variant: hoursThreshold === value ? "primary" : "secondary",
-          size: "small",
-          onClick: () => setHoursThreshold(value),
-          children: label
-        },
-        value
-      )) })
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", flexDirection: "column", gap: 4, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, color: "default2", children: "Количество:" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "medium", children: count })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, color: "default2", children: "Потенциальная выручка:" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "medium", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Money,
-          {
-            money: {
-              amount: potentialRevenue,
-              currency: currency2
-            }
-          }
-        ) })
-      ] }),
-      count > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { marginTop: 3, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 4, fontWeight: "medium", marginBottom: 2, children: "Топ корзин:" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(J, { display: "flex", flexDirection: "column", gap: 2, children: checkouts.map(({ node }) => {
-          var _a, _b2, _c, _d;
-          const email = node.email || ((_a = node.user) == null ? void 0 : _a.email) || "Нет email";
-          const total = ((_c = (_b2 = node.totalPrice) == null ? void 0 : _b2.gross) == null ? void 0 : _c.amount) || 0;
-          const itemsCount = ((_d = node.lines) == null ? void 0 : _d.length) || 0;
-          const lastChange = new Date(node.lastChange);
-          const hoursAgo = Math.floor(
-            ((/* @__PURE__ */ new Date()).getTime() - lastChange.getTime()) / (1e3 * 60 * 60)
-          );
-          const daysAgo = Math.floor(hoursAgo / 24);
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            J,
-            {
-              padding: 3,
-              borderRadius: 2,
-              backgroundColor: "default2",
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, fontWeight: "medium", children: email.length > 30 ? email.substring(0, 27) + "..." : email }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 2, color: "default2", children: [
-                    itemsCount,
-                    " ",
-                    itemsCount === 1 ? "товар" : "товаров"
-                  ] }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 2, fontWeight: "medium", children: [
-                    total.toFixed(2),
-                    " ",
-                    currency2
-                  ] })
-                ] }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 2, color: "default2", children: daysAgo > 0 ? `${daysAgo}д ${hoursAgo % 24}ч назад` : `${hoursAgo}ч назад` })
-              ]
-            },
-            node.id
-          );
-        }) })
-      ] }),
-      count === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-        J,
-        {
-          padding: 4,
-          borderRadius: 2,
-          backgroundColor: "default2",
-          display: "flex",
-          justifyContent: "center",
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, color: "default2", children: "✅ Нет брошенных корзин" })
-        }
-      )
-    ] }) })
-  ] });
 };
 const useWelcomePageTopProducts = (period = ReportingPeriod.TODAY) => {
   var _a;
@@ -136782,45 +136283,34 @@ const WelcomePageTopProducts = () => {
     ) }) })
   ] });
 };
+function getPeriodStartIsoDate(period) {
+  const now = /* @__PURE__ */ new Date();
+  const start = period === ReportingPeriod.TODAY ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) : new Date(now.getFullYear(), now.getMonth(), 1);
+  return start.toISOString().slice(0, 10);
+}
 const useWelcomePageComplexStats = (period = ReportingPeriod.TODAY) => {
-  var _a, _b2, _c, _d, _e, _f, _g, _h, _i, _j;
+  var _a, _b2, _c, _d, _e, _f;
   const { channel } = useAppChannel();
+  const periodStart = getPeriodStartIsoDate(period);
   const { data, loading, error } = useComplexDashboardStatsQuery({
     variables: {
       period,
-      channel: (channel == null ? void 0 : channel.slug) || ""
+      channel: (channel == null ? void 0 : channel.slug) || "",
+      ordersCreatedGte: periodStart,
+      customersJoinedGte: periodStart
     },
     skip: !channel
   });
-  const totalRevenue = ((_b2 = (_a = data == null ? void 0 : data.ordersTotal) == null ? void 0 : _a.gross) == null ? void 0 : _b2.amount) || 0;
+  const totalRevenue = ((_b2 = (_a = data == null ? void 0 : data.ordersTotal) == null ? void 0 : _a.gross) == null ? void 0 : _b2.amount) ?? 0;
   const currency2 = ((_d = (_c = data == null ? void 0 : data.ordersTotal) == null ? void 0 : _c.gross) == null ? void 0 : _d.currency) || (channel == null ? void 0 : channel.currencyCode) || "RUB";
-  const now = /* @__PURE__ */ new Date();
-  const periodStart = period === ReportingPeriod.TODAY ? new Date(now.getFullYear(), now.getMonth(), now.getDate()) : new Date(now.getFullYear(), now.getMonth(), 1);
-  const ordersInPeriod = ((_f = (_e = data == null ? void 0 : data.orders) == null ? void 0 : _e.edges) == null ? void 0 : _f.filter(({ node }) => {
-    const orderDate = new Date(node.created);
-    return orderDate >= periodStart;
-  })) || [];
-  const ordersCount = ordersInPeriod.length;
+  const ordersCount = ((_e = data == null ? void 0 : data.orders) == null ? void 0 : _e.totalCount) ?? 0;
+  const newCustomersCount = ((_f = data == null ? void 0 : data.customers) == null ? void 0 : _f.totalCount) ?? 0;
   const averageOrderValue = ordersCount > 0 ? totalRevenue / ordersCount : 0;
-  const newCustomers = ((_h = (_g = data == null ? void 0 : data.customers) == null ? void 0 : _g.edges) == null ? void 0 : _h.filter(({ node }) => {
-    const joinDate = new Date(node.dateJoined);
-    return joinDate >= periodStart;
-  })) || [];
-  const newCustomersCount = newCustomers.length;
-  const checkoutsInPeriod = ((_j = (_i = data == null ? void 0 : data.checkouts) == null ? void 0 : _i.edges) == null ? void 0 : _j.filter(({ node }) => {
-    const checkoutDate = new Date(node.created);
-    const hasItems = node.lines && node.lines.length > 0;
-    return checkoutDate >= periodStart && hasItems;
-  })) || [];
-  const checkoutsCount = checkoutsInPeriod.length;
-  const conversionRate = checkoutsCount > 0 ? ordersCount / checkoutsCount * 100 : 0;
   return {
     totalRevenue,
     ordersCount,
     averageOrderValue,
     newCustomersCount,
-    checkoutsCount,
-    conversionRate,
     currency: currency2,
     loading,
     hasError: !!error
@@ -136837,8 +136327,6 @@ const WelcomePageComplexStats = () => {
     ordersCount,
     averageOrderValue,
     newCustomersCount,
-    checkoutsCount,
-    conversionRate,
     currency: currency2,
     loading,
     hasError: hasError2
@@ -136850,7 +136338,10 @@ const WelcomePageComplexStats = () => {
     ] });
   }
   if (hasError2) {
-    return null;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard, { borderRadius: 3, borderWidth: 1, borderStyle: "solid", borderColor: "default1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Header, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Title, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 6, fontWeight: "bold", children: "📊 Сводка" }) }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Content, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 3, color: "default2", children: "Не удалось загрузить статистику" }) })
+    ] });
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard, { borderRadius: 3, borderWidth: 1, borderStyle: "solid", borderColor: "default1", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Header, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", children: [
@@ -136942,34 +136433,6 @@ const WelcomePageComplexStats = () => {
             /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 5, fontWeight: "bold", children: newCustomersCount })
           ]
         }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        J,
-        {
-          padding: 3,
-          borderRadius: 2,
-          backgroundColor: "default2",
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-          __gridColumn: "1 / -1",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 2, color: "default2", children: "Конверсия корзины → заказ" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(J, { display: "flex", justifyContent: "space-between", alignItems: "center", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 5, fontWeight: "bold", children: [
-                checkoutsCount > 0 ? conversionRate.toFixed(1) : "0.0",
-                "%"
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(Ts, { size: 2, color: "default2", children: [
-                "(",
-                ordersCount,
-                " заказов / ",
-                checkoutsCount,
-                " корзин)"
-              ] })
-            ] })
-          ]
-        }
       )
     ] }) })
   ] });
@@ -136998,18 +136461,12 @@ const WelcomePageSidebarContextProvider = ({
 };
 const WelcomePageSidebar = (props) => {
   var _a;
+  const intl = useIntl();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(WelcomePageSidebarContextProvider, { ...props, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(RequirePermissions, { requiredPermissions: [PermissionEnum.MANAGE_ORDERS], children: /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomePageComplexStats, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard, { borderRadius: 3, borderWidth: 1, borderStyle: "solid", borderColor: "default1", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(DashboardCard.Header, { gap: 3, display: "flex", flexWrap: "wrap", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Title, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 8, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          MemoizedFormattedMessage,
-          {
-            defaultMessage: "Your store info",
-            id: "x0wum5",
-            description: "home sidebar card title"
-          }
-        ) }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(DashboardCard.Title, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Ts, { size: 8, children: intl.formatMessage(welcomePageMessages.storeInfoTitle) }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           AppChannelSelect,
           {
@@ -137027,7 +136484,6 @@ const WelcomePageSidebar = (props) => {
         /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomePageActivities, {})
       ] })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(RequirePermissions, { requiredPermissions: [PermissionEnum.MANAGE_CHECKOUTS], children: /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomePageAbandonedCheckouts, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(RequirePermissions, { requiredPermissions: [PermissionEnum.MANAGE_PRODUCTS], children: /* @__PURE__ */ jsxRuntimeExports.jsx(WelcomePageTopProducts, {}) })
   ] });
 };
@@ -137141,7 +136597,7 @@ const Routes = () => {
             {
               permissions: [PermissionEnum.MANAGE_PRODUCTS],
               path: "/categories",
-              component: Component$a
+              component: Component$c
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -137149,7 +136605,7 @@ const Routes = () => {
             {
               permissions: [PermissionEnum.MANAGE_PRODUCTS],
               path: "/collections",
-              component: Component$9
+              component: Component$b
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -137165,7 +136621,7 @@ const Routes = () => {
             {
               permissions: [PermissionEnum.MANAGE_GIFT_CARD],
               path: giftCardsSectionUrlName,
-              component: Component$8
+              component: Component$a
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -137181,7 +136637,15 @@ const Routes = () => {
             {
               permissions: [PermissionEnum.MANAGE_PAGES],
               path: pageListPath,
-              component: Component$7
+              component: Component$8
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SectionRoute,
+            {
+              permissions: [PermissionEnum.MANAGE_PAGES],
+              path: articleListPath,
+              component: Component$9
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -137201,6 +136665,14 @@ const Routes = () => {
             {
               permissions: [PermissionEnum.MANAGE_ORDERS],
               path: "/orders",
+              component: Component$7
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SectionRoute,
+            {
+              permissions: [PermissionEnum.MANAGE_ORDERS],
+              path: "/custom-orders",
               component: Component$6
             }
           ),
