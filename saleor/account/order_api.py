@@ -91,9 +91,18 @@ def format_delivery_summary(order) -> str | None:
     meta = parse_vsp_address_meta(addr.street_address_2)
     carrier = meta.get("carrier", "cdek")
     carrier_label = CARRIER_LABELS.get(carrier, carrier)
-    mode_label = "ПВЗ" if meta.get("dropoff") == "pvz" else "Курьер"
-    city = (addr.city or "").strip()
     street = (addr.street_address_1 or "").strip()
+    city = (addr.city or "").strip()
+
+    street_lower = street.lower()
+    if street and (
+        "пвз:" in street_lower
+        or carrier_label.lower() in street_lower
+        or street.startswith(("Ozon", "СДЭК", "Яндекс"))
+    ):
+        return street
+
+    mode_label = "ПВЗ" if meta.get("dropoff") == "pvz" else "Курьер"
     parts = [p for p in (city, street) if p]
     location = ", ".join(parts) if parts else street or city
     return f"{carrier_label}, {mode_label}: {location}"
@@ -169,9 +178,18 @@ def format_delivery_summary_from_address(addr) -> str:
     meta = parse_vsp_address_meta(addr.street_address_2)
     carrier = meta.get("carrier", "cdek")
     carrier_label = CARRIER_LABELS.get(carrier, carrier)
-    mode_label = "ПВЗ" if meta.get("dropoff") == "pvz" else "Курьер"
-    city = (addr.city or "").strip()
     street = (addr.street_address_1 or "").strip()
+    city = (addr.city or "").strip()
+
+    street_lower = street.lower()
+    if street and (
+        "пвз:" in street_lower
+        or carrier_label.lower() in street_lower
+        or street.startswith(("Ozon", "СДЭК", "Яндекс"))
+    ):
+        return street
+
+    mode_label = "ПВЗ" if meta.get("dropoff") == "pvz" else "Курьер"
     parts = [p for p in (city, street) if p]
     location = ", ".join(parts) if parts else street or city
     return f"{carrier_label}, {mode_label}: {location}"

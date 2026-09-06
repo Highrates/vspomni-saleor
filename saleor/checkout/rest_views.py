@@ -715,6 +715,52 @@ def _apply_external_shipping_to_checkout(
     return fetch_checkout_data(checkout_info, manager, lines)
 
 
+def _align_order_with_external_shipping_payment(order, checkout, payment_amount):
+    """Синхронизирует total/shipping заказа с REST-доставкой (CDEK/Yandex/Ozon)."""
+    from ..order.utils import update_order_charge_status
+
+    shipping_amount = Decimal(str(checkout.undiscounted_base_shipping_price_amount or 0))
+    if not checkout.external_shipping_method_id or shipping_amount <= 0:
+        return order
+
+    subtotal = Decimal(str(order.subtotal_gross_amount or 0))
+    expected_total = subtotal + shipping_amount
+    current_total = Decimal(str(order.total_gross_amount or 0))
+
+    if abs(current_total - expected_total) <= Decimal("0.01"):
+        update_order_charge_status(order, Decimal("0"))
+        order.save(update_fields=["charge_status"])
+        return order
+
+    order.shipping_price_gross_amount = shipping_amount
+    order.shipping_price_net_amount = shipping_amount
+    order.base_shipping_price_amount = shipping_amount
+    order.undiscounted_base_shipping_price_amount = shipping_amount
+    order.total_gross_amount = expected_total
+    order.total_net_amount = expected_total
+    order.save(
+        update_fields=[
+            "shipping_price_gross_amount",
+            "shipping_price_net_amount",
+            "base_shipping_price_amount",
+            "undiscounted_base_shipping_price_amount",
+            "total_gross_amount",
+            "total_net_amount",
+        ]
+    )
+    update_order_charge_status(order, Decimal("0"))
+    order.save(update_fields=["charge_status"])
+    logger.info(
+        "Aligned order %s totals: subtotal=%s shipping=%s total=%s payment=%s",
+        order.number,
+        subtotal,
+        shipping_amount,
+        expected_total,
+        payment_amount,
+    )
+    return order
+
+
 def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, manager):
     from ..payment import TransactionAction
     from ..payment.models import TransactionItem
@@ -1354,6 +1400,10 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         private_metadata_list=None,
                         delete_checkout=True,  # Удаляем checkout после создания order, чтобы избежать повторных попыток
                         is_automatic_completion=True,
+                    )
+
+                    order = _align_order_with_external_shipping_payment(
+                        order, checkout, payment_amount
                     )
                     
                     logger.info(f'Order created successfully: {order.id}, number: {order.number}')

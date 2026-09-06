@@ -628,9 +628,16 @@ class GetOrdersView(View):
                 page_size = 10
 
             if user.email:
+                # Привязываем только «сиротские» заказы за последние 7 дней — не старые тестовые.
+                from django.utils import timezone
+                from datetime import timedelta
+
+                recent_cutoff = timezone.now() - timedelta(days=7)
                 orders_by_email = Order.objects.filter(
                     user_email__iexact=user.email,
-                ).exclude(user=user)
+                    user__isnull=True,
+                    created_at__gte=recent_cutoff,
+                )
                 if orders_by_email.exists():
                     orders_by_email.update(user=user)
 

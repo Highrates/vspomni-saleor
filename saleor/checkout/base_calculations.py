@@ -146,7 +146,19 @@ def calculate_base_price_for_shipping_method(
     else:
         shipping_required = checkout_info.checkout.is_shipping_required()
 
-    if not shipping_method or not shipping_required:
+    if not shipping_method:
+        return zero_money(checkout_info.checkout.currency)
+
+    if not shipping_required:
+        checkout = checkout_info.checkout
+        if (
+            checkout.external_shipping_method_id
+            and checkout.undiscounted_base_shipping_price_amount
+        ):
+            return quantize_price(
+                checkout.undiscounted_base_shipping_price,
+                checkout.currency,
+            )
         return zero_money(checkout_info.checkout.currency)
 
     return quantize_price(
