@@ -379,6 +379,17 @@ class VerifyEmailCodeView(View):
       user.is_active = True
       user.save(update_fields=["is_confirmed", "is_active"])
 
+      # Телефон с регистрации: из тела запроса или из OTP-записи
+      phone = (data.get("phone") or "").strip() or (ver.phone or "").strip()
+      if phone:
+        user.store_value_in_metadata({"phone": phone})
+        user.save(update_fields=["metadata", "updated_at"])
+        # Если уже есть адрес по умолчанию — обновим телефон там тоже
+        default_addr = user.default_shipping_address or user.default_billing_address
+        if default_addr is not None:
+          default_addr.phone = phone
+          default_addr.save(update_fields=["phone"])
+
       # Автоматический логин: создаём токены как в AuthLoginView
       csrf_token = _get_new_csrf_token()
       access_token = create_access_token(user)
@@ -400,6 +411,7 @@ class VerifyEmailCodeView(View):
             "email": user.email,
             "firstName": user.first_name,
             "lastName": user.last_name,
+            "phone": phone,
             "isActive": user.is_active,
             "isConfirmed": user.is_confirmed,
           },
