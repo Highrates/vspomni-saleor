@@ -13,16 +13,14 @@ const PERIOD_LABELS = {
 
 export const WelcomePageComplexStats = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<ReportingPeriod>(ReportingPeriod.TODAY);
-  const { 
-    totalRevenue, 
-    ordersCount, 
-    averageOrderValue, 
+  const {
+    totalRevenue,
+    ordersCount,
+    averageOrderValue,
     newCustomersCount,
-    checkoutsCount,
-    conversionRate,
-    currency, 
-    loading, 
-    hasError 
+    currency,
+    loading,
+    hasError,
   } = useWelcomePageComplexStats(selectedPeriod);
 
   if (loading) {
@@ -41,7 +39,22 @@ export const WelcomePageComplexStats = () => {
   }
 
   if (hasError) {
-    return null;
+    return (
+      <DashboardCard borderRadius={3} borderWidth={1} borderStyle="solid" borderColor="default1">
+        <DashboardCard.Header>
+          <DashboardCard.Title>
+            <Text size={6} fontWeight="bold">
+              📊 Сводка
+            </Text>
+          </DashboardCard.Title>
+        </DashboardCard.Header>
+        <DashboardCard.Content>
+          <Text size={3} color="default2">
+            Не удалось загрузить статистику
+          </Text>
+        </DashboardCard.Content>
+      </DashboardCard>
+    );
   }
 
   return (
@@ -53,7 +66,7 @@ export const WelcomePageComplexStats = () => {
               📊 Сводка
             </Text>
           </DashboardCard.Title>
-          
+
           <Box display="flex" gap={2}>
             {Object.entries(PERIOD_LABELS).map(([period, label]) => (
               <Button
@@ -68,10 +81,9 @@ export const WelcomePageComplexStats = () => {
           </Box>
         </Box>
       </DashboardCard.Header>
-      
+
       <DashboardCard.Content>
         <Box display="grid" __gridTemplateColumns="repeat(2, 1fr)" gap={4}>
-          {/* Заказы и выручка */}
           <Box
             padding={3}
             borderRadius={2}
@@ -109,7 +121,6 @@ export const WelcomePageComplexStats = () => {
             </Text>
           </Box>
 
-          {/* Средний чек */}
           <Box
             padding={3}
             borderRadius={2}
@@ -131,7 +142,6 @@ export const WelcomePageComplexStats = () => {
             </Text>
           </Box>
 
-          {/* Новые клиенты */}
           <Box
             padding={3}
             borderRadius={2}
@@ -147,32 +157,8 @@ export const WelcomePageComplexStats = () => {
               {newCustomersCount}
             </Text>
           </Box>
-
-          {/* Конверсия корзины → заказ */}
-          <Box
-            padding={3}
-            borderRadius={2}
-            backgroundColor="default2"
-            display="flex"
-            flexDirection="column"
-            gap={1}
-            __gridColumn="1 / -1"
-          >
-            <Text size={2} color="default2">
-              Конверсия корзины → заказ
-            </Text>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Text size={5} fontWeight="bold">
-                {checkoutsCount > 0 ? conversionRate.toFixed(1) : "0.0"}%
-              </Text>
-              <Text size={2} color="default2">
-                ({ordersCount} заказов / {checkoutsCount} корзин)
-              </Text>
-            </Box>
-          </Box>
         </Box>
       </DashboardCard.Content>
     </DashboardCard>
   );
 };
-

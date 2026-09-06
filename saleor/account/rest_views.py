@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import timedelta
 from random import randint
 
@@ -21,6 +22,7 @@ from ..graphql.site.dataloaders import get_site_promise
 
 
 OTP_EXPIRATION_MINUTES = 10
+logger = logging.getLogger(__name__)
 
 
 def _generate_verification_code() -> str:
@@ -35,19 +37,12 @@ def _send_site_email(
   recipient: str,
   html_message: str | None = None,
 ) -> int:
-  """
-  Та же отправка, что для OTP: Django EMAIL_URL / DEFAULT_FROM_EMAIL.
-  """
-  from django.core.mail import get_connection, send_mail
+  from .email_utils import send_site_email
 
-  connection = get_connection(timeout=15)
-  return send_mail(
-    subject,
-    message,
-    settings.DEFAULT_FROM_EMAIL,
-    [recipient],
-    fail_silently=False,
-    connection=connection,
+  return send_site_email(
+    subject=subject,
+    message=message,
+    recipient=recipient,
     html_message=html_message,
   )
 
@@ -330,7 +325,8 @@ class RequestEmailCodeView(View):
     except json.JSONDecodeError:
       return JsonResponse({"error": "Неверный формат JSON"}, status=400)
     except Exception as e:
-      return JsonResponse({"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500)
+      logger.exception("request-email-code failed")
+      return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -475,8 +471,10 @@ class ForgotPasswordView(View):
     except json.JSONDecodeError:
       return JsonResponse({"error": "Неверный формат JSON"}, status=400)
     except Exception as e:
+      logger.exception("forgot-password failed")
       return JsonResponse(
-        {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
+        {"ok": False, "error": str(e)},
+        status=500,
       )
 
 
@@ -590,123 +588,126 @@ class ChangePasswordView(View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class GetOrdersView(View):
-    """Получить оформленные заказы пользователя (исключая DRAFT)."""
+    """Получить оформленные заказы пользователя (исключая DRAFT) с пагинацией."""
 
     def get(self, request):
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.info('GetOrdersView: Request received')
         from ..core.auth_backend import load_user_from_request
         from ..order.models import Order
         from ..order import OrderStatus
+        from .order_api import serialize_order
 
         try:
             user = load_user_from_request(request)
             if not user:
-                logger.warning('GetOrdersView: User not authenticated')
                 return JsonResponse(
                     {"ok": False, "error": "Не авторизован"}, status=401
                 )
 
-            logger.info(f'GetOrdersView: Fetching orders for user {user.email} (id: {user.id})')
+            try:
+                page = max(1, int(request.GET.get("page", 1)))
+            except (TypeError, ValueError):
+                page = 1
+            try:
+                page_size = min(50, max(1, int(request.GET.get("page_size", 10))))
+            except (TypeError, ValueError):
+                page_size = 10
 
-            # Проверяем все заказы пользователя (для отладки)
-            all_orders = Order.objects.filter(user=user)
-            logger.info(f'GetOrdersView: Total orders for user (all statuses): {all_orders.count()}')
-            for order in all_orders[:10]:  # Показываем первые 10 для отладки
-                logger.info(f'GetOrdersView: Order {order.id} - status: {order.status}, number: {order.number}, created_at: {order.created_at}, user_id: {order.user_id if order.user else None}')
-            
-            # Также проверяем заказы по email (на случай если user не установлен)
             if user.email:
                 orders_by_email = Order.objects.filter(
                     user_email__iexact=user.email,
                 ).exclude(user=user)
-                logger.info(f'GetOrdersView: Found {orders_by_email.count()} orders by email {user.email} without user link')
                 if orders_by_email.exists():
-                    # Обновляем заказы, связывая их с пользователем
                     orders_by_email.update(user=user)
-                    logger.info(f'GetOrdersView: Linked {orders_by_email.count()} orders to user {user.id}')
 
-            # Получаем все заказы кроме DRAFT (включаем UNCONFIRMED и UNFULFILLED)
-            # UNCONFIRMED - заказ создан, но ещё не подтверждён
-            # UNFULFILLED - заказ подтверждён, но ещё не выполнен
-            orders = Order.objects.filter(
-                user=user
-            ).exclude(
-                status=OrderStatus.DRAFT
-            ).order_by('-created_at')[:20]
-            
-            logger.info(f'GetOrdersView: Found {orders.count()} confirmed orders for user {user.email}')
+            base_qs = (
+                Order.objects.filter(user=user)
+                .exclude(status=OrderStatus.DRAFT)
+                .order_by("-created_at")
+                .prefetch_related("lines", "lines__variant__product__media")
+                .select_related("shipping_address", "billing_address")
+            )
 
-            orders_data = []
-            for order in orders:
-                lines_data = []
-                for line in order.lines.all():
-                    thumbnail_url = None
-                    try:
-                        if line.variant and line.variant.product:
-                            product = line.variant.product
-                            # Получаем первое изображение продукта из media
-                            product_media = product.media.filter(type='IMAGE').first()
-                            if product_media and product_media.image:
-                                thumbnail_url = product_media.image.url
-                    except Exception as e:
-                        logger.warning(f'Error getting thumbnail for product {line.product_name}: {e}')
-                        thumbnail_url = None
-                    
-                    lines_data.append({
-                        "id": str(line.id),
-                        "productName": line.product_name,
-                        "variantName": line.variant_name or "100 мл",
-                        "quantity": line.quantity,
-                        "unitPrice": {
-                            "gross": {
-                                "amount": int(line.unit_price_gross_amount * 100),
-                                "currency": order.currency,
-                            }
-                        },
-                        "undiscountedUnitPrice": {
-                            "gross": {
-                                "amount": int(line.undiscounted_unit_price_gross_amount * 100),
-                                "currency": order.currency,
-                            }
-                        },
-                        "thumbnail": {
-                            "url": thumbnail_url,
-                            "alt": line.product_name,
-                        },
-                    })
+            total = base_qs.count()
+            offset = (page - 1) * page_size
+            orders = base_qs[offset : offset + page_size]
 
-                # Переводим статус на русский
-                status_text = "В процессе"
-                if order.status == OrderStatus.FULFILLED:
-                    status_text = "Доставлено"
-                elif order.status == OrderStatus.CANCELED:
-                    status_text = "Отменено"
-                elif order.status == OrderStatus.PARTIALLY_FULFILLED:
-                    status_text = "Частично выполнен"
-                elif order.status == OrderStatus.UNFULFILLED:
-                    status_text = "В процессе"
+            orders_data = [serialize_order(order) for order in orders]
 
-                orders_data.append({
-                    "id": str(order.id),
-                    "number": order.number or str(order.id),
-                    "created": order.created_at.isoformat(),
-                    "status": order.status,
-                    "statusDisplay": status_text,
-                    "total": {
-                        "gross": {
-                            "amount": int(order.total_gross_amount * 100),
-                            "currency": order.currency,
-                        }
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "orders": orders_data,
+                    "pagination": {
+                        "page": page,
+                        "pageSize": page_size,
+                        "total": total,
+                        "hasNext": offset + page_size < total,
+                        "hasPrevious": page > 1,
                     },
-                    "lines": lines_data,
-                })
-
-            logger.info(f'GetOrdersView: Returning {len(orders_data)} orders')
-            return JsonResponse({"ok": True, "orders": orders_data})
+                }
+            )
         except Exception as e:
-            logger.error(f'GetOrdersView: Error - {str(e)}', exc_info=True)
+            logger.error(f"GetOrdersView: Error - {str(e)}", exc_info=True)
+            return JsonResponse(
+                {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
+            )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GetOrderDetailView(View):
+    """Получить один заказ пользователя по UUID или номеру."""
+
+    def get(self, request, order_ref):
+        import logging
+
+        logger = logging.getLogger(__name__)
+        from django.db.models import Q
+
+        from ..core.auth_backend import load_user_from_request
+        from ..order.models import Order
+        from ..order import OrderStatus
+        from .order_api import serialize_order
+
+        try:
+            user = load_user_from_request(request)
+            if not user:
+                return JsonResponse(
+                    {"ok": False, "error": "Не авторизован"}, status=401
+                )
+
+            ref = str(order_ref).strip()
+            filters = Q(user=user) & ~Q(status=OrderStatus.DRAFT)
+            order = None
+
+            try:
+                order = (
+                    Order.objects.filter(filters & Q(id=ref))
+                    .prefetch_related("lines", "lines__variant__product__media")
+                    .select_related("shipping_address", "billing_address")
+                    .first()
+                )
+            except Exception:
+                order = None
+
+            if not order and ref.isdigit():
+                order = (
+                    Order.objects.filter(filters & Q(number=int(ref)))
+                    .prefetch_related("lines", "lines__variant__product__media")
+                    .select_related("shipping_address", "billing_address")
+                    .first()
+                )
+
+            if not order:
+                return JsonResponse(
+                    {"ok": False, "error": "Заказ не найден"}, status=404
+                )
+
+            return JsonResponse({"ok": True, "order": serialize_order(order)})
+        except Exception as e:
+            logger.error(f"GetOrderDetailView: Error - {str(e)}", exc_info=True)
             return JsonResponse(
                 {"ok": False, "error": f"Ошибка сервера: {str(e)}"}, status=500
             )

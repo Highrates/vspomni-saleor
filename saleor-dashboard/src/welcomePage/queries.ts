@@ -32,50 +32,6 @@ export const welcomePageNotifications = gql`
   }
 `;
 
-export const abandonedCheckouts = gql`
-  query AbandonedCheckouts($channel: String!) {
-    checkouts(first: 100, channel: $channel) {
-      totalCount
-      edges {
-        node {
-          id
-          token
-          email
-          user {
-            email
-            firstName
-            lastName
-          }
-          created
-          lastChange
-          lines {
-            id
-            quantity
-            variant {
-              id
-              name
-              product {
-                name
-              }
-            }
-            totalPrice {
-              gross {
-                amount
-              }
-            }
-          }
-          totalPrice {
-            gross {
-              amount
-              currency
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
 export const topProductSales = gql`
   query TopProductSales($period: ReportingPeriod!, $channel: String!) {
     reportProductSales(period: $period, first: 5, channel: $channel) {
@@ -105,55 +61,29 @@ export const topProductSales = gql`
 `;
 
 export const complexDashboardStats = gql`
-  query ComplexDashboardStats($period: ReportingPeriod!, $channel: String!) {
-    # Общая выручка
+  query ComplexDashboardStats(
+    $period: ReportingPeriod!
+    $channel: String!
+    $ordersCreatedGte: Date!
+    $customersJoinedGte: Date!
+  ) {
     ordersTotal(period: $period, channel: $channel) {
       gross {
         amount
         currency
       }
     }
-    
-    # Все заказы за период
-    orders(first: 100, channel: $channel) {
+
+    orders(
+      first: 0
+      channel: $channel
+      filter: { created: { gte: $ordersCreatedGte } }
+    ) {
       totalCount
-      edges {
-        node {
-          id
-          created
-          total {
-            gross {
-              amount
-            }
-          }
-        }
-      }
     }
-    
-    # Все корзины за период (для расчёта конверсии)
-    checkouts(first: 100, channel: $channel) {
+
+    customers(first: 0, filter: { dateJoined: { gte: $customersJoinedGte } }) {
       totalCount
-      edges {
-        node {
-          id
-          created
-          lastChange
-          lines {
-            id
-          }
-        }
-      }
-    }
-    
-    # Новые клиенты
-    customers(first: 100) {
-      totalCount
-      edges {
-        node {
-          id
-          dateJoined
-        }
-      }
     }
   }
 `;

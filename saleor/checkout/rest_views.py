@@ -4,8 +4,10 @@ This bypasses the standard checkout creation flow to avoid stock availability is
 """
 import json
 import logging
+import os
 import graphene
 from decimal import Decimal
+from django.utils import timezone
 
 from django.db import transaction
 from django.http import JsonResponse
@@ -108,11 +110,413 @@ def _send_order_confirmation_if_needed(order, manager, redirect_url: str = ""):
     send_order_confirmation(order_info, redirect_url, manager)
 
 
+def _serialize_insufficient_stock_items(stock_error) -> list[dict]:
+    items = []
+    for item in stock_error.items:
+        variant = item.variant
+        product_name = ""
+        variant_id = ""
+        requested = None
+        if variant:
+            variant_id = str(variant.id)
+            product_name = getattr(getattr(variant, "product", None), "name", "") or str(
+                variant
+            )
+        if item.checkout_line:
+            requested = item.checkout_line.quantity
+        items.append(
+            {
+                "variantId": variant_id,
+                "productName": product_name,
+                "requested": requested,
+                "available": item.available_quantity,
+            }
+        )
+    return items
+
+
+def _run_checkout_stock_check(checkout_info, checkout_lines) -> None:
+    from ..warehouse.availability import check_stock_and_preorder_quantity_bulk
+
+    variants = [line_info.variant for line_info in checkout_lines]
+    quantities = [line_info.line.quantity for line_info in checkout_lines]
+    country_code = checkout_info.get_country()
+    additional_warehouse_lookup = (
+        checkout_info.get_delivery_method_info().get_warehouse_filter_lookup()
+    )
+    check_stock_and_preorder_quantity_bulk(
+        variants,
+        country_code,
+        quantities,
+        checkout_info.channel.slug,
+        global_quantity_limit=None,
+        delivery_method_info=checkout_info.get_delivery_method_info(),
+        additional_filter_lookup=additional_warehouse_lookup,
+        existing_lines=checkout_lines,
+        replace=True,
+        check_reservations=True,
+    )
+
+
+def _get_ops_alert_email() -> str | None:
+    return (
+        os.environ.get("OPS_ALERT_EMAIL", "").strip()
+        or os.environ.get("ORDER_ALERT_EMAIL", "").strip()
+        or None
+    )
+
+
+def _mark_checkout_paid_stock_failure(
+    checkout,
+    *,
+    payment_id: str | None,
+    payment_amount,
+    message: str,
+) -> None:
+    metadata_storage, _ = checkout_models.CheckoutMetadata.objects.get_or_create(
+        checkout=checkout
+    )
+    metadata_storage.store_value_in_private_metadata(
+        {
+            "vsp_paid_stock_failure": "true",
+            "vsp_paid_stock_failure_at": timezone.now().isoformat(),
+            "vsp_paid_stock_payment_id": payment_id or "",
+            "vsp_paid_stock_payment_amount": str(payment_amount or ""),
+            "vsp_paid_stock_message": message[:500],
+        }
+    )
+    metadata_storage.save(update_fields=["private_metadata"])
+
+
+def _notify_ops_paid_stock_failure(
+    *,
+    checkout_token: str,
+    payment_id: str | None,
+    payment_amount,
+    user_email: str | None,
+    message: str,
+    items: list[dict],
+) -> None:
+    recipient = _get_ops_alert_email()
+    if not recipient:
+        logger.warning(
+            "Paid stock failure for checkout %s but OPS_ALERT_EMAIL is not set",
+            checkout_token,
+        )
+        return
+
+    from ..account.rest_views import _send_site_email
+
+    lines = [
+        f"Checkout: {checkout_token}",
+        f"Payment ID: {payment_id or '—'}",
+        f"Amount: {payment_amount or '—'}",
+        f"Customer: {user_email or '—'}",
+        f"Error: {message}",
+        "",
+        "Items:",
+    ]
+    for item in items:
+        lines.append(
+            " - {name} (variant {variant}): requested {requested}, available {available}".format(
+                name=item.get("productName") or "?",
+                variant=item.get("variantId") or "?",
+                requested=item.get("requested"),
+                available=item.get("available"),
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "Action: refund via YooKassa or manually complete order after restocking.",
+        ]
+    )
+    body = "\n".join(lines)
+    try:
+        _send_site_email(
+            subject=f"[Vspomni] Paid checkout stock failure ({checkout_token[:8]})",
+            message=body,
+            recipient=recipient,
+        )
+        logger.info(
+            "Sent paid stock failure alert for checkout %s to %s",
+            checkout_token,
+            recipient,
+        )
+    except Exception as email_error:
+        logger.error(
+            "Failed to send paid stock failure alert for checkout %s: %s",
+            checkout_token,
+            email_error,
+            exc_info=True,
+        )
+
+
+def _insufficient_stock_json_response(
+    data: dict,
+    stock_error,
+    *,
+    requires_refund: bool = False,
+) -> JsonResponse:
+    items = _serialize_insufficient_stock_items(stock_error)
+    checkout_token = data.get("checkoutId") or data.get("checkout_token")
+    payment_id = data.get("paymentId") or data.get("payment_id")
+    payment_amount = data.get("paymentAmount") or data.get("payment_amount")
+    user_email = data.get("userEmail") or data.get("email")
+
+    if requires_refund and checkout_token and payment_id:
+        _notify_ops_paid_stock_failure(
+            checkout_token=checkout_token,
+            payment_id=payment_id,
+            payment_amount=payment_amount,
+            user_email=user_email,
+            message=str(stock_error),
+            items=items,
+        )
+        try:
+            with transaction.atomic():
+                checkout = checkout_models.Checkout.objects.select_for_update().get(
+                    token=checkout_token
+                )
+                _mark_checkout_paid_stock_failure(
+                    checkout,
+                    payment_id=payment_id,
+                    payment_amount=payment_amount,
+                    message=str(stock_error),
+                )
+        except checkout_models.Checkout.DoesNotExist:
+            logger.warning(
+                "Checkout %s not found when marking paid stock failure",
+                checkout_token,
+            )
+        except Exception as mark_error:
+            logger.warning(
+                "Failed to mark paid stock failure on checkout %s: %s",
+                checkout_token,
+                mark_error,
+                exc_info=True,
+            )
+
+    return JsonResponse(
+        {
+            "error": "Insufficient stock for one or more items",
+            "code": "INSUFFICIENT_STOCK",
+            "message": str(stock_error),
+            "items": items,
+            "requiresRefund": bool(requires_refund and payment_id),
+        },
+        status=409,
+    )
+
+
+class PaidCheckoutCompleteError(Exception):
+    def __init__(
+        self,
+        code: str,
+        message: str,
+        *,
+        expected_total: float | None = None,
+        paid_amount: float | None = None,
+    ):
+        self.code = code
+        self.message = message
+        self.expected_total = expected_total
+        self.paid_amount = paid_amount
+        super().__init__(message)
+
+
+def _is_quantity_limit_error(exc: Exception) -> bool:
+    msg = str(exc)
+    return "Cannot add more than" in msg and "times this item" in msg
+
+
+def _verify_payment_matches_checkout_total(checkout_info, payment_amount) -> None:
+    if payment_amount is None:
+        return
+
+    expected = Decimal(str(checkout_info.checkout.total.gross.amount))
+    paid = Decimal(str(payment_amount))
+    if abs(expected - paid) > Decimal("0.01"):
+        raise PaidCheckoutCompleteError(
+            "PAYMENT_AMOUNT_MISMATCH",
+            f"Payment amount {paid} does not match checkout total {expected}",
+            expected_total=float(expected),
+            paid_amount=float(paid),
+        )
+
+
+def _notify_ops_paid_complete_failure(
+    *,
+    checkout_token: str,
+    payment_id: str | None,
+    payment_amount,
+    user_email: str | None,
+    code: str,
+    message: str,
+) -> None:
+    recipient = _get_ops_alert_email()
+    if not recipient:
+        return
+
+    from ..account.rest_views import _send_site_email
+
+    body = "\n".join(
+        [
+            f"Checkout: {checkout_token}",
+            f"Payment ID: {payment_id or '—'}",
+            f"Amount: {payment_amount or '—'}",
+            f"Customer: {user_email or '—'}",
+            f"Code: {code}",
+            f"Error: {message}",
+        ]
+    )
+    try:
+        _send_site_email(
+            subject=f"[Vspomni] Paid checkout failure ({code})",
+            message=body,
+            recipient=recipient,
+        )
+    except Exception as email_error:
+        logger.error(
+            "Failed to send paid complete failure alert for checkout %s: %s",
+            checkout_token,
+            email_error,
+            exc_info=True,
+        )
+
+
+def _paid_complete_failure_json_response(
+    data: dict,
+    error: PaidCheckoutCompleteError,
+) -> JsonResponse:
+    checkout_token = data.get("checkoutId") or data.get("checkout_token")
+    payment_id = data.get("paymentId") or data.get("payment_id")
+    payment_amount = data.get("paymentAmount") or data.get("payment_amount")
+    user_email = data.get("userEmail") or data.get("email")
+    requires_refund = bool(payment_id)
+
+    if requires_refund and checkout_token:
+        _notify_ops_paid_complete_failure(
+            checkout_token=checkout_token,
+            payment_id=payment_id,
+            payment_amount=payment_amount,
+            user_email=user_email,
+            code=error.code,
+            message=error.message,
+        )
+        try:
+            with transaction.atomic():
+                checkout = checkout_models.Checkout.objects.select_for_update().get(
+                    token=checkout_token
+                )
+                _mark_checkout_paid_stock_failure(
+                    checkout,
+                    payment_id=payment_id,
+                    payment_amount=payment_amount,
+                    message=f"{error.code}: {error.message}"[:500],
+                )
+        except Exception:
+            pass
+
+    payload = {
+        "error": error.message,
+        "code": error.code,
+        "message": error.message,
+        "requiresRefund": requires_refund,
+    }
+    if error.expected_total is not None:
+        payload["expectedTotal"] = error.expected_total
+    if error.paid_amount is not None:
+        payload["paidAmount"] = error.paid_amount
+
+    return JsonResponse(payload, status=409)
+
+
+def _parse_allow_free_shipping(data: dict) -> bool:
+    raw = data.get("allowFreeShipping")
+    if raw is None:
+        raw = data.get("allow_free_shipping")
+    return str(raw).lower() in {"1", "true", "yes"}
+
+
+def _validate_shipping_amount_for_carrier(
+    shipping_carrier,
+    shipping_amount,
+    *,
+    allow_free_shipping: bool,
+) -> str | None:
+    carrier = (shipping_carrier or "").strip().lower()
+    amount = Decimal(str(shipping_amount or 0))
+    if not carrier:
+        return None
+    if amount <= 0 and not allow_free_shipping:
+        return (
+            "Shipping amount must be positive when a carrier is selected "
+            "(or set allowFreeShipping=true for free shipping)"
+        )
+    return None
+
+
 CARRIER_SHIPPING_NAMES = {
     "cdek": "CDEK",
     "yandex": "Яндекс Доставка",
     "ozon": "Ozon",
 }
+
+
+def _external_shipping_graphql_id(carrier: str) -> str:
+    """Saleor ожидает external shipping id в формате GraphQL app global id."""
+    carrier = (carrier or "cdek").strip().lower()
+    legacy = f"vspomni-external:{carrier}"
+    return graphene.Node.to_global_id("app", f"0:{legacy}")
+
+
+def _normalize_checkout_external_shipping_id(checkout) -> None:
+    """Исправляет legacy id вида vspomni-external:cdek (ломает base64 decode)."""
+    ext_id = checkout.external_shipping_method_id
+    if not ext_id or not str(ext_id).startswith("vspomni-external:"):
+        return
+    checkout.external_shipping_method_id = graphene.Node.to_global_id(
+        "app", f"0:{ext_id}"
+    )
+    checkout.save(update_fields=["external_shipping_method_id"])
+    logger.info(
+        "Normalized legacy external_shipping_method_id on checkout %s",
+        checkout.token,
+    )
+
+
+def _fix_transaction_available_actions(transaction) -> None:
+    """GraphQL ожидает lowercase: charge/refund, не CHARGE/REFUND."""
+    from ..payment import TransactionAction
+
+    mapping = {
+        "CHARGE": TransactionAction.CHARGE,
+        "REFUND": TransactionAction.REFUND,
+        "CANCEL": TransactionAction.CANCEL,
+        "CAPTURE": TransactionAction.CHARGE,
+        "VOID": TransactionAction.CANCEL,
+    }
+    actions = list(transaction.available_actions or [])
+    if not actions:
+        return
+    fixed = []
+    changed = False
+    for action in actions:
+        normalized = mapping.get(str(action).upper(), str(action).lower())
+        if normalized not in fixed:
+            fixed.append(normalized)
+        if normalized != action:
+            changed = True
+    if changed:
+        transaction.available_actions = fixed
+        transaction.save(update_fields=["available_actions"])
+        logger.info(
+            "Fixed transaction %s available_actions: %s -> %s",
+            transaction.pk,
+            actions,
+            fixed,
+        )
 
 
 def _country_code_from_payload(address: dict) -> str:
@@ -124,29 +528,62 @@ def _country_code_from_payload(address: dict) -> str:
     return "RU"
 
 
+def _validate_address_payload(address: dict | None) -> str | None:
+    """Return error message if address is missing required delivery fields."""
+    if not address or not isinstance(address, dict):
+        return "address is required"
+
+    street = (
+        address.get("streetAddress1") or address.get("street_address_1") or ""
+    ).strip()
+    city = (address.get("city") or "").strip()
+    phone = (address.get("phone") or "").strip()
+    postal = (
+        address.get("postalCode") or address.get("postal_code") or ""
+    ).strip()
+
+    if not street:
+        return "streetAddress1 is required"
+    if not city:
+        return "city is required"
+    if not phone:
+        return "phone is required"
+    if not postal:
+        return "postalCode is required"
+    return None
+
+
 def _create_address_from_payload(address: dict | None):
     """Create Saleor Address without GraphQL quantity/stock validation."""
     from ..account.models import Address
 
-    if not address:
-        return None
+    error = _validate_address_payload(address)
+    if error:
+        raise ValueError(error)
+
+    street = (
+        address.get("streetAddress1") or address.get("street_address_1") or ""
+    ).strip()
+    city = (address.get("city") or "").strip()
+    phone = (address.get("phone") or "").strip()
+    postal = (
+        address.get("postalCode") or address.get("postal_code") or ""
+    ).strip()
 
     return Address.objects.create(
         first_name=(address.get("firstName") or address.get("first_name") or "Пользователь")[:256],
         last_name=(address.get("lastName") or address.get("last_name") or "")[:256],
         company_name=(address.get("companyName") or address.get("company_name") or "")[:256],
-        street_address_1=(
-            address.get("streetAddress1") or address.get("street_address_1") or "Адрес не указан"
-        )[:256],
+        street_address_1=street[:256],
         street_address_2=(
             address.get("streetAddress2") or address.get("street_address_2") or ""
         )[:256],
-        city=(address.get("city") or "Москва")[:256],
+        city=city[:256],
         city_area=(address.get("cityArea") or address.get("city_area") or "")[:128],
-        postal_code=(address.get("postalCode") or address.get("postal_code") or "000000")[:20],
+        postal_code=postal[:20],
         country=_country_code_from_payload(address),
         country_area=(address.get("countryArea") or address.get("country_area") or "")[:128],
-        phone=(address.get("phone") or "")[:128],
+        phone=phone[:128],
         validation_skipped=True,
     )
 
@@ -154,6 +591,10 @@ def _create_address_from_payload(address: dict | None):
 def _assign_addresses_to_checkout(checkout, address_payload: dict | None):
     if not address_payload:
         return False
+
+    error = _validate_address_payload(address_payload)
+    if error:
+        raise ValueError(error)
 
     billing = _create_address_from_payload(address_payload)
     shipping = _create_address_from_payload(address_payload)
@@ -210,7 +651,7 @@ def _build_external_shipping_method(shipping_amount, shipping_carrier, currency)
 
     carrier = (shipping_carrier or "cdek").strip().lower()
     name = CARRIER_SHIPPING_NAMES.get(carrier, "Доставка")
-    method_id = f"vspomni-external:{carrier}"
+    method_id = _external_shipping_graphql_id(carrier)
     amount = Decimal(str(shipping_amount or 0))
     return ShippingMethodData(
         id=method_id,
@@ -247,6 +688,7 @@ def _apply_external_shipping_to_checkout(
 
 
 def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, manager):
+    from ..payment import TransactionAction
     from ..payment.models import TransactionItem
     from ..payment.utils import (
         create_manual_adjustment_events,
@@ -268,6 +710,7 @@ def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, man
             psp_reference=psp_ref,
         ).first()
         if existing:
+            _fix_transaction_available_actions(existing)
             return existing
 
     existing_charged = TransactionItem.objects.filter(
@@ -275,6 +718,7 @@ def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, man
         charged_value__gte=amount,
     ).first()
     if existing_charged:
+        _fix_transaction_available_actions(existing_charged)
         return existing_charged
 
     txn = TransactionItem.objects.create(
@@ -283,7 +727,7 @@ def _ensure_yookassa_transaction(checkout, user, payment_id, payment_amount, man
             user=user,
             app=None,
             psp_reference=psp_ref or None,
-            available_actions=["CHARGE", "REFUND"],
+            available_actions=[TransactionAction.CHARGE, TransactionAction.REFUND],
             name=name,
         )
     )
@@ -315,13 +759,44 @@ class ApplyExternalShippingView(View):
             checkout_token = data.get("checkoutId") or data.get("checkout_token")
             shipping_amount = data.get("shippingAmount") or data.get("shipping_amount")
             shipping_carrier = data.get("shippingCarrier") or data.get("shipping_carrier")
+            allow_free_shipping = _parse_allow_free_shipping(data)
 
             if not checkout_token:
                 return JsonResponse({"error": "checkoutId is required"}, status=400)
 
+            shipping_error = _validate_shipping_amount_for_carrier(
+                shipping_carrier,
+                shipping_amount,
+                allow_free_shipping=allow_free_shipping,
+            )
+            if shipping_error:
+                return JsonResponse({"error": shipping_error}, status=400)
+
             amount = Decimal(str(shipping_amount or 0))
             if amount <= 0:
-                return JsonResponse({"error": "shippingAmount must be positive"}, status=400)
+                try:
+                    checkout = checkout_models.Checkout.objects.get(token=checkout_token)
+                except checkout_models.Checkout.DoesNotExist:
+                    return JsonResponse({"error": "Checkout not found"}, status=404)
+
+                manager = get_plugins_manager(allow_replica=False)
+                checkout_lines, _ = fetch_checkout_lines(checkout)
+                checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+                total = checkout_info.checkout.total.gross
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "total": {
+                            "amount": float(total.amount),
+                            "currency": str(total.currency),
+                        },
+                        "shipping": {
+                            "amount": 0.0,
+                            "carrier": (shipping_carrier or "cdek"),
+                            "free": True,
+                        },
+                    }
+                )
 
             try:
                 checkout = checkout_models.Checkout.objects.get(token=checkout_token)
@@ -401,6 +876,11 @@ class CreateCheckoutWithoutStockCheckView(View):
                     {'error': 'Lines are required'}, 
                     status=400
                 )
+
+            if address_payload:
+                address_error = _validate_address_payload(address_payload)
+                if address_error:
+                    return JsonResponse({'error': address_error}, status=400)
             
             # Получаем канал
             try:
@@ -530,6 +1010,8 @@ class CreateCheckoutWithoutStockCheckView(View):
                 if address_payload:
                     try:
                         _assign_addresses_to_checkout(checkout, address_payload)
+                    except ValueError as addr_error:
+                        return JsonResponse({'error': str(addr_error)}, status=400)
                     except Exception as addr_error:
                         logger.warning(
                             "Failed to set addresses on checkout %s: %s",
@@ -597,6 +1079,49 @@ class CreateCheckoutWithoutStockCheckView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+class CheckCheckoutStockView(View):
+    """Проверка наличия товара до создания платежа."""
+
+    def options(self, request):
+        response = JsonResponse({})
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            checkout_token = data.get("checkoutId") or data.get("checkout_token")
+
+            if not checkout_token:
+                return JsonResponse({"error": "checkoutId is required"}, status=400)
+
+            try:
+                checkout = checkout_models.Checkout.objects.get(token=checkout_token)
+            except checkout_models.Checkout.DoesNotExist:
+                return JsonResponse({"error": "Checkout not found"}, status=404)
+
+            from ..core.exceptions import InsufficientStock
+
+            manager = get_plugins_manager(allow_replica=False)
+            checkout_lines, _ = fetch_checkout_lines(checkout)
+            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+
+            try:
+                _run_checkout_stock_check(checkout_info, checkout_lines)
+            except InsufficientStock as stock_error:
+                return _insufficient_stock_json_response(data, stock_error)
+
+            return JsonResponse({"available": True, "success": True})
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        except Exception as e:
+            logger.error("Error checking checkout stock", exc_info=e)
+            return JsonResponse({"error": str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
 class CompleteCheckoutWithoutStockCheckView(View):
     """
     Completes a checkout without stock availability validation.
@@ -623,6 +1148,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
             payment_amount = data.get('paymentAmount') or data.get('payment_amount')
             shipping_amount = data.get('shippingAmount') or data.get('shipping_amount')
             shipping_carrier = data.get('shippingCarrier') or data.get('shipping_carrier')
+            allow_free_shipping = _parse_allow_free_shipping(data)
             address_payload = data.get('address') or data.get('deliveryAddress')
             
             if not checkout_token:
@@ -630,6 +1156,14 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     {'error': 'checkoutId is required'}, 
                     status=400
                 )
+
+            shipping_validation_error = _validate_shipping_amount_for_carrier(
+                shipping_carrier,
+                shipping_amount,
+                allow_free_shipping=allow_free_shipping,
+            )
+            if shipping_validation_error:
+                return JsonResponse({'error': shipping_validation_error}, status=400)
             
             # Обёртываем всё в транзакцию для использования select_for_update
             with transaction.atomic():
@@ -677,6 +1211,11 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         }
                     })
                 
+                if address_payload:
+                    address_error = _validate_address_payload(address_payload)
+                    if address_error:
+                        return JsonResponse({'error': address_error}, status=400)
+
                 # Получаем checkout с блокировкой
                 try:
                     checkout = checkout_models.Checkout.objects.select_for_update().get(token=checkout_token)
@@ -686,6 +1225,8 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         status=404
                     )
 
+                _normalize_checkout_external_shipping_id(checkout)
+
                 _ensure_checkout_email(checkout, user_email)
                 checkout.refresh_from_db()
 
@@ -693,6 +1234,8 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     try:
                         _assign_addresses_to_checkout(checkout, address_payload)
                         checkout.refresh_from_db()
+                    except ValueError as addr_error:
+                        return JsonResponse({'error': str(addr_error)}, status=400)
                     except Exception as addr_error:
                         logger.warning(
                             "Failed to set addresses before complete on %s: %s",
@@ -700,12 +1243,11 @@ class CompleteCheckoutWithoutStockCheckView(View):
                             addr_error,
                             exc_info=True,
                         )
-                
+
                 # Импортируем необходимые функции для создания order
                 from ..checkout.complete_checkout import complete_checkout
                 from ..plugins.manager import get_plugins_manager
                 from ..core.exceptions import InsufficientStock
-                from ..warehouse.models import Stock
                 
                 manager = get_plugins_manager(allow_replica=False)
                 checkout_lines, _ = fetch_checkout_lines(checkout)
@@ -720,35 +1262,21 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     )
 
                 # Убеждаемся, что shipping address установлен, если его нет
-                # Это может предотвратить бесконечные циклы в админке
                 if not checkout.shipping_address and checkout.billing_address:
-                    # Используем billing address как shipping address если shipping не установлен
                     checkout.shipping_address = checkout.billing_address
                     checkout.save(update_fields=['shipping_address'])
                     logger.info(f'Set shipping address from billing address for checkout {checkout_token}')
-                    # Обновляем checkout_info после изменения
                     checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
+
+                if not checkout.shipping_address:
+                    return JsonResponse(
+                        {'error': 'Checkout shipping address is required'},
+                        status=400,
+                    )
                 
-                # Импортируем helper для выборочного отключения quantity-лимитов
+                # Отключаем quantity-лимиты ваучеров только на время создания order
                 from ..warehouse.availability import set_disable_quantity_limits
 
-                # ВРЕМЕННО отключаем track_inventory для всех вариантов в checkout, чтобы обойти проверку наличия
-                # Это радикальное решение, которое гарантированно обходит проверку stock
-                # Проверка наличия пропускается если variant.track_inventory = False
-                variant_track_inventory_states = {}
-                for line in checkout_lines:
-                    variant = line.variant
-                    if variant and variant.track_inventory:
-                        variant_track_inventory_states[variant.id] = True
-                        # Обновляем в БД напрямую для гарантии
-                        from ..product.models import ProductVariant
-                        ProductVariant.objects.filter(id=variant.id).update(track_inventory=False)
-                        # Обновляем объект в памяти
-                        variant.track_inventory = False
-                        variant.refresh_from_db()
-                        logger.info(f'Temporarily disabled track_inventory for variant {variant.id} (product: {variant.product.name if variant.product else "N/A"})')
-                
-                # Дополнительно отключаем глобальные quantity-лимиты только на время создания order
                 set_disable_quantity_limits(True)
 
                 try:
@@ -763,7 +1291,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         except Exception:
                             user = None
 
-                    if shipping_amount:
+                    if shipping_amount and Decimal(str(shipping_amount)) > 0:
                         checkout_info, checkout_lines = _apply_external_shipping_to_checkout(
                             checkout,
                             checkout_info,
@@ -786,6 +1314,8 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         checkout_info, checkout_lines = fetch_checkout_data(
                             checkout_info, manager, checkout_lines
                         )
+
+                    _verify_payment_matches_checkout_total(checkout_info, payment_amount)
                     
                     # Используем create_order_from_checkout с правильными параметрами
                     # Передаём checkout_info, а не checkout
@@ -842,91 +1372,25 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     except Exception as cleanup_error:
                         logger.warning(f'Error during cleanup after order creation: {cleanup_error}', exc_info=True)
                     
+                except InsufficientStock as stock_error:
+                    logger.error('Insufficient stock when creating order: %s', stock_error)
+                    raise stock_error
+                except PaidCheckoutCompleteError:
+                    raise
                 except Exception as e:
                     logger.error(f'Error creating order: {e}', exc_info=True)
-                    error_msg = str(e)
-                    
-                    # Специальный обход ошибки "Cannot add more than 1 times this item"
-                    # которая связана с ограничениями ваучера/промоакции на количество.
-                    if "Cannot add more than 1 times this item" in error_msg:
-                        logger.warning(
-                            'Detected quantity limit error when creating order. '
-                            'Retrying order creation after removing voucher/discounts.'
-                        )
-                        try:
-                            checkout.refresh_from_db()
-                            original_voucher = checkout.voucher_code
-                            promo_metadata = None
-                            if original_voucher:
-                                promo_metadata = [
-                                    {
-                                        "key": "external_promo_code",
-                                        "value": original_voucher,
-                                    },
-                                    {
-                                        "key": "promo_note",
-                                        "value": (
-                                            "Promo was applied at payment; removed on "
-                                            "complete due to Saleor quantity limits"
-                                        ),
-                                    },
-                                ]
-
-                            checkout.discount_amount = Decimal("0")
-                            checkout.discount_name = ""
-                            checkout.voucher_code = None
-                            checkout.save(
-                                update_fields=["discount_amount", "discount_name", "voucher_code"]
-                            )
-                            
-                            checkout_lines, _ = fetch_checkout_lines(checkout)
-                            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
-                            
-                            order = create_order_from_checkout(
-                                checkout_info=checkout_info,
-                                manager=manager,
-                                user=user,
-                                app=None,
-                                metadata_list=None,
-                                private_metadata_list=promo_metadata,
-                                delete_checkout=True,
-                                is_automatic_completion=True,
-                            )
-                            
-                            logger.info(
-                                'Order created successfully on retry without voucher: %s',
-                                order.id,
-                            )
-                        except Exception as retry_error:
-                            logger.error(
-                                'Retry order creation without voucher failed: %s',
-                                retry_error,
-                                exc_info=True,
-                            )
-                            # Пробрасываем исходную ошибку, чтобы REST вернул её наверх
-                            raise e
-                    else:
-                        # Для всех остальных ошибок пробрасываем как есть
-                        raise
+                    if payment_id and _is_quantity_limit_error(e):
+                        raise PaidCheckoutCompleteError(
+                            "CHECKOUT_QUANTITY_LIMIT",
+                            str(e),
+                        ) from e
+                    raise
                 finally:
                     # Возвращаем поведение quantity-лимитов к стандартному
                     try:
                         set_disable_quantity_limits(False)
                     except Exception:
                         pass
-
-                    # Восстанавливаем track_inventory для всех вариантов
-                    for line in checkout_lines:
-                        variant = line.variant
-                        if variant and variant.id in variant_track_inventory_states:
-                            original_value = variant_track_inventory_states[variant.id]
-                            # Восстанавливаем в БД
-                            from ..product.models import ProductVariant
-                            ProductVariant.objects.filter(id=variant.id).update(track_inventory=original_value)
-                            # Обновляем объект в памяти
-                            variant.track_inventory = original_value
-                            variant.refresh_from_db()
-                            logger.info(f'Restored track_inventory={original_value} for variant {variant.id}')
                 
                 logger.info(f'Order created from checkout {checkout_token}: {order.number if order else "None"}')
                 
@@ -939,6 +1403,16 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     }
                 })
             
+        except InsufficientStock as stock_error:
+            return _insufficient_stock_json_response(
+                data,
+                stock_error,
+                requires_refund=bool(
+                    (data.get("paymentId") or data.get("payment_id"))
+                ),
+            )
+        except PaidCheckoutCompleteError as complete_error:
+            return _paid_complete_failure_json_response(data, complete_error)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         except Exception as e:
@@ -1105,12 +1579,18 @@ class ValidateVoucherView(View):
                 )
             
             try:
-                add_promo_code_to_checkout(
-                    manager,
-                    checkout_info,
-                    checkout_lines,
-                    promo_code,  # Используем найденный код
-                )
+                from ..warehouse.availability import set_disable_quantity_limits
+
+                set_disable_quantity_limits(True)
+                try:
+                    add_promo_code_to_checkout(
+                        manager,
+                        checkout_info,
+                        checkout_lines,
+                        promo_code,
+                    )
+                finally:
+                    set_disable_quantity_limits(False)
                 checkout.refresh_from_db()
 
                 # Вычисляем скидку
@@ -1125,8 +1605,13 @@ class ValidateVoucherView(View):
                 if voucher_code_obj:
                     voucher = voucher_code_obj.voucher
                     channel_listing = voucher.channel_listings.filter(channel=channel).first()
-                    
-                    if voucher.discount_value_type == "PERCENTAGE":
+
+                    from ..discount.models import VoucherType
+
+                    if voucher.type == VoucherType.SHIPPING:
+                        discount_type = "SHIPPING"
+                        discount_percent = 0
+                    elif voucher.discount_value_type == "PERCENTAGE":
                         discount_type = "PERCENTAGE"
                         discount_percent = float(channel_listing.discount_value or 0) if channel_listing else 0
                     else:

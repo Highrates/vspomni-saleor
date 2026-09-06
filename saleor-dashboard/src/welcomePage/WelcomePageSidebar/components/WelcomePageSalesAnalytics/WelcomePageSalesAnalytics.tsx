@@ -1,6 +1,6 @@
 import useAppChannel from "@dashboard/components/AppLayout/AppChannelContext";
 import Money from "@dashboard/components/Money";
-import { Skeleton } from "@saleor/macaw-ui-next";
+import { Skeleton, Text } from "@saleor/macaw-ui-next";
 import { useIntl } from "react-intl";
 
 import { welcomePageMessages } from "../../messages";
@@ -19,9 +19,15 @@ export const WelcomePageSalesAnalytics = () => {
       testId="sales-analytics"
     >
       {noChannel || hasError ? (
-        0
-      ) : !loading ? (
+        <Text size={5} color="default2">
+          —
+        </Text>
+      ) : !loading && analytics.sales ? (
         <Money money={analytics.sales} />
+      ) : !loading ? (
+        <Text size={5} color="default2">
+          0
+        </Text>
       ) : (
         <Skeleton width={10} height={3} />
       )}

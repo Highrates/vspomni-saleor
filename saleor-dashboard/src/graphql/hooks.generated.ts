@@ -3671,6 +3671,107 @@ export const WebhookDetailsFragmentDoc = gql`
   customHeaders
 }
     ${WebhookFragmentDoc}`;
+export const StoryFragmentDoc = gql`
+    fragment Story on Shop {
+  id
+}
+    `;
+export const ArticleListDocument = gql`
+    query ArticleList($first: Int, $after: String, $last: Int, $before: String, $sort: PageSortingInput, $filter: PageFilterInput) {
+  pages(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sortBy: $sort
+    filter: $filter
+  ) {
+    edges {
+      node {
+        ...Page
+      }
+    }
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+  }
+}
+    ${PageFragmentDoc}`;
+
+/**
+ * __useArticleListQuery__
+ *
+ * To run a query within a React component, call `useArticleListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useArticleListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useArticleListQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *      sort: // value for 'sort'
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useArticleListQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<Types.ArticleListQuery, Types.ArticleListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.ArticleListQuery, Types.ArticleListQueryVariables>(ArticleListDocument, options);
+      }
+export function useArticleListLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.ArticleListQuery, Types.ArticleListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.ArticleListQuery, Types.ArticleListQueryVariables>(ArticleListDocument, options);
+        }
+export type ArticleListQueryHookResult = ReturnType<typeof useArticleListQuery>;
+export type ArticleListLazyQueryHookResult = ReturnType<typeof useArticleListLazyQuery>;
+export type ArticleListQueryResult = Apollo.QueryResult<Types.ArticleListQuery, Types.ArticleListQueryVariables>;
+export const ArticleDetailsDocument = gql`
+    query ArticleDetails($id: ID!, $firstValues: Int, $afterValues: String, $lastValues: Int, $beforeValues: String) {
+  page(id: $id) {
+    ...PageDetails
+  }
+}
+    ${PageDetailsFragmentDoc}`;
+
+/**
+ * __useArticleDetailsQuery__
+ *
+ * To run a query within a React component, call `useArticleDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useArticleDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useArticleDetailsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      firstValues: // value for 'firstValues'
+ *      afterValues: // value for 'afterValues'
+ *      lastValues: // value for 'lastValues'
+ *      beforeValues: // value for 'beforeValues'
+ *   },
+ * });
+ */
+export function useArticleDetailsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.ArticleDetailsQuery, Types.ArticleDetailsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.ArticleDetailsQuery, Types.ArticleDetailsQueryVariables>(ArticleDetailsDocument, options);
+      }
+export function useArticleDetailsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.ArticleDetailsQuery, Types.ArticleDetailsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.ArticleDetailsQuery, Types.ArticleDetailsQueryVariables>(ArticleDetailsDocument, options);
+        }
+export type ArticleDetailsQueryHookResult = ReturnType<typeof useArticleDetailsQuery>;
+export type ArticleDetailsLazyQueryHookResult = ReturnType<typeof useArticleDetailsLazyQuery>;
+export type ArticleDetailsQueryResult = Apollo.QueryResult<Types.ArticleDetailsQuery, Types.ArticleDetailsQueryVariables>;
 export const AttributeBulkDeleteDocument = gql`
     mutation AttributeBulkDelete($ids: [ID!]!) {
   attributeBulkDelete(ids: $ids) {
@@ -18873,6 +18974,74 @@ export function useStaffMemberDetailsLazyQuery(baseOptions?: ApolloReactHooks.La
 export type StaffMemberDetailsQueryHookResult = ReturnType<typeof useStaffMemberDetailsQuery>;
 export type StaffMemberDetailsLazyQueryHookResult = ReturnType<typeof useStaffMemberDetailsLazyQuery>;
 export type StaffMemberDetailsQueryResult = Apollo.QueryResult<Types.StaffMemberDetailsQuery, Types.StaffMemberDetailsQueryVariables>;
+export const StoryListDocument = gql`
+    query StoryList {
+  shop {
+    id
+  }
+}
+    `;
+
+/**
+ * __useStoryListQuery__
+ *
+ * To run a query within a React component, call `useStoryListQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStoryListQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStoryListQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useStoryListQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<Types.StoryListQuery, Types.StoryListQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.StoryListQuery, Types.StoryListQueryVariables>(StoryListDocument, options);
+      }
+export function useStoryListLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.StoryListQuery, Types.StoryListQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.StoryListQuery, Types.StoryListQueryVariables>(StoryListDocument, options);
+        }
+export type StoryListQueryHookResult = ReturnType<typeof useStoryListQuery>;
+export type StoryListLazyQueryHookResult = ReturnType<typeof useStoryListLazyQuery>;
+export type StoryListQueryResult = Apollo.QueryResult<Types.StoryListQuery, Types.StoryListQueryVariables>;
+export const StoryDetailsDocument = gql`
+    query StoryDetails {
+  shop {
+    id
+  }
+}
+    `;
+
+/**
+ * __useStoryDetailsQuery__
+ *
+ * To run a query within a React component, call `useStoryDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStoryDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStoryDetailsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useStoryDetailsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<Types.StoryDetailsQuery, Types.StoryDetailsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<Types.StoryDetailsQuery, Types.StoryDetailsQueryVariables>(StoryDetailsDocument, options);
+      }
+export function useStoryDetailsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.StoryDetailsQuery, Types.StoryDetailsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<Types.StoryDetailsQuery, Types.StoryDetailsQueryVariables>(StoryDetailsDocument, options);
+        }
+export type StoryDetailsQueryHookResult = ReturnType<typeof useStoryDetailsQuery>;
+export type StoryDetailsLazyQueryHookResult = ReturnType<typeof useStoryDetailsLazyQuery>;
+export type StoryDetailsQueryResult = Apollo.QueryResult<Types.StoryDetailsQuery, Types.StoryDetailsQueryVariables>;
 export const MenuCreateDocument = gql`
     mutation MenuCreate($input: MenuCreateInput!) {
   menuCreate(input: $input) {
@@ -21578,77 +21747,6 @@ export function useWelcomePageNotificationsLazyQuery(baseOptions?: ApolloReactHo
 export type WelcomePageNotificationsQueryHookResult = ReturnType<typeof useWelcomePageNotificationsQuery>;
 export type WelcomePageNotificationsLazyQueryHookResult = ReturnType<typeof useWelcomePageNotificationsLazyQuery>;
 export type WelcomePageNotificationsQueryResult = Apollo.QueryResult<Types.WelcomePageNotificationsQuery, Types.WelcomePageNotificationsQueryVariables>;
-export const AbandonedCheckoutsDocument = gql`
-    query AbandonedCheckouts($channel: String!) {
-  checkouts(first: 100, channel: $channel) {
-    totalCount
-    edges {
-      node {
-        id
-        token
-        email
-        user {
-          email
-          firstName
-          lastName
-        }
-        created
-        lastChange
-        lines {
-          id
-          quantity
-          variant {
-            id
-            name
-            product {
-              name
-            }
-          }
-          totalPrice {
-            gross {
-              amount
-            }
-          }
-        }
-        totalPrice {
-          gross {
-            amount
-            currency
-          }
-        }
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useAbandonedCheckoutsQuery__
- *
- * To run a query within a React component, call `useAbandonedCheckoutsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAbandonedCheckoutsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAbandonedCheckoutsQuery({
- *   variables: {
- *      channel: // value for 'channel'
- *   },
- * });
- */
-export function useAbandonedCheckoutsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<Types.AbandonedCheckoutsQuery, Types.AbandonedCheckoutsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<Types.AbandonedCheckoutsQuery, Types.AbandonedCheckoutsQueryVariables>(AbandonedCheckoutsDocument, options);
-      }
-export function useAbandonedCheckoutsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<Types.AbandonedCheckoutsQuery, Types.AbandonedCheckoutsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<Types.AbandonedCheckoutsQuery, Types.AbandonedCheckoutsQueryVariables>(AbandonedCheckoutsDocument, options);
-        }
-export type AbandonedCheckoutsQueryHookResult = ReturnType<typeof useAbandonedCheckoutsQuery>;
-export type AbandonedCheckoutsLazyQueryHookResult = ReturnType<typeof useAbandonedCheckoutsLazyQuery>;
-export type AbandonedCheckoutsQueryResult = Apollo.QueryResult<Types.AbandonedCheckoutsQuery, Types.AbandonedCheckoutsQueryVariables>;
 export const TopProductSalesDocument = gql`
     query TopProductSales($period: ReportingPeriod!, $channel: String!) {
   reportProductSales(period: $period, first: 5, channel: $channel) {
@@ -21706,48 +21804,18 @@ export type TopProductSalesQueryHookResult = ReturnType<typeof useTopProductSale
 export type TopProductSalesLazyQueryHookResult = ReturnType<typeof useTopProductSalesLazyQuery>;
 export type TopProductSalesQueryResult = Apollo.QueryResult<Types.TopProductSalesQuery, Types.TopProductSalesQueryVariables>;
 export const ComplexDashboardStatsDocument = gql`
-    query ComplexDashboardStats($period: ReportingPeriod!, $channel: String!) {
+    query ComplexDashboardStats($period: ReportingPeriod!, $channel: String!, $ordersCreatedGte: Date!, $customersJoinedGte: Date!) {
   ordersTotal(period: $period, channel: $channel) {
     gross {
       amount
       currency
     }
   }
-  orders(first: 100, channel: $channel) {
+  orders(first: 0, channel: $channel, filter: {created: {gte: $ordersCreatedGte}}) {
     totalCount
-    edges {
-      node {
-        id
-        created
-        total {
-          gross {
-            amount
-          }
-        }
-      }
-    }
   }
-  checkouts(first: 100, channel: $channel) {
+  customers(first: 0, filter: {dateJoined: {gte: $customersJoinedGte}}) {
     totalCount
-    edges {
-      node {
-        id
-        created
-        lastChange
-        lines {
-          id
-        }
-      }
-    }
-  }
-  customers(first: 100) {
-    totalCount
-    edges {
-      node {
-        id
-        dateJoined
-      }
-    }
   }
 }
     `;
@@ -21766,6 +21834,8 @@ export const ComplexDashboardStatsDocument = gql`
  *   variables: {
  *      period: // value for 'period'
  *      channel: // value for 'channel'
+ *      ordersCreatedGte: // value for 'ordersCreatedGte'
+ *      customersJoinedGte: // value for 'customersJoinedGte'
  *   },
  * });
  */

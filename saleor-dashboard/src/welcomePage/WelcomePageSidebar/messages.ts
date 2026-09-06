@@ -1,12 +1,17 @@
 import { defineMessages } from "react-intl";
 
 export const welcomePageMessages = defineMessages({
+  storeInfoTitle: {
+    defaultMessage: "Информация о вашем магазине",
+    id: "x0wum5",
+    description: "home sidebar card title",
+  },
   salesCardTitle: {
-    defaultMessage: "Sales",
+    defaultMessage: "Продажи сегодня",
     id: "c8nvms",
   },
   outOfStockCardTitle: {
-    defaultMessage: "Out of stock",
+    defaultMessage: "Нет в наличии",
     id: "WHgdsk",
   },
 });

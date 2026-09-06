@@ -25,9 +25,11 @@ from .account.rest_views import (
     ResetPasswordView,
     ChangePasswordView,
     GetOrdersView,
+    GetOrderDetailView,
 )
 from .checkout.rest_views import (
     ApplyExternalShippingView,
+    CheckCheckoutStockView,
     CreateCheckoutWithoutStockCheckView,
     CompleteCheckoutWithoutStockCheckView,
     ValidateVoucherView,
@@ -108,6 +110,11 @@ urlpatterns = [
         name="auth-orders",
     ),
     re_path(
+        r"^auth/orders/(?P<order_ref>[0-9A-Za-z\-]+)/$",
+        GetOrderDetailView.as_view(),
+        name="auth-order-detail",
+    ),
+    re_path(
         r"^api/checkout/create-without-stock-check/$",
         CreateCheckoutWithoutStockCheckView.as_view(),
         name="checkout-create-without-stock-check",
@@ -127,6 +134,16 @@ urlpatterns = [
         r"^checkout/apply-external-shipping/$",
         ApplyExternalShippingView.as_view(),
         name="checkout-apply-external-shipping-alt",
+    ),
+    re_path(
+        r"^api/checkout/check-stock/$",
+        CheckCheckoutStockView.as_view(),
+        name="checkout-check-stock",
+    ),
+    re_path(
+        r"^checkout/check-stock/$",
+        CheckCheckoutStockView.as_view(),
+        name="checkout-check-stock-alt",
     ),
     re_path(
         r"^api/checkout/complete-without-stock-check/$",

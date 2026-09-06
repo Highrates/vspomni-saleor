@@ -3,15 +3,15 @@ import { DashboardCard } from "@dashboard/components/Card";
 import RequirePermissions from "@dashboard/components/RequirePermissions";
 import { ChannelFragment, PermissionEnum } from "@dashboard/graphql";
 import { Box, Text } from "@saleor/macaw-ui-next";
-import { FormattedMessage } from "react-intl";
+import { useIntl } from "react-intl";
 
 import { WelcomePageActivities } from "./components/WelcomePageActivities";
 import { WelcomePageSalesAnalytics } from "./components/WelcomePageSalesAnalytics";
 import { WelcomePageStocksAnalytics } from "./components/WelcomePageStocksAnalytics";
-import { WelcomePageAbandonedCheckouts } from "./components/WelcomePageAbandonedCheckouts";
 import { WelcomePageTopProducts } from "./components/WelcomePageTopProducts";
 import { WelcomePageComplexStats } from "./components/WelcomePageComplexStats";
 import { WelcomePageSidebarContextProvider } from "./context/WelcomePageSidebarContextProvider";
+import { welcomePageMessages } from "./messages";
 
 interface HomeSidebarProps {
   channel: ChannelFragment | undefined;
@@ -21,23 +21,18 @@ interface HomeSidebarProps {
 }
 
 export const WelcomePageSidebar = (props: HomeSidebarProps) => {
+  const intl = useIntl();
+
   return (
     <WelcomePageSidebarContextProvider {...props}>
-      {/* Комплексная панель статистики */}
       <RequirePermissions requiredPermissions={[PermissionEnum.MANAGE_ORDERS]}>
         <WelcomePageComplexStats />
       </RequirePermissions>
-      
+
       <DashboardCard borderRadius={3} borderWidth={1} borderStyle="solid" borderColor="default1">
         <DashboardCard.Header gap={3} display="flex" flexWrap="wrap">
           <DashboardCard.Title>
-            <Text size={8}>
-              <FormattedMessage
-                defaultMessage="Your store info"
-                id="x0wum5"
-                description="home sidebar card title"
-              />
-            </Text>
+            <Text size={8}>{intl.formatMessage(welcomePageMessages.storeInfoTitle)}</Text>
           </DashboardCard.Title>
 
           <AppChannelSelect
@@ -56,11 +51,7 @@ export const WelcomePageSidebar = (props: HomeSidebarProps) => {
           <WelcomePageActivities />
         </DashboardCard.Content>
       </DashboardCard>
-      
-      <RequirePermissions requiredPermissions={[PermissionEnum.MANAGE_CHECKOUTS]}>
-        <WelcomePageAbandonedCheckouts />
-      </RequirePermissions>
-      
+
       <RequirePermissions requiredPermissions={[PermissionEnum.MANAGE_PRODUCTS]}>
         <WelcomePageTopProducts />
       </RequirePermissions>

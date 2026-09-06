@@ -1,4 +1,4 @@
-import { Skeleton } from "@saleor/macaw-ui-next";
+import { Skeleton, Text } from "@saleor/macaw-ui-next";
 import { useIntl } from "react-intl";
 
 import { useWelcomePageSidebarContext } from "../../context/welcomePageSidebarContext";
@@ -17,7 +17,9 @@ export const WelcomePageStocksAnalytics = () => {
       testId="out-of-stock-analytics"
     >
       {hasNoChannels || hasError ? (
-        0
+        <Text size={5} color="default2">
+          —
+        </Text>
       ) : !loading ? (
         analytics.productsOutOfStock
       ) : (

@@ -8936,6 +8936,29 @@ export enum WeightUnitsEnum {
   TONNE = 'TONNE'
 }
 
+export type ArticleListQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']>;
+  after?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['Int']>;
+  before?: InputMaybe<Scalars['String']>;
+  sort?: InputMaybe<PageSortingInput>;
+  filter?: InputMaybe<PageFilterInput>;
+}>;
+
+
+export type ArticleListQuery = { __typename: 'Query', pages: { __typename: 'PageCountableConnection', edges: Array<{ __typename: 'PageCountableEdge', node: { __typename: 'Page', id: string, title: string, slug: string, isPublished: boolean, pageType: { __typename: 'PageType', id: string, name: string } } }>, pageInfo: { __typename: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string | null, endCursor: string | null } } | null };
+
+export type ArticleDetailsQueryVariables = Exact<{
+  id: Scalars['ID'];
+  firstValues?: InputMaybe<Scalars['Int']>;
+  afterValues?: InputMaybe<Scalars['String']>;
+  lastValues?: InputMaybe<Scalars['Int']>;
+  beforeValues?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type ArticleDetailsQuery = { __typename: 'Query', page: { __typename: 'Page', content: any | null, seoTitle: string | null, seoDescription: string | null, publishedAt: any | null, id: string, title: string, slug: string, isPublished: boolean, pageType: { __typename: 'PageType', id: string, name: string, attributes: Array<{ __typename: 'Attribute', id: string, name: string | null, inputType: AttributeInputTypeEnum | null, entityType: AttributeEntityTypeEnum | null, valueRequired: boolean, choices: { __typename: 'AttributeValueCountableConnection', pageInfo: { __typename: 'PageInfo', endCursor: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string | null }, edges: Array<{ __typename: 'AttributeValueCountableEdge', cursor: string, node: { __typename: 'AttributeValue', plainText: string | null, richText: any | null, id: string, name: string | null, slug: string | null, reference: string | null, boolean: boolean | null, date: any | null, dateTime: any | null, value: string | null, file: { __typename: 'File', url: string, contentType: string | null } | null } }> } | null }> | null }, attributes: Array<{ __typename: 'SelectedAttribute', attribute: { __typename: 'Attribute', availableInGrid: boolean, entityType: AttributeEntityTypeEnum | null, storefrontSearchPosition: number, valueRequired: boolean, id: string, name: string | null, slug: string | null, type: AttributeTypeEnum | null, visibleInStorefront: boolean, filterableInDashboard: boolean, filterableInStorefront: boolean, unit: MeasurementUnitsEnum | null, inputType: AttributeInputTypeEnum | null, referenceTypes: Array<{ __typename: 'PageType', id: string, name: string } | { __typename: 'ProductType', id: string, name: string }> | null, choices: { __typename: 'AttributeValueCountableConnection', pageInfo: { __typename: 'PageInfo', endCursor: string | null, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string | null }, edges: Array<{ __typename: 'AttributeValueCountableEdge', cursor: string, node: { __typename: 'AttributeValue', plainText: string | null, richText: any | null, id: string, name: string | null, slug: string | null, reference: string | null, boolean: boolean | null, date: any | null, dateTime: any | null, value: string | null, file: { __typename: 'File', url: string, contentType: string | null } | null } }> } | null, metadata: Array<{ __typename: 'MetadataItem', key: string, value: string }>, privateMetadata: Array<{ __typename: 'MetadataItem', key: string, value: string }> }, values: Array<{ __typename: 'AttributeValue', plainText: string | null, richText: any | null, id: string, name: string | null, slug: string | null, reference: string | null, boolean: boolean | null, date: any | null, dateTime: any | null, value: string | null, file: { __typename: 'File', url: string, contentType: string | null } | null }> }>, metadata: Array<{ __typename: 'MetadataItem', key: string, value: string }>, privateMetadata: Array<{ __typename: 'MetadataItem', key: string, value: string }> } | null };
+
 export type AttributeBulkDeleteMutationVariables = Exact<{
   ids: Array<Scalars['ID']> | Scalars['ID'];
 }>;
@@ -12329,6 +12352,18 @@ export type StaffMemberDetailsQueryVariables = Exact<{
 
 export type StaffMemberDetailsQuery = { __typename: 'Query', user: { __typename: 'User', id: string, email: string, firstName: string, isActive: boolean, lastName: string, permissionGroups: Array<{ __typename: 'Group', id: string, name: string, userCanManage: boolean }> | null, userPermissions: Array<{ __typename: 'UserPermission', code: PermissionEnum, name: string }> | null, avatar: { __typename: 'Image', url: string } | null, metadata: Array<{ __typename: 'MetadataItem', key: string, value: string }> } | null };
 
+export type StoryFragment = { __typename: 'Shop', id: string };
+
+export type StoryListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type StoryListQuery = { __typename: 'Query', shop: { __typename: 'Shop', id: string } };
+
+export type StoryDetailsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type StoryDetailsQuery = { __typename: 'Query', shop: { __typename: 'Shop', id: string } };
+
 export type MenuCreateMutationVariables = Exact<{
   input: MenuCreateInput;
 }>;
@@ -12862,13 +12897,6 @@ export type WelcomePageNotificationsQueryVariables = Exact<{
 
 export type WelcomePageNotificationsQuery = { __typename: 'Query', productsOutOfStock: { __typename: 'ProductCountableConnection', totalCount: number | null } | null };
 
-export type AbandonedCheckoutsQueryVariables = Exact<{
-  channel: Scalars['String'];
-}>;
-
-
-export type AbandonedCheckoutsQuery = { __typename: 'Query', checkouts: { __typename: 'CheckoutCountableConnection', totalCount: number | null, edges: Array<{ __typename: 'CheckoutCountableEdge', node: { __typename: 'Checkout', id: string, token: any, email: string | null, created: any, lastChange: any, user: { __typename: 'User', email: string, firstName: string, lastName: string } | null, lines: Array<{ __typename: 'CheckoutLine', id: string, quantity: number, variant: { __typename: 'ProductVariant', id: string, name: string, product: { __typename: 'Product', name: string } }, totalPrice: { __typename: 'TaxedMoney', gross: { __typename: 'Money', amount: number } } }>, totalPrice: { __typename: 'TaxedMoney', gross: { __typename: 'Money', amount: number, currency: string } } } }> } | null };
-
 export type TopProductSalesQueryVariables = Exact<{
   period: ReportingPeriod;
   channel: Scalars['String'];
@@ -12880,7 +12908,9 @@ export type TopProductSalesQuery = { __typename: 'Query', reportProductSales: { 
 export type ComplexDashboardStatsQueryVariables = Exact<{
   period: ReportingPeriod;
   channel: Scalars['String'];
+  ordersCreatedGte: Scalars['Date'];
+  customersJoinedGte: Scalars['Date'];
 }>;
 
 
-export type ComplexDashboardStatsQuery = { __typename: 'Query', ordersTotal: { __typename: 'TaxedMoney', gross: { __typename: 'Money', amount: number, currency: string } } | null, orders: { __typename: 'OrderCountableConnection', totalCount: number | null, edges: Array<{ __typename: 'OrderCountableEdge', node: { __typename: 'Order', id: string, created: any, total: { __typename: 'TaxedMoney', gross: { __typename: 'Money', amount: number } } } }> } | null, checkouts: { __typename: 'CheckoutCountableConnection', totalCount: number | null, edges: Array<{ __typename: 'CheckoutCountableEdge', node: { __typename: 'Checkout', id: string, created: any, lastChange: any, lines: Array<{ __typename: 'CheckoutLine', id: string }> } }> } | null, customers: { __typename: 'UserCountableConnection', totalCount: number | null, edges: Array<{ __typename: 'UserCountableEdge', node: { __typename: 'User', id: string, dateJoined: any } }> } | null };
+export type ComplexDashboardStatsQuery = { __typename: 'Query', ordersTotal: { __typename: 'TaxedMoney', gross: { __typename: 'Money', amount: number, currency: string } } | null, orders: { __typename: 'OrderCountableConnection', totalCount: number | null } | null, customers: { __typename: 'UserCountableConnection', totalCount: number | null } | null };
