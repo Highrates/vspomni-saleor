@@ -23,7 +23,7 @@ from ..checkout.fetch import (
     fetch_checkout_lines,
 )
 from ..plugins.manager import get_plugins_manager
-from ..core.exceptions import PermissionDenied
+from ..core.exceptions import InsufficientStock, PermissionDenied
 from ..core.utils.promo_code import InvalidPromoCode
 from ..checkout import models as checkout_models
 from ..channel.models import Channel
@@ -77,7 +77,7 @@ def _ensure_checkout_email(checkout, user_email: str | None):
 
 
 def _send_order_confirmation_if_needed(order, manager, redirect_url: str = ""):
-    from ..checkout.fetch import OrderInfo
+    from ..order.fetch import fetch_order_info
     from ..order.notifications import send_order_confirmation
 
     customer_email = order.get_customer_email()
@@ -95,19 +95,25 @@ def _send_order_confirmation_if_needed(order, manager, redirect_url: str = ""):
         )
         return
 
-    order_info = OrderInfo(
-        order=order,
-        customer_email=customer_email,
-        channel=order.channel,
-        payment=order.get_last_payment(),
-        lines_data=[],
-    )
+    order_info = fetch_order_info(order)
     logger.info(
         "Sending order confirmation email to %s for order %s",
         customer_email,
         order.id,
     )
     send_order_confirmation(order_info, redirect_url, manager)
+
+
+def _safe_send_order_confirmation(order, manager, redirect_url: str = "") -> None:
+    try:
+        _send_order_confirmation_if_needed(order, manager, redirect_url)
+    except Exception as email_error:
+        logger.error(
+            "Failed to send order confirmation for order %s: %s",
+            order.id,
+            email_error,
+            exc_info=True,
+        )
 
 
 def _serialize_insufficient_stock_items(stock_error) -> list[dict]:
@@ -1124,8 +1130,6 @@ class CheckCheckoutStockView(View):
             except checkout_models.Checkout.DoesNotExist:
                 return JsonResponse({"error": "Checkout not found"}, status=404)
 
-            from ..core.exceptions import InsufficientStock
-
             manager = get_plugins_manager(allow_replica=False)
             checkout_lines, _ = fetch_checkout_lines(checkout)
             checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
@@ -1203,7 +1207,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
                     plugin_manager = get_plugins_manager(allow_replica=False)
                     transaction.on_commit(
                         lambda order=existing_order, mgr=plugin_manager, url=redirect_url: (
-                            _send_order_confirmation_if_needed(order, mgr, url)
+                            _safe_send_order_confirmation(order, mgr, url)
                         )
                     )
 
@@ -1268,9 +1272,7 @@ class CompleteCheckoutWithoutStockCheckView(View):
 
                 # Импортируем необходимые функции для создания order
                 from ..checkout.complete_checkout import complete_checkout
-                from ..plugins.manager import get_plugins_manager
-                from ..core.exceptions import InsufficientStock
-                
+
                 manager = get_plugins_manager(allow_replica=False)
                 checkout_lines, _ = fetch_checkout_lines(checkout)
                 checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
