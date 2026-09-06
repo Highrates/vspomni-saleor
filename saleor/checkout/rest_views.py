@@ -330,11 +330,33 @@ def _is_quantity_limit_error(exc: Exception) -> bool:
     return "Cannot add more than" in msg and "times this item" in msg
 
 
+def _checkout_expected_payment_total(checkout_info) -> Decimal:
+    checkout = checkout_info.checkout
+    expected = Decimal(str(checkout.total.gross.amount))
+    shipping_stored = Decimal(str(checkout.undiscounted_base_shipping_price_amount or 0))
+    shipping_in_total = Decimal(
+        str(checkout.shipping_price.gross.amount if checkout.shipping_price else 0)
+    )
+
+    if (
+        checkout.external_shipping_method_id
+        and shipping_stored > 0
+        and shipping_in_total <= 0
+    ):
+        subtotal = Decimal(str(checkout.subtotal.gross.amount))
+        discount = (
+            Decimal(str(checkout.discount.amount)) if checkout.discount else Decimal(0)
+        )
+        expected = subtotal - discount + shipping_stored
+
+    return expected
+
+
 def _verify_payment_matches_checkout_total(checkout_info, payment_amount) -> None:
     if payment_amount is None:
         return
 
-    expected = Decimal(str(checkout_info.checkout.total.gross.amount))
+    expected = _checkout_expected_payment_total(checkout_info)
     paid = Decimal(str(payment_amount))
     if abs(expected - paid) > Decimal("0.01"):
         raise PaidCheckoutCompleteError(

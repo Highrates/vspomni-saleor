@@ -266,6 +266,17 @@ class CheckoutInfo:
                     price=self.checkout.undiscounted_base_shipping_price,
                 )
 
+            # REST-assigned carriers (CDEK/Yandex/Ozon) are not returned by app webhooks.
+            if delivery_method is None and (
+                self.checkout.undiscounted_base_shipping_price_amount
+                or self.checkout.shipping_method_name
+            ):
+                delivery_method = ShippingMethodData(
+                    id=get_external_shipping_id(self.checkout),
+                    name=self.checkout.shipping_method_name or "",
+                    price=self.checkout.undiscounted_base_shipping_price,
+                )
+
         else:
             delivery_method = self.collection_point
 
