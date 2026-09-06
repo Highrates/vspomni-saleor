@@ -130,6 +130,12 @@ def is_active_customer_order(status_code: str) -> bool:
     return status_code not in ("delivered", "canceled")
 
 
+def _phone_to_str(phone) -> str:
+    if phone is None:
+        return ""
+    return str(phone)
+
+
 def serialize_address(addr) -> dict | None:
     if not addr:
         return None
@@ -143,7 +149,7 @@ def serialize_address(addr) -> dict | None:
     return {
         "firstName": addr.first_name,
         "lastName": addr.last_name,
-        "phone": addr.phone,
+        "phone": _phone_to_str(addr.phone),
         "city": addr.city,
         "postalCode": addr.postal_code,
         "streetAddress1": addr.street_address_1,
