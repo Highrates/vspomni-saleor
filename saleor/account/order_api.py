@@ -195,6 +195,28 @@ def format_delivery_summary_from_address(addr) -> str:
     return f"{carrier_label}, {mode_label}: {location}"
 
 
+def _is_tracking_url(value: str) -> bool:
+    lowered = value.lower()
+    return lowered.startswith("http://") or lowered.startswith("https://")
+
+
+def serialize_fulfillments(order) -> list[dict]:
+    fulfillments = []
+    for fulfillment in order.fulfillments.all().order_by("created_at"):
+        tracking_number = (fulfillment.tracking_number or "").strip()
+        if not tracking_number:
+            continue
+        fulfillments.append(
+            {
+                "id": str(fulfillment.id),
+                "trackingNumber": tracking_number,
+                "isTrackingUrl": _is_tracking_url(tracking_number),
+                "created": fulfillment.created_at.isoformat(),
+            }
+        )
+    return fulfillments
+
+
 def serialize_order_line(line, currency: str) -> dict:
     thumbnail_url = None
     try:
@@ -246,6 +268,9 @@ def serialize_order(order, *, include_lines: bool = True) -> dict:
     shipping = Decimal(str(order.shipping_price_gross_amount or 0))
     total = Decimal(str(order.total_gross_amount or 0))
 
+    fulfillments = serialize_fulfillments(order)
+    tracking_numbers = [item["trackingNumber"] for item in fulfillments]
+
     payload: dict = {
         "id": str(order.id),
         "number": order.number or str(order.id),
@@ -253,6 +278,9 @@ def serialize_order(order, *, include_lines: bool = True) -> dict:
         "status": order.status,
         "statusCode": status_code,
         "statusDisplay": status_display,
+        "fulfillments": fulfillments,
+        "trackingNumbers": tracking_numbers,
+        "trackingNumber": tracking_numbers[-1] if tracking_numbers else None,
         "chargeStatus": order.charge_status,
         "chargeStatusDisplay": CHARGE_STATUS_LABELS.get(
             order.charge_status, order.charge_status

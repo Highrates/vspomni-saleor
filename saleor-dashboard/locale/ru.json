@@ -8242,5 +8242,21 @@
   "zv9OGI": { "string": "Модели не найдены" },
   "/x7Y7U": { "context": "search models placeholder", "string": "Поиск моделей" },
   "r5h6qc": { "context": "model type name", "string": "Название типа модели" },
-  "IalCDT": { "string": "Типы моделей не найдены" }
+  "IalCDT": { "string": "Типы моделей не найдены" },
+  "IyV8CY": { "context": "all authorized amount from transactions in order", "string": "Авторизовано" },
+  "egBBQ/": { "context": "all captured amount from transactions in order", "string": "Списано" },
+  "lrdAIY": { "context": "amount of all cancelled transactions in order", "string": "Отменено" },
+  "NAepnj": { "string": "Авторизовано" },
+  "nMwGMj": { "string": "Списано" },
+  "3wsVWF": { "string": "Отменено" },
+  "7ejEbB": { "context": "Authorized (amount locked on card, not transfered to store owner) transaction amount, data display header", "string": "Авторизовано" },
+  "LY5dS9": { "context": "Charged transaction amount, data display header", "string": "Списано" },
+  "phIGQ1": { "context": "Canceled transaction amount, data display header", "string": "Отменено" },
+  "1wbsEu": { "context": "Transaction card title", "string": "Транзакция" },
+  "xNElry": { "context": "Transaction card title with name", "string": "Транзакция — {name}" },
+  "nYD7NT": { "string": "Транзакция №{index} от {date}" },
+  "43QkTW": { "context": "Transaction capture button - charge preauthorized transaction amount", "string": "Списать" },
+  "f2WJW7": { "context": "transaction event type, amount was captured from client", "string": "Списание" },
+  "qtF0Ft": { "context": "transaction event type, amount was authorized, but not captured", "string": "Авторизация" },
+  "FmwGVb": { "context": "Charged transaction amount, data display header", "string": "Списано" }
 }

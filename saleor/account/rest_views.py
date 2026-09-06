@@ -645,7 +645,7 @@ class GetOrdersView(View):
                 Order.objects.filter(user=user)
                 .exclude(status=OrderStatus.DRAFT)
                 .order_by("-created_at")
-                .prefetch_related("lines", "lines__variant__product__media")
+                .prefetch_related("lines", "lines__variant__product__media", "fulfillments")
                 .select_related("shipping_address", "billing_address")
             )
 
@@ -704,7 +704,7 @@ class GetOrderDetailView(View):
             try:
                 order = (
                     Order.objects.filter(filters & Q(id=ref))
-                    .prefetch_related("lines", "lines__variant__product__media")
+                    .prefetch_related("lines", "lines__variant__product__media", "fulfillments")
                     .select_related("shipping_address", "billing_address")
                     .first()
                 )
@@ -714,7 +714,7 @@ class GetOrderDetailView(View):
             if not order and ref.isdigit():
                 order = (
                     Order.objects.filter(filters & Q(number=int(ref)))
-                    .prefetch_related("lines", "lines__variant__product__media")
+                    .prefetch_related("lines", "lines__variant__product__media", "fulfillments")
                     .select_related("shipping_address", "billing_address")
                     .first()
                 )
