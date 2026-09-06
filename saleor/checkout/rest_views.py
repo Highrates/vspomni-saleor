@@ -1249,7 +1249,6 @@ class CompleteCheckoutWithoutStockCheckView(View):
                         existing_order.id,
                     )
                     redirect_url = existing_order.redirect_url or ''
-                    from ..plugins.manager import get_plugins_manager
                     plugin_manager = get_plugins_manager(allow_replica=False)
                     transaction.on_commit(
                         lambda order=existing_order, mgr=plugin_manager, url=redirect_url: (
