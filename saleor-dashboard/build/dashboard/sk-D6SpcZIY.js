@@ -2,7 +2,7 @@
 !function() {
   try {
     var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {}, n = new e.Error().stack;
-    n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "5e5daf9f-884c-40b3-832d-0ca597bc9485", e._sentryDebugIdIdentifier = "sentry-dbid-5e5daf9f-884c-40b3-832d-0ca597bc9485");
+    n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "9856e674-1399-49b6-8e01-09bfa32c88ee", e._sentryDebugIdIdentifier = "sentry-dbid-9856e674-1399-49b6-8e01-09bfa32c88ee");
   } catch (e2) {
   }
 }();
@@ -10966,7 +10966,7 @@ const fjPWOA$1 = { "context": "header", "string": "Обзор клиента" };
 const qNcoRY$1 = { "context": "notes about customer header", "string": "Заметки" };
 const w3sGrD$1 = { "string": "Введите любую дополнительную информацию об этом клиенте." };
 const N76zUg$1 = { "context": "page header", "string": "Создать клиента" };
-const MjUyhA$1 = { "context": "section subheader", "string": "Активный участник с {дата}" };
+const MjUyhA$1 = { "context": "section subheader", "string": "Активный участник с {date}" };
 const SMakqb$1 = { "context": "customer contact section, header", "string": "Контактная информация" };
 const QLVddq$1 = { "context": "button", "string": "Создать клиента" };
 const xQK2EC = { "context": "tab name", "string": "Все клиенты" };
@@ -11215,7 +11215,7 @@ const bFhzRX$1 = { "string": "Нет товаров, отсутствующих 
 const c0H45L$1 = { "string": "{amount, plural, one {Готов к исполнению один заказ} few {{amount} заказа готовы к исполнению} many {{amount} заказов готовы к исполнению} other {{amount} заказа готовы к исполнению}}" };
 const md326v$1 = { "string": "{amount, plural, one {Один платёж к захвату} few {{amount} платежа к захвату} many {{amount} платежей к захвату} other {{amount} платежа к захвату}}" };
 const cdxwA8$1 = { "string": "{amount, plural, one {Один товар отсутствует на складе} few {{amount} товара отсутствуют на складе} many {{amount} товаров отсутствуют на складе} other {{amount} товара отсутствуют на складе}}" };
-const gSQ0Ge$1 = { "string": "Вариант {имя} установлен по умолчанию." };
+const gSQ0Ge$1 = { "string": "Вариант {name} установлен по умолчанию." };
 const DOkfyZ$1 = { "string": "Недостаточно прав" };
 const aheQdn$1 = { "string": "Фамилия" };
 const IbVKSH$1 = { "context": "button", "string": "Управление" };

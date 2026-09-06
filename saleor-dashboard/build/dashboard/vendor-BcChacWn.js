@@ -5,7 +5,7 @@ var __publicField = (obj, key, value3) => __defNormalProp(obj, typeof key !== "s
 !function() {
   try {
     var e3 = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {}, n3 = new e3.Error().stack;
-    n3 && (e3._sentryDebugIds = e3._sentryDebugIds || {}, e3._sentryDebugIds[n3] = "7d1c5820-f003-460f-8580-380f05027065", e3._sentryDebugIdIdentifier = "sentry-dbid-7d1c5820-f003-460f-8580-380f05027065");
+    n3 && (e3._sentryDebugIds = e3._sentryDebugIds || {}, e3._sentryDebugIds[n3] = "d785f95c-1095-49e4-9a26-922c4243ce53", e3._sentryDebugIdIdentifier = "sentry-dbid-d785f95c-1095-49e4-9a26-922c4243ce53");
   } catch (e4) {
   }
 }();
@@ -29,7 +29,7 @@ function _mergeNamespaces(n3, m4) {
   return Object.freeze(Object.defineProperty(n3, Symbol.toStringTag, { value: "Module" }));
 }
 var _global = typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : {};
-_global.SENTRY_RELEASE = { id: "ffce97ec7555546f6afbf4981eba4deb3b81478b" };
+_global.SENTRY_RELEASE = { id: "01eaf679865c82936e6836256c6711958daf6dc4" };
 var commonjsGlobal$3 = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs$1(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
