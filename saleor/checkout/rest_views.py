@@ -27,6 +27,7 @@ from ..core.exceptions import InsufficientStock, PermissionDenied
 from ..core.utils.promo_code import InvalidPromoCode
 from ..checkout import models as checkout_models
 from ..channel.models import Channel
+from ..discount import DiscountValueType, VoucherType
 from ..product import models as product_models
 
 logger = logging.getLogger(__name__)
@@ -349,11 +350,13 @@ def _checkout_expected_payment_total(checkout_info) -> Decimal:
         and shipping_stored > 0
         and shipping_in_total <= 0
     ):
+        # Subtotal already includes order and product voucher discounts.
         subtotal = Decimal(str(checkout.subtotal.gross.amount))
-        discount = (
-            Decimal(str(checkout.discount.amount)) if checkout.discount else Decimal(0)
-        )
-        expected = subtotal - discount + shipping_stored
+        shipping = shipping_stored
+        voucher = checkout_info.voucher
+        if voucher and voucher.type == VoucherType.SHIPPING and checkout.discount:
+            shipping = max(Decimal(0), shipping - Decimal(str(checkout.discount.amount)))
+        expected = subtotal + shipping
 
     return expected
 
@@ -636,25 +639,110 @@ def _assign_addresses_to_checkout(checkout, address_payload: dict | None):
     return True
 
 
+class PromoCodeNotApplied(Exception):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+def _format_rub(amount) -> str:
+    value = Decimal(str(amount))
+    if value == value.to_integral_value():
+        return f"{int(value)}"
+    return f"{value:.2f}"
+
+
+def _promo_error_message(exc: Exception) -> str:
+    from ..discount.models import NotApplicable
+
+    if isinstance(exc, InvalidPromoCode):
+        return "Промокод не найден или больше не действует"
+
+    cause = exc if isinstance(exc, NotApplicable) else exc.__cause__
+    if isinstance(cause, NotApplicable):
+        if cause.min_spent is not None:
+            return (
+                "Промокод действует для заказов от "
+                f"{_format_rub(cause.min_spent.amount)} ₽"
+            )
+        if cause.min_checkout_items_quantity:
+            return (
+                "Промокод действует при заказе от "
+                f"{cause.min_checkout_items_quantity} шт."
+            )
+        msg = str(cause).lower()
+        if "once per customer" in msg:
+            return "Вы уже использовали этот промокод"
+        if "staff" in msg:
+            return "Промокод недоступен"
+        if "selected items" in msg:
+            return "Промокод не распространяется на товары в корзине"
+        if "country" in msg:
+            return "Промокод не действует в вашем регионе"
+        if "delivery method" in msg:
+            return "Промокод на доставку применится после расчёта доставки"
+        if "not require shipping" in msg:
+            return "Промокод на доставку не подходит для этого заказа"
+        if "channel" in msg:
+            return "Промокод не действует в этом магазине"
+    return "Промокод не подходит для этого заказа"
+
+
+def _resolve_voucher_code(promo_code: str):
+    from ..discount.models import VoucherCode
+
+    code = (promo_code or "").strip()
+    if not code:
+        return None
+    return (
+        VoucherCode.objects.filter(code=code).first()
+        or VoucherCode.objects.filter(code__iexact=code).first()
+    )
+
+
 def _apply_promo_code_without_quantity_limits(checkout, promo_code: str | None):
-    """Apply voucher bypassing quantity_limit_per_customer checks."""
+    """Apply voucher bypassing quantity_limit_per_customer checks.
+
+    Raise PromoCodeNotApplied when the code cannot be applied, so the caller never
+    creates a full-price checkout while the customer expects a discount.
+    """
     if not promo_code or not str(promo_code).strip():
         return None
 
+    from ..checkout.calculations import fetch_checkout_data
+    from ..checkout.utils import invalidate_checkout
     from ..warehouse.availability import set_disable_quantity_limits
 
-    code = str(promo_code).strip()
+    requested_code = str(promo_code).strip()
+    voucher_code = _resolve_voucher_code(requested_code)
+    code = voucher_code.code if voucher_code else requested_code
+
     manager = get_plugins_manager(allow_replica=False)
     lines, _ = fetch_checkout_lines(checkout)
     checkout_info = fetch_checkout_info(checkout, lines, manager)
 
     set_disable_quantity_limits(True)
     try:
-        add_promo_code_to_checkout(checkout_info, lines, code, manager)
-        from ..checkout.calculations import fetch_checkout_data
+        try:
+            add_promo_code_to_checkout(manager, checkout_info, lines, code)
+        except Exception as promo_error:
+            raise PromoCodeNotApplied(
+                requested_code, _promo_error_message(promo_error)
+            ) from promo_error
 
+        invalidate_fields = invalidate_checkout(
+            checkout_info, lines, manager, recalculate_discount=False, save=False
+        )
+        if invalidate_fields:
+            checkout.save(update_fields=invalidate_fields)
         checkout_info, lines = fetch_checkout_data(checkout_info, manager, lines)
         checkout.refresh_from_db()
+        if not checkout.voucher_code:
+            raise PromoCodeNotApplied(
+                requested_code, "Промокод не подходит для этого заказа"
+            )
+
         total = checkout.total.gross
         logger.info(
             "Applied promo %s on checkout %s without quantity limits, total=%s",
@@ -663,7 +751,7 @@ def _apply_promo_code_without_quantity_limits(checkout, promo_code: str | None):
             total.amount,
         )
         return {
-            "code": checkout.voucher_code or code,
+            "code": checkout.voucher_code,
             "total": float(total.amount),
             "currency": str(total.currency),
             "discount": float(checkout.discount_amount or 0),
@@ -719,9 +807,21 @@ def _align_order_with_external_shipping_payment(order, checkout, payment_amount)
     """Синхронизирует total/shipping заказа с REST-доставкой (CDEK/Yandex/Ozon)."""
     from ..order.utils import update_order_charge_status
 
-    shipping_amount = Decimal(str(checkout.undiscounted_base_shipping_price_amount or 0))
-    if not checkout.external_shipping_method_id or shipping_amount <= 0:
+    undiscounted_shipping = Decimal(
+        str(checkout.undiscounted_base_shipping_price_amount or 0)
+    )
+    if not checkout.external_shipping_method_id or undiscounted_shipping <= 0:
         return order
+
+    shipping_amount = undiscounted_shipping
+    voucher = order.voucher
+    if voucher and voucher.type == VoucherType.SHIPPING:
+        from prices import Money
+
+        discount = voucher.get_discount_amount_for(
+            Money(undiscounted_shipping, order.currency), order.channel
+        )
+        shipping_amount = max(Decimal(0), undiscounted_shipping - discount.amount)
 
     subtotal = Decimal(str(order.subtotal_gross_amount or 0))
     expected_total = subtotal + shipping_amount
@@ -735,7 +835,7 @@ def _align_order_with_external_shipping_payment(order, checkout, payment_amount)
     order.shipping_price_gross_amount = shipping_amount
     order.shipping_price_net_amount = shipping_amount
     order.base_shipping_price_amount = shipping_amount
-    order.undiscounted_base_shipping_price_amount = shipping_amount
+    order.undiscounted_base_shipping_price_amount = undiscounted_shipping
     order.total_gross_amount = expected_total
     order.total_net_amount = expected_total
     order.save(
@@ -944,6 +1044,8 @@ class CreateCheckoutWithoutStockCheckView(View):
                 email = email.strip().lower()
             address_payload = data.get('address') or data.get('deliveryAddress')
             promo_code = data.get('promoCode') or data.get('promo_code')
+            shipping_amount = data.get('shippingAmount') or data.get('shipping_amount')
+            shipping_carrier = data.get('shippingCarrier') or data.get('shipping_carrier')
             
             if not lines:
                 return JsonResponse(
@@ -1095,17 +1197,40 @@ class CreateCheckoutWithoutStockCheckView(View):
                         )
 
                 if promo_code:
+                    # Shipping vouchers need the delivery method on the checkout.
+                    if shipping_amount and Decimal(str(shipping_amount)) > 0:
+                        shipping_manager = get_plugins_manager(allow_replica=False)
+                        shipping_lines, _ = fetch_checkout_lines(checkout)
+                        shipping_info = fetch_checkout_info(
+                            checkout, shipping_lines, shipping_manager
+                        )
+                        _apply_external_shipping_to_checkout(
+                            checkout,
+                            shipping_info,
+                            shipping_lines,
+                            shipping_manager,
+                            shipping_amount,
+                            shipping_carrier,
+                        )
                     try:
                         promo_info = _apply_promo_code_without_quantity_limits(
                             checkout, promo_code
                         )
-                    except Exception as promo_error:
+                    except PromoCodeNotApplied as promo_error:
                         logger.warning(
-                            "Failed to apply promo %s on checkout %s: %s",
+                            "Promo %s rejected on checkout %s: %s",
                             promo_code,
                             checkout.token,
-                            promo_error,
-                            exc_info=True,
+                            promo_error.__cause__ or promo_error.message,
+                        )
+                        transaction.set_rollback(True)
+                        return JsonResponse(
+                            {
+                                'error': promo_error.message,
+                                'code': 'PROMO_CODE_NOT_APPLIED',
+                                'promoCode': promo_error.code,
+                            },
+                            status=400,
                         )
             
             logger.info(f'Checkout creation completed: {checkout.token}')
@@ -1496,251 +1621,264 @@ class CompleteCheckoutWithoutStockCheckView(View):
             )
 
 
+VOUCHER_VALIDATE_WINDOW_SECONDS = 600
+VOUCHER_VALIDATE_MAX_REQUESTS = 40
+VOUCHER_VALIDATE_MAX_UNKNOWN_CODES = 10
+VOUCHER_VALIDATE_MAX_LINES = 100
+
+
+def _cache_incr(key: str, timeout: int) -> int:
+    from django.core.cache import cache
+
+    if cache.add(key, 1, timeout):
+        return 1
+    try:
+        return cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, timeout)
+        return 1
+
+
+def _parse_variant_db_id(variant_id) -> int | None:
+    raw = str(variant_id or "").strip()
+    if raw.isdigit():
+        return int(raw)
+    try:
+        _, db_id = graphene.Node.from_global_id(raw)
+        return int(db_id)
+    except Exception:
+        return None
+
+
+def _voucher_scope(voucher) -> str:
+    if voucher.type == VoucherType.SHIPPING:
+        return "SHIPPING"
+    if voucher.type == VoucherType.SPECIFIC_PRODUCT:
+        return "PRODUCTS"
+    if voucher.apply_once_per_order:
+        return "CHEAPEST"
+    return "ORDER"
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class ValidateVoucherView(View):
-    """Валидация и применение ваучера через Saleor с применением всех правил."""
+    """Проверка промокода по правилам Saleor на временном checkout.
+
+    Все записи в БД откатываются; запросы ограничены по IP, неизвестные коды
+    считаются отдельно, чтобы коды нельзя было перебирать.
+    """
+
+    def options(self, request):
+        response = JsonResponse({})
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response
 
     def post(self, request):
+        from django.core.cache import cache
+
+        from ..core.utils import get_client_ip
+
+        # X-Real-IP is set by nginx; the first X-Forwarded-For hop is client-controlled.
+        client_ip = (
+            request.META.get("HTTP_X_REAL_IP", "").strip()
+            or get_client_ip(request)
+            or "unknown"
+        )
+        requests_key = f"voucher-validate:requests:{client_ip}"
+        unknown_key = f"voucher-validate:unknown:{client_ip}"
+        too_many = JsonResponse(
+            {
+                "ok": False,
+                "error": "Слишком много попыток. Попробуйте через несколько минут.",
+            },
+            status=429,
+        )
+        if (cache.get(unknown_key) or 0) >= VOUCHER_VALIDATE_MAX_UNKNOWN_CODES:
+            return too_many
+        if (
+            _cache_incr(requests_key, VOUCHER_VALIDATE_WINDOW_SECONDS)
+            > VOUCHER_VALIDATE_MAX_REQUESTS
+        ):
+            return too_many
+
         try:
             data = json.loads(request.body)
-            promo_code = (data.get("promoCode") or "").strip()
-            variant_ids = data.get("variantIds", [])  # Список ID вариантов товаров
-            quantities = data.get("quantities", [])  # Список количеств
-            channel_slug = data.get("channel", "vspomni-site")
-
-            if not promo_code:
-                return JsonResponse(
-                    {"ok": False, "error": "Код промокода обязателен для заполнения"},
-                    status=400,
-                )
-
-            if not variant_ids or len(variant_ids) != len(quantities):
-                return JsonResponse(
-                    {"ok": False, "error": "Неверный формат товаров"},
-                    status=400,
-                )
-
-            # Получаем канал
-            channel = Channel.objects.filter(slug=channel_slug).first()
-            if not channel:
-                return JsonResponse(
-                    {"ok": False, "error": "Канал не найден"},
-                    status=400,
-                )
-
-            # Создаем временный checkout для проверки ваучера
-            manager = get_plugins_manager(allow_replica=False)
-            checkout = checkout_models.Checkout.objects.create(
-                channel=channel,
-                currency=channel.currency_code,
-            )
-
-            # Получаем channel listings для цен
-            # Добавляем товары в checkout
-            lines = []
-            variant_db_ids = []
-            for variant_id, quantity in zip(variant_ids, quantities):
-                try:
-                    # Преобразуем global ID в database ID
-                    try:
-                        _, db_id = graphene.Node.from_global_id(variant_id)
-                        variant_db_id = int(db_id)
-                    except:
-                        # Если это уже database ID
-                        variant_db_id = int(variant_id) if variant_id.isdigit() else None
-                        if not variant_db_id:
-                            continue
-                    
-                    variant_db_ids.append(variant_db_id)
-                except Exception as e:
-                    print(f"Error parsing variant ID {variant_id}: {e}")
-                    continue
-            
-            # Получаем варианты и их channel listings
-            variants = product_models.ProductVariant.objects.filter(id__in=variant_db_ids).select_related('product')
-            variant_listings = {
-                listing.variant_id: listing
-                for listing in product_models.ProductVariantChannelListing.objects.filter(
-                    channel_id=channel.id,
-                    variant_id__in=variant_db_ids
-                )
-            }
-            
-            for variant_id, quantity in zip(variant_ids, quantities):
-                try:
-                    try:
-                        _, db_id = graphene.Node.from_global_id(variant_id)
-                        variant_db_id = int(db_id)
-                    except:
-                        variant_db_id = int(variant_id) if variant_id.isdigit() else None
-                        if not variant_db_id:
-                            continue
-                    
-                    variant = variants.filter(id=variant_db_id).first()
-                    variant_listing = variant_listings.get(variant_db_id)
-                    
-                    if variant and variant_listing:
-                        # Получаем цены из channel listing
-                        variant_price_amount = variant_listing.price_amount or Decimal('0')
-                        variant_prior_price_amount = variant_listing.prior_price_amount
-                        
-                        checkout_line = checkout_models.CheckoutLine.objects.create(
-                            checkout=checkout,
-                            variant=variant,
-                            quantity=quantity,
-                            currency=channel.currency_code,
-                            undiscounted_unit_price_amount=variant_price_amount,
-                            prior_unit_price_amount=variant_prior_price_amount,
-                        )
-                        lines.append(checkout_line)
-                except Exception as e:
-                    print(f"Error adding variant {variant_id}: {e}")
-                    continue
-
-            if not lines:
-                checkout.delete()
-                return JsonResponse(
-                    {"ok": False, "error": "Не удалось добавить товары в корзину"},
-                    status=400,
-                )
-
-            # Получаем checkout_info и lines для применения ваучера
-            checkout_lines, _ = fetch_checkout_lines(checkout)
-            checkout_info = fetch_checkout_info(checkout, checkout_lines, manager)
-
-            # Пытаемся применить ваучер
-            # Сначала проверяем, существует ли код ваучера
-            from ..discount.models import VoucherCode, Voucher
-            from django.utils import timezone
-            
-            # Пробуем найти код ваучера (с учетом и без учета регистра)
-            voucher_code_obj = None
-            codes_to_try = [
-                promo_code,
-                promo_code.upper(),
-                promo_code.lower(),
-                promo_code.strip(),
-            ]
-            
-            for code_variant in codes_to_try:
-                voucher_code_obj = VoucherCode.objects.filter(
-                    code=code_variant,
-                    is_active=True
-                ).first()
-                if voucher_code_obj:
-                    # Если нашли код, используем его для применения
-                    promo_code = voucher_code_obj.code
-                    break
-            
-            if not voucher_code_obj:
-                checkout.delete()
-                return JsonResponse(
-                    {"ok": False, "error": f"Ваучер с кодом '{promo_code}' не найден"},
-                    status=400,
-                )
-            
-            # Проверяем, что ваучер активен в канале
-            voucher = voucher_code_obj.voucher
-            if not Voucher.objects.active_in_channel(
-                date=timezone.now(),
-                channel_slug=channel_slug
-            ).filter(id=voucher.id).exists():
-                checkout.delete()
-                return JsonResponse(
-                    {"ok": False, "error": "Ваучер не активен в данном канале или истек"},
-                    status=400,
-                )
-            
-            try:
-                from ..warehouse.availability import set_disable_quantity_limits
-
-                set_disable_quantity_limits(True)
-                try:
-                    add_promo_code_to_checkout(
-                        manager,
-                        checkout_info,
-                        checkout_lines,
-                        promo_code,
-                    )
-                finally:
-                    set_disable_quantity_limits(False)
-                checkout.refresh_from_db()
-
-                # Вычисляем скидку
-                discount_amount = float(checkout.discount_amount or Decimal('0'))
-                subtotal = float(checkout.subtotal.gross.amount)
-                
-                # Получаем информацию о ваучере для определения типа скидки
-                # voucher_code_obj уже найден выше
-                discount_type = "FIXED"
-                discount_percent = 0
-                
-                if voucher_code_obj:
-                    voucher = voucher_code_obj.voucher
-                    channel_listing = voucher.channel_listings.filter(channel=channel).first()
-
-                    from ..discount.models import VoucherType
-
-                    if voucher.type == VoucherType.SHIPPING:
-                        discount_type = "SHIPPING"
-                        discount_percent = 0
-                    elif voucher.discount_value_type == "PERCENTAGE":
-                        discount_type = "PERCENTAGE"
-                        discount_percent = float(channel_listing.discount_value or 0) if channel_listing else 0
-                    else:
-                        # FIXED - фиксированная сумма
-                        discount_type = "FIXED"
-                        discount_percent = 0
-                        
-                        # Для фиксированной скидки вычисляем процент от суммы для отображения
-                        if subtotal > 0 and discount_amount > 0:
-                            discount_percent = round((discount_amount / subtotal) * 100, 2)
-                
-                # Удаляем временный checkout
-                checkout.delete()
-
-                return JsonResponse({
-                    "ok": True,
-                    "code": promo_code,
-                    "discountAmount": discount_amount,
-                    "discountType": discount_type,
-                    "discountPercent": discount_percent,
-                    "discountName": checkout.discount_name or "",
-                })
-            except InvalidPromoCode:
-                # Удаляем временный checkout при ошибке
-                checkout.delete()
-                return JsonResponse(
-                    {"ok": False, "error": "Ваучер не найден или недействителен"},
-                    status=400,
-                )
-            except Exception as voucher_error:
-                # Удаляем временный checkout при ошибке
-                checkout.delete()
-                error_msg = str(voucher_error)
-                
-                # Переводим стандартные ошибки на русский
-                if "not found" in error_msg.lower() or "does not exist" in error_msg.lower() or "Invalid" in error_msg:
-                    error_msg = "Ваучер не найден"
-                elif "not applicable" in error_msg.lower() or "not valid" in error_msg.lower():
-                    error_msg = "Ваучер не применим к данным товарам"
-                elif "expired" in error_msg.lower():
-                    error_msg = "Ваучер истек"
-                elif "used" in error_msg.lower():
-                    error_msg = "Ваучер уже использован"
-                
-                return JsonResponse(
-                    {"ok": False, "error": error_msg},
-                    status=400,
-                )
-
         except json.JSONDecodeError:
             return JsonResponse(
-                {"ok": False, "error": "Неверный формат JSON"},
-                status=400,
+                {"ok": False, "error": "Неверный формат запроса"}, status=400
             )
-        except Exception as e:
+
+        try:
+            with transaction.atomic():
+                payload, status = self._validate(data)
+                transaction.set_rollback(True)
+        except Exception:
+            logger.exception("Voucher validation failed")
             return JsonResponse(
-                {"ok": False, "error": f"Ошибка сервера: {str(e)}"},
+                {
+                    "ok": False,
+                    "error": "Не удалось проверить промокод. Попробуйте позже.",
+                },
                 status=500,
             )
+
+        if payload.pop("unknownCode", False):
+            _cache_incr(unknown_key, VOUCHER_VALIDATE_WINDOW_SECONDS)
+        return JsonResponse(payload, status=status)
+
+    def _validate(self, data: dict) -> tuple[dict, int]:
+        from ..account.models import User
+        from ..checkout.utils import assign_external_shipping_to_checkout
+        from ..discount.models import Voucher
+        from ..discount.utils.voucher import validate_voucher_for_checkout
+        from ..warehouse.availability import set_disable_quantity_limits
+
+        promo_code = str(data.get("promoCode") or "").strip()[:255]
+        variant_ids = data.get("variantIds") or []
+        quantities = data.get("quantities") or []
+        channel_slug = data.get("channel") or "vspomni-site"
+        email = str(data.get("email") or "").strip().lower() or None
+        shipping_amount = Decimal(str(data.get("shippingAmount") or 0))
+        shipping_carrier = data.get("shippingCarrier")
+
+        if not promo_code:
+            return {"ok": False, "error": "Введите промокод"}, 400
+        if (
+            not isinstance(variant_ids, list)
+            or not isinstance(quantities, list)
+            or not variant_ids
+            or len(variant_ids) != len(quantities)
+            or len(variant_ids) > VOUCHER_VALIDATE_MAX_LINES
+        ):
+            return {"ok": False, "error": "Неверный формат товаров"}, 400
+
+        channel = Channel.objects.filter(slug=channel_slug, is_active=True).first()
+        if not channel:
+            return {"ok": False, "error": "Магазин не найден"}, 400
+
+        not_found = {
+            "ok": False,
+            "error": "Промокод не найден или больше не действует",
+            "unknownCode": True,
+        }
+        voucher_code = _resolve_voucher_code(promo_code)
+        if not voucher_code or not voucher_code.is_active:
+            return not_found, 400
+        voucher = voucher_code.voucher
+        if (
+            not Voucher.objects.active_in_channel(
+                date=timezone.now(), channel_slug=channel.slug
+            )
+            .filter(id=voucher.id)
+            .exists()
+        ):
+            return not_found, 400
+
+        quantity_by_variant: dict[int, int] = {}
+        for variant_id, quantity in zip(variant_ids, quantities):
+            db_id = _parse_variant_db_id(variant_id)
+            try:
+                qty = int(quantity)
+            except (TypeError, ValueError):
+                qty = 0
+            if db_id and qty > 0:
+                quantity_by_variant[db_id] = (
+                    quantity_by_variant.get(db_id, 0) + min(qty, 999)
+                )
+
+        variants = product_models.ProductVariant.objects.filter(
+            id__in=quantity_by_variant.keys()
+        )
+        listings = {
+            listing.variant_id: listing
+            for listing in product_models.ProductVariantChannelListing.objects.filter(
+                channel_id=channel.id, variant_id__in=quantity_by_variant.keys()
+            )
+        }
+
+        user = User.objects.filter(email=email).first() if email else None
+        checkout = checkout_models.Checkout.objects.create(
+            channel=channel,
+            currency=channel.currency_code,
+            email=email,
+            user=user,
+        )
+        checkout_lines = [
+            checkout_models.CheckoutLine(
+                checkout=checkout,
+                variant=variant,
+                quantity=quantity_by_variant[variant.id],
+                currency=channel.currency_code,
+                undiscounted_unit_price_amount=listings[variant.id].price_amount
+                or Decimal("0"),
+                prior_unit_price_amount=listings[variant.id].prior_price_amount,
+            )
+            for variant in variants
+            if variant.id in listings
+        ]
+        if not checkout_lines:
+            return {"ok": False, "error": "Товары из корзины недоступны"}, 400
+        checkout_models.CheckoutLine.objects.bulk_create(checkout_lines)
+
+        has_shipping = shipping_amount > 0
+        if has_shipping:
+            shipping_fields = assign_external_shipping_to_checkout(
+                checkout,
+                _build_external_shipping_method(
+                    shipping_amount, shipping_carrier, checkout.currency
+                ),
+            )
+            if shipping_fields:
+                checkout.save(update_fields=shipping_fields)
+
+        manager = get_plugins_manager(allow_replica=False)
+        lines, _ = fetch_checkout_lines(checkout)
+        checkout_info = fetch_checkout_info(checkout, lines, manager)
+
+        set_disable_quantity_limits(True)
+        try:
+            if voucher.type == VoucherType.SHIPPING and not has_shipping:
+                validate_voucher_for_checkout(manager, voucher, checkout_info, lines)
+                discount_amount = Decimal(0)
+            else:
+                add_promo_code_to_checkout(
+                    manager, checkout_info, lines, voucher_code.code
+                )
+                discount_amount = Decimal(str(checkout.discount_amount or 0))
+        except Exception as voucher_error:
+            return {"ok": False, "error": _promo_error_message(voucher_error)}, 400
+        finally:
+            set_disable_quantity_limits(False)
+
+        listing = voucher.channel_listings.filter(channel=channel).first()
+        discount_value = float(listing.discount_value or 0) if listing else 0.0
+        min_spent = (
+            float(listing.min_spent_amount)
+            if listing and listing.min_spent_amount
+            else None
+        )
+        is_percentage = voucher.discount_value_type == DiscountValueType.PERCENTAGE
+        is_shipping = voucher.type == VoucherType.SHIPPING
+
+        if is_shipping:
+            discount_type = "SHIPPING"
+        elif is_percentage:
+            discount_type = "PERCENTAGE"
+        else:
+            discount_type = "FIXED"
+
+        return {
+            "ok": True,
+            "code": voucher_code.code,
+            "discountType": discount_type,
+            "discountValueType": "PERCENTAGE" if is_percentage else "FIXED",
+            "discountValue": discount_value,
+            "discountPercent": discount_value if is_percentage else 0,
+            "discountAmount": 0.0 if is_shipping else float(discount_amount),
+            "shippingDiscountAmount": float(discount_amount) if is_shipping else None,
+            "scope": _voucher_scope(voucher),
+            "minSpent": min_spent,
+            "discountName": voucher.name or "",
+        }, 200

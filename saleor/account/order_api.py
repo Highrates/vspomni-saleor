@@ -267,6 +267,20 @@ def serialize_order(order, *, include_lines: bool = True) -> dict:
     subtotal = Decimal(str(order.subtotal_gross_amount or 0))
     shipping = Decimal(str(order.shipping_price_gross_amount or 0))
     total = Decimal(str(order.total_gross_amount or 0))
+    promo_discount = Decimal(0)
+    if order.voucher_code:
+        from django.db.models import Sum
+
+        from ..discount import DiscountType
+        from ..discount.models import OrderLineDiscount
+
+        order_level = order.discounts.filter(type=DiscountType.VOUCHER).aggregate(
+            total=Sum("amount_value")
+        )["total"]
+        line_level = OrderLineDiscount.objects.filter(
+            line__order_id=order.id, type=DiscountType.VOUCHER
+        ).aggregate(total=Sum("amount_value"))["total"]
+        promo_discount = Decimal(str(order_level or 0)) + Decimal(str(line_level or 0))
 
     fulfillments = serialize_fulfillments(order)
     tracking_numbers = [item["trackingNumber"] for item in fulfillments]
@@ -302,6 +316,13 @@ def serialize_order(order, *, include_lines: bool = True) -> dict:
         },
         "total": {
             "gross": {"amount": _money_to_kopecks(total), "currency": currency}
+        },
+        "voucherCode": order.voucher_code or None,
+        "promoDiscount": {
+            "gross": {
+                "amount": _money_to_kopecks(promo_discount),
+                "currency": currency,
+            }
         },
         "metadata": order.metadata or {},
     }
