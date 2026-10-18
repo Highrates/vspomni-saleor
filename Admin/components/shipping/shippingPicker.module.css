@@ -1,0 +1,178 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 160px;
+}
+
+.fieldLabel {
+  margin: 0 0 6px;
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-gray);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cityWrap {
+  position: relative;
+}
+
+.cityBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 6px;
+  background: var(--color-white);
+  font-family: var(--font-open-sans);
+  font-size: var(--text-body);
+  color: var(--color-ink-black);
+  cursor: pointer;
+  text-align: left;
+}
+
+.cityBtn:hover {
+  border-color: var(--color-ink-black);
+}
+
+.cityPlaceholder {
+  color: var(--color-gray);
+}
+
+.dropdown {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 6px;
+  background: var(--color-white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-body);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownItem:hover,
+.dropdownItemActive {
+  background: var(--color-bright-snow);
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 6px;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-body);
+  color: var(--color-ink-black);
+  background: var(--color-white);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-ink-black);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: min(320px, 40vh);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 6px;
+  background: transparent;
+  font-family: var(--font-open-sans);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.listItem:hover {
+  border-color: var(--color-ink-black);
+  background: var(--color-bright-snow);
+}
+
+.listItemSelected {
+  border-color: var(--color-ink-black);
+  background: var(--color-bright-snow);
+}
+
+.itemTitle {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-350);
+  line-height: 1.35;
+  color: var(--color-ink-black);
+}
+
+.itemMeta {
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-gray);
+  line-height: 1.4;
+}
+
+.status {
+  margin: 0;
+  padding: 16px 0;
+  font-size: var(--text-caption);
+  color: var(--color-gray);
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(180, 40, 40, 0.25);
+  border-radius: 6px;
+  background: rgba(180, 40, 40, 0.06);
+  font-size: var(--text-caption);
+  color: var(--color-red, #b42828);
+  line-height: 1.4;
+}

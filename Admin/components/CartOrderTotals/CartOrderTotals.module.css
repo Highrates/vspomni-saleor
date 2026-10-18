@@ -1,0 +1,37 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row,
+.rowMuted,
+.rowNote,
+.rowFinal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: var(--text-caption, 14px);
+  line-height: 1.4;
+}
+
+.row {
+  color: var(--color-black, #111);
+}
+
+.rowMuted {
+  color: var(--color-gray, #888);
+}
+
+.rowNote {
+  color: var(--color-gray, #888);
+  font-size: 12px;
+}
+
+.rowFinal {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-black, #111);
+}

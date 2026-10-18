@@ -1,0 +1,340 @@
+.section {
+  margin-top: 96px;
+  margin-bottom: 96px;
+  width: 100%;
+}
+
+/* Серая подложка + side рядом (не внутри подложки) */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, min(448px, 32vw));
+  align-items: stretch;
+  width: 100%;
+}
+
+.main {
+  min-width: 0;
+  background: var(--color-bright-snow);
+}
+
+.inner {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  /* как BestBrands infoPad / padding-global на full-bleed */
+  padding-left: max(2rem, calc((100vw - 1536px) / 2 + 2rem));
+  /* правый padding ужимаем — рядом side */
+  padding-right: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  gap: 46px;
+  align-items: stretch;
+  /* компенсируем обнулённый padding-right у .inner + gap до side */
+  padding-right: 46px;
+}
+
+/* —— Featured (left) —— */
+.featured {
+  min-width: 0;
+  display: flex;
+}
+
+.featuredLink {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.featuredCover {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-4);
+}
+
+.featuredCover .coverImg,
+.featuredCover .coverPlaceholder {
+  transform: scale(1);
+  transition: transform 0.35s ease;
+}
+
+.featuredLink:hover .featuredCover .coverImg,
+.featuredLink:hover .featuredCover .coverPlaceholder {
+  transform: scale(1.06);
+}
+
+.featuredTitle {
+  font-size: var(--text-card-20-400);
+  font-weight: var(--font-weight-350);
+  line-height: 1.35;
+  color: var(--color-black);
+}
+
+/* —— Middle list —— */
+.middle {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.middleHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 20px;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category {
+  flex-shrink: 0;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-350);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-black);
+  text-decoration: none;
+}
+
+.category:hover {
+  opacity: 0.75;
+}
+
+.allLink {
+  flex-shrink: 0;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-350);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-gray);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.allLink:hover {
+  color: var(--color-black);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.listItem {
+  border-top: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listLink {
+  display: grid;
+  grid-template-columns: clamp(120px, 18vw, 208px) minmax(0, 1fr);
+  gap: clamp(12px, 1.4vw, 20px);
+  align-items: start;
+  padding: 20px 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.thumb {
+  display: block;
+  width: clamp(120px, 18vw, 208px);
+  height: clamp(120px, 18vw, 208px);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  border-radius: var(--radius-4);
+}
+
+.thumb .coverImg,
+.thumb .coverPlaceholder {
+  transform: scale(1);
+  transition: transform 0.35s ease;
+}
+
+.listLink:hover .thumb .coverImg,
+.listLink:hover .thumb .coverPlaceholder {
+  transform: scale(1.06);
+}
+
+.listCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.listTitle {
+  font-size: var(--text-card-20-400);
+  font-weight: var(--font-weight-350);
+  line-height: 1.35;
+  color: var(--color-black);
+}
+
+.readLink {
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-gray);
+  line-height: 1.2;
+}
+
+/* —— Side visual: рядом с серой подложкой —— */
+.side {
+  min-width: 0;
+  max-width: 448px;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: transparent;
+  align-self: stretch;
+  justify-self: end;
+}
+
+.sideImg,
+.sidePlaceholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  object-fit: cover;
+}
+
+.sidePlaceholder {
+  background: rgba(0, 0, 0, 0.06);
+  min-height: 420px;
+}
+
+.coverImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverPlaceholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featuredCover .coverImg,
+  .featuredCover .coverPlaceholder,
+  .thumb .coverImg,
+  .thumb .coverPlaceholder {
+    transition: none;
+  }
+
+  .featuredLink:hover .featuredCover .coverImg,
+  .featuredLink:hover .featuredCover .coverPlaceholder,
+  .listLink:hover .thumb .coverImg,
+  .listLink:hover .thumb .coverPlaceholder {
+    transform: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .inner {
+    padding-right: max(2rem, calc((100vw - 1536px) / 2 + 2rem));
+  }
+
+  .grid {
+    padding-right: 0;
+    gap: 46px;
+  }
+
+  .side {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    margin-top: 64px;
+    margin-bottom: 64px;
+  }
+
+  .inner {
+    padding-top: 28px;
+    padding-bottom: 28px;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .middle {
+    order: 1;
+  }
+
+  .featured {
+    order: 2;
+  }
+
+  .middleHead {
+    flex-wrap: wrap;
+  }
+
+  .categories {
+    gap: 14px;
+  }
+
+  .listLink {
+    grid-template-columns: clamp(96px, 28vw, 120px) minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px 0;
+  }
+
+  .thumb {
+    width: clamp(96px, 28vw, 120px);
+    height: clamp(96px, 28vw, 120px);
+  }
+
+  .featuredTitle,
+  .listTitle {
+    font-size: 16px;
+    font-weight: var(--font-weight-350);
+  }
+}

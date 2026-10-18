@@ -1,0 +1,83 @@
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--color-bright-snow, #f5f5f5);
+}
+
+.tab {
+  flex: 1;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-350);
+  letter-spacing: 0.03em;
+  color: var(--color-gray);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--color-ink-black);
+}
+
+.tabActive {
+  background: var(--color-white);
+  color: var(--color-ink-black);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 8px;
+  background: var(--color-white);
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-350);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-black);
+}
+
+.blockHint {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-gray);
+  line-height: 1.4;
+}
+
+.pickerFrame {
+  max-height: min(640px, 62vh);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px;
+}
+
+.selectedHint {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--color-bright-snow);
+  font-size: var(--text-caption);
+  color: var(--color-ink-black);
+  line-height: 1.4;
+}
+
+.calcNote {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--color-gray);
+}

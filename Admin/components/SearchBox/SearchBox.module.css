@@ -1,0 +1,124 @@
+.searchBoxInner {
+  align-self: stretch;
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #fafafa;
+  border-radius: var(--radius-4);
+  box-shadow: inset 0 0 0 var(--account-hairline-width) var(--account-hairline-color);
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+
+.searchRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  color: var(--color-gray);
+}
+
+.searchInput {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-black);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: var(--color-gray);
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+/* Компактный вариант админки — как AdminTextField */
+.searchBoxAdmin {
+  align-self: stretch;
+  width: 100%;
+  min-height: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  background-color: var(--color-white, #fff);
+  border-width: var(--account-hairline-width, 0.7px);
+  border-style: solid;
+  border-color: var(--admin-border-secondary, var(--account-hairline-color, rgba(0, 0, 0, 0.2)));
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.searchBoxAdmin:hover {
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+.searchBoxAdmin:focus-within {
+  border-color: var(--color-blue, #3d83f6);
+  outline: none;
+}
+
+.searchRowAdmin {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.searchIconAdmin {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--admin-text-tertiary, var(--text-secondary, var(--color-gray, #9d9d9d)));
+}
+
+.searchInputAdmin {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--text-caption, 14px);
+  font-weight: var(--text-caption-weight, 300);
+  line-height: var(--line-height-sm, 18px);
+  color: var(--color-black, #000);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.searchInputAdmin::placeholder {
+  color: var(--admin-text-tertiary, var(--text-secondary, var(--color-gray, #9d9d9d)));
+}
+
+.searchInputAdmin:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchBoxAdmin {
+    transition: none;
+  }
+}

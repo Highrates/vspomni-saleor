@@ -1,0 +1,339 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--account-hairline-color, #e2e6e8);
+}
+
+.tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-gray, #9d9d9d);
+}
+
+.tab:hover {
+  color: var(--color-black);
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.tabActive {
+  color: var(--color-black);
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.saved {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eef8f0;
+  color: #1f6b36;
+  font-size: 0.875rem;
+}
+
+.faqList {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+}
+
+.faqCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--account-hairline-color, #e2e6e8);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.faqCardDragging {
+  opacity: 0.85;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+}
+
+.faqCardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.dragBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--account-hairline-color, #e2e6e8);
+  border-radius: 6px;
+  background: var(--color-bright-snow, #f5f7f8);
+  color: var(--color-gray, #9d9d9d);
+  cursor: grab;
+  font-size: 12px;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.dragBtn:active {
+  cursor: grabbing;
+}
+
+.dragBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.activeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-black);
+  cursor: pointer;
+  user-select: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.attrListToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0 0 16px;
+}
+
+.attrListSearch {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 360px;
+}
+
+.attrFilterLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-black);
+  cursor: pointer;
+  user-select: none;
+}
+
+.heroImages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .heroImages {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heroImageCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroImageLabel {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-gray, #9d9d9d);
+}
+
+.heroThumb {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--account-hairline-color, #e2e6e8);
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+/** Превью доп. плашки: натуральные пропорции, без квадрата 1:1 */
+.heroThumbSecondary {
+  width: auto;
+  max-width: 280px;
+  max-height: 160px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid var(--account-hairline-color, #e2e6e8);
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.heroFileInput {
+  font-size: 0.8125rem;
+}
+
+.heroTextInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--account-hairline-color, #e2e6e8);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.875rem;
+  background: #fff;
+  color: var(--color-black);
+  resize: vertical;
+}
+
+.heroTextInput:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hubHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 16px;
+  margin: 0 0 8px;
+}
+
+.hubHeaderTitle {
+  margin: 0;
+}
+
+.storefrontLink {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--color-brand);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-brand) 35%, transparent);
+  padding-bottom: 1px;
+}
+
+.storefrontLink:hover {
+  color: #1f5a26;
+  border-bottom-color: #1f5a26;
+}
+
+/* Settings hub — KPI-style section tiles (как dashboard) */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .kpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi {
+  padding: 14px 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.kpiClickable {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.kpiClickable:hover {
+  border-color: #c8c8c8;
+  background: #f3f3f3;
+}
+
+.kpiClickable:focus-visible {
+  outline: 2px solid #3d83f6;
+  outline-offset: 2px;
+}
+
+.kpiValue {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.kpiBadge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #eef2ff;
+  color: #3d4ea3;
+}
+
+.menuFormStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.menuProductMeta {
+  margin: 0 0 10px;
+}
+
+.menuProductActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settingsEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+  border: 1px dashed var(--account-hairline-color, #e2e6e8);
+  border-radius: 10px;
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.settingsEmptyTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-black, #000);
+}
+
+.settingsEmptyHint {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-gray, #9d9d9d);
+}
+
+

@@ -1,0 +1,25 @@
+[Unit]
+Description=Vspomni Next.js storefront
+After=network.target vspomni-api.service
+
+[Service]
+Type=simple
+User=vspomni
+Group=vspomni
+WorkingDirectory=/opt/vspomni/Front
+EnvironmentFile=-/opt/vspomni/Front/.env.local
+Environment=NODE_ENV=production
+Environment=PORT=3001
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/npx next start -H 127.0.0.1 -p 3001
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/vspomni/Front
+
+[Install]
+WantedBy=multi-user.target

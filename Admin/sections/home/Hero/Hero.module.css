@@ -1,0 +1,70 @@
+.section {
+  margin: 0;
+  position: relative;
+}
+
+.heroBg {
+  min-height: 78vh;
+  background-color: var(--color-black);
+  position: relative;
+  overflow: hidden;
+}
+
+.heroImage {
+  object-fit: cover;
+  object-position: center center;
+  z-index: 0;
+}
+
+.heroImageMobile {
+  display: none;
+}
+
+.dots {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.dotActive {
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  .heroBg {
+    /* Короче + меньше агрессивного crop по краям */
+    min-height: 48svh;
+    max-height: 520px;
+  }
+
+  .heroImage {
+    object-position: center 30%;
+  }
+
+  .heroImageDesktop {
+    display: none;
+  }
+
+  .heroImageMobile {
+    display: block;
+  }
+
+  .dots {
+    bottom: 12px;
+  }
+}
+

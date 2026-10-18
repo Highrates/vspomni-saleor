@@ -1,0 +1,21 @@
+{
+  "name": "vspomni-monorepo",
+  "private": true,
+  "workspaces": [
+    "api",
+    "Admin",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run start:dev -w vspomni-api",
+    "dev:admin": "npm run dev -w vspomni-admin",
+    "build:packages": "npm run build -w @vspomni/admin-sections && npm run build -w @vspomni/admin-types",
+    "build:api": "npm run build:packages && npm run build -w vspomni-api",
+    "build:admin": "npm run build:packages && npm run build -w vspomni-admin",
+    "build": "npm run build:api && npm run build:admin"
+  },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

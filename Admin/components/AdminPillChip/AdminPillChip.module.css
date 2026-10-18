@@ -1,0 +1,89 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 2px 0 10px;
+  border: none;
+  border-radius: var(--cursor-radius-full, 9999px);
+  background: #e6e6e6;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--font-size-sm, var(--text-caption, 14px));
+  font-weight: var(--text-caption-weight, 300);
+  line-height: 1;
+  color: var(--color-black, #000);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.chipConflict {
+  background: #fff5f5;
+  box-shadow: inset 0 0 0 var(--account-hairline-width, 0.7px) #c62828;
+}
+
+.badgeInline {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding-right: 10px;
+  cursor: default;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.remove {
+  flex-shrink: 0;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--cursor-radius-full, 9999px);
+  background: transparent;
+  color: var(--color-gray, #9d9d9d);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Крестик в геометрическом центре круга (без baseline-смещения глифа) */
+.removeIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.remove:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--color-black, #000);
+}

@@ -1,0 +1,110 @@
+.panel {
+  max-width: 980px;
+}
+
+.lead {
+  margin: 0 0 12px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: var(--text-caption, 14px);
+  line-height: 1.45;
+}
+
+.rootUnderline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+  margin: 16px 0 16px;
+  border-bottom: var(--account-hairline-width, 0.7px) solid var(--account-hairline-color, rgba(0, 0, 0, 0.2));
+}
+
+.rootUnderlineCompact {
+  margin: 0 0 8px;
+}
+
+.tabsCluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.endSlot {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+}
+
+.endSlotHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tabUnderline {
+  margin-bottom: -1px;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--text-caption, 14px);
+  font-weight: var(--text-caption-weight, 300);
+  line-height: var(--line-height-sm, 18px);
+  color: var(--text-secondary, var(--color-gray, #9d9d9d));
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tabUnderline:hover {
+  color: var(--color-black, #000);
+}
+
+.tabUnderlineActive {
+  color: var(--color-black, #000);
+  border-bottom-color: var(--color-black, #000);
+}
+
+.rootPill {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tabPill {
+  display: flex;
+  min-width: 32px;
+  min-height: 28px;
+  padding: calc((28px - var(--line-height-sm, 18px)) / 2) 10px;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--font-size-sm, var(--text-caption, 14px));
+  font-style: normal;
+  font-weight: var(--text-caption-weight, 300);
+  line-height: var(--line-height-sm, 18px);
+  transition: color 0.15s ease, background-color 0.15s ease;
+  border-radius: var(--cursor-radius-full, 9999px);
+  color: var(--text-secondary, var(--color-gray, #9d9d9d));
+  flex-shrink: 0;
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tabPill:hover {
+  color: var(--color-black, #000);
+}
+
+.tabPillActive {
+  color: var(--color-black, #000);
+  background: #e6e6e6;
+}

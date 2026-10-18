@@ -1,0 +1,131 @@
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-bottom: var(--account-hairline-width) solid var(--account-hairline-color);
+  background: transparent;
+  transition: border-color 0.18s ease;
+}
+
+.fieldFocused {
+  border-bottom-color: var(--floating-field-focus, var(--color-black));
+}
+
+.fieldInvalid {
+  border-bottom-color: var(--color-red);
+}
+
+.fieldDisabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 350;
+  line-height: 1.2;
+  color: var(--color-gray);
+  pointer-events: none;
+  transform-origin: left center;
+  transition:
+    top 0.18s ease,
+    transform 0.18s ease,
+    font-size 0.18s ease,
+    color 0.18s ease;
+}
+
+.fieldActive .label {
+  top: 4px;
+  transform: translateY(0);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fieldFocused .label {
+  color: var(--floating-field-focus, var(--color-black));
+}
+
+.fieldInvalid .label {
+  color: var(--color-red);
+}
+
+.inputWrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 18px 0 10px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-black);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 350;
+  line-height: 1.3;
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.inputWithToggle {
+  padding-right: 44px;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-40%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-gray);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.passwordToggle:hover {
+  color: var(--color-ink-black);
+}
+
+.input:disabled {
+  cursor: default;
+}
+
+.capsHint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 350;
+  color: var(--color-gray);
+}
+
+.error {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 350;
+  color: var(--color-red);
+}

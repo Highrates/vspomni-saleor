@@ -1,0 +1,152 @@
+.avatarField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.avatarLabel {
+  font-size: 0.8125rem;
+  color: var(--color-gray, #9d9d9d);
+}
+
+.avatarPicker {
+  position: relative;
+  display: inline-flex;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: var(--account-hairline-width, 0.7px) solid var(--account-hairline-color, rgba(0, 0, 0, 0.2));
+}
+
+.avatarPickerDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.avatarHint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-gray, #9d9d9d);
+}
+
+.staffListHeader {
+  margin-bottom: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.listPanel,
+.formPanel {
+  border-radius: 12px;
+  border: var(--account-hairline-width, 0.7px) solid var(--account-hairline-color, rgba(0, 0, 0, 0.2));
+  padding: 16px;
+  background: var(--color-white, #fff);
+}
+
+.listHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.profileList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profileItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-body, 15px);
+  line-height: 1.2;
+  color: var(--color-black, #000);
+  text-align: left;
+  cursor: pointer;
+}
+
+.profileItem:hover,
+.profileItemActive {
+  background: #e6e6e6;
+}
+
+.profileName {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileMeta {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-gray, #9d9d9d);
+}
+
+.profileFormFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.formSection {
+  margin-top: 20px;
+}
+
+.profileFormActions {
+  margin-top: 16px;
+}
+
+.flashSuccess {
+  color: var(--admin-success-text, #1f6b36);
+}
+
+.panelHeading {
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+}

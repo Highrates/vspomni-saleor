@@ -1,0 +1,239 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { readApiError } from '@/lib/readApiError';
+
+export type PayStartResult = {
+  alreadyPaid?: boolean;
+  orderId: string;
+  number: string;
+  total?: number;
+  paymentId?: string;
+  confirmationToken?: string;
+  /** HMAC для poll status (если pay шёл по JWT buyer). */
+  payToken?: string | null;
+  message?: string | string[];
+};
+
+export type PaidInfo = {
+  orderId: string;
+  number: string;
+  message?: string;
+};
+
+type Options = {
+  /** Интервал опроса статуса, мс (default 4000). */
+  pollMs?: number;
+  /** Писать vspomni.pending* в sessionStorage. */
+  persistSession?: boolean;
+  onPaid: (info: PaidInfo) => void;
+  onError?: (message: string) => void;
+};
+
+function writePendingSession(input: {
+  orderId: string;
+  number: string;
+  paymentId?: string;
+  payToken?: string | null;
+  confirmed?: boolean;
+}) {
+  try {
+    if (input.confirmed) {
+      sessionStorage.setItem('vspomni.pendingPaidConfirmed', input.orderId || '1');
+    }
+    sessionStorage.setItem('vspomni.pendingOrderId', input.orderId);
+    sessionStorage.setItem('vspomni.pendingOrderNumber', input.number);
+    if (input.paymentId) {
+      sessionStorage.setItem('vspomni.pendingPaymentId', input.paymentId);
+    }
+    if (input.payToken) {
+      sessionStorage.setItem('vspomni.pendingPayToken', input.payToken);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearPendingPaymentSession() {
+  try {
+    sessionStorage.removeItem('vspomni.pendingPaymentId');
+    sessionStorage.removeItem('vspomni.pendingOrderId');
+    sessionStorage.removeItem('vspomni.pendingOrderNumber');
+    sessionStorage.removeItem('vspomni.pendingPayToken');
+    sessionStorage.removeItem('vspomni.pendingPaidConfirmed');
+  } catch {
+    /* ignore */
+  }
+}
+
+function paymentStatusUrl(paymentId: string, payToken?: string | null): string {
+  const base = `/api/public/orders/payments/${encodeURIComponent(paymentId)}/status`;
+  const token = payToken?.trim();
+  return token ? `${base}?payToken=${encodeURIComponent(token)}` : base;
+}
+
+/**
+ * Общий поток: POST …/pay → confirmationToken + poll status.
+ * payToken опционален: владелец заказа может платить по JWT (BFF прокидывает cookie).
+ * Используется checkout / account / certificates.
+ */
+export function useYooKassaOrderPayment(opts: Options) {
+  const pollMs = opts.pollMs ?? 4000;
+  const persistSession = opts.persistSession ?? true;
+  const onPaidRef = useRef(opts.onPaid);
+  const onErrorRef = useRef(opts.onError);
+  onPaidRef.current = opts.onPaid;
+  onErrorRef.current = opts.onError;
+
+  const [busy, setBusy] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const paidRef = useRef(false);
+  const [confirmationToken, setConfirmationToken] = useState<string | null>(
+    null,
+  );
+  const [paymentId, setPaymentId] = useState<string | null>(null);
+  const [payToken, setPayToken] = useState<string | null>(null);
+  const [orderMeta, setOrderMeta] = useState<{
+    orderId: string;
+    number: string;
+  } | null>(null);
+
+  const markPaid = useCallback((info: PaidInfo) => {
+    if (paidRef.current) return;
+    paidRef.current = true;
+    setPaid(true);
+    setConfirmationToken(null);
+    onPaidRef.current(info);
+  }, []);
+
+  const checkPaid = useCallback(async () => {
+    if (!paymentId || paidRef.current) return false;
+    const token =
+      payToken ||
+      (typeof sessionStorage !== 'undefined'
+        ? sessionStorage.getItem('vspomni.pendingPayToken')
+        : null);
+    try {
+      const res = await fetch(paymentStatusUrl(paymentId, token), {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        paid?: boolean;
+        number?: string;
+        orderId?: string;
+        message?: string;
+      };
+      if (!res.ok || !data.paid) {
+        if (!res.ok && data.message) onErrorRef.current?.(String(data.message));
+        return false;
+      }
+      markPaid({
+        orderId: data.orderId || orderMeta?.orderId || '',
+        number: data.number || orderMeta?.number || '',
+        message: data.message,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }, [markPaid, orderMeta?.number, orderMeta?.orderId, payToken, paymentId]);
+
+  const startPay = useCallback(
+    async (orderId: string, token?: string | null) => {
+      setBusy(true);
+      try {
+        const payTokenTrim = token?.trim() || '';
+        const res = await fetch(
+          `/api/public/orders/${encodeURIComponent(orderId)}/pay`,
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payTokenTrim ? { payToken: payTokenTrim } : {}),
+            cache: 'no-store',
+            credentials: 'same-origin',
+          },
+        );
+        const data = (await res.json().catch(() => ({}))) as PayStartResult;
+        if (!res.ok) {
+          onErrorRef.current?.(readApiError(data, 'Не удалось создать платёж'));
+          return null;
+        }
+        const sessionToken = data.payToken?.trim() || payTokenTrim || null;
+        setPayToken(sessionToken);
+        setOrderMeta({ orderId: data.orderId, number: data.number });
+
+        if (data.alreadyPaid) {
+          if (persistSession) {
+            writePendingSession({
+              orderId: data.orderId,
+              number: data.number,
+              payToken: sessionToken,
+              confirmed: true,
+            });
+          }
+          markPaid({ orderId: data.orderId, number: data.number });
+          return data;
+        }
+
+        if (!data.confirmationToken || !data.paymentId) {
+          onErrorRef.current?.('Сервер не вернул данные оплаты');
+          return null;
+        }
+
+        setConfirmationToken(data.confirmationToken);
+        setPaymentId(data.paymentId);
+        if (persistSession) {
+          writePendingSession({
+            orderId: data.orderId,
+            number: data.number,
+            paymentId: data.paymentId,
+            payToken: sessionToken,
+          });
+        }
+        return data;
+      } catch {
+        onErrorRef.current?.('Сеть недоступна');
+        return null;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [markPaid, persistSession],
+  );
+
+  const resetPayment = useCallback(() => {
+    paidRef.current = false;
+    setPaid(false);
+    setConfirmationToken(null);
+    setPaymentId(null);
+    setPayToken(null);
+    setOrderMeta(null);
+    if (persistSession) clearPendingPaymentSession();
+  }, [persistSession]);
+
+  useEffect(() => {
+    if (!paymentId || paid) return;
+    const id = window.setInterval(() => {
+      void checkPaid();
+    }, pollMs);
+    return () => window.clearInterval(id);
+  }, [checkPaid, paid, paymentId, pollMs]);
+
+  return {
+    busy,
+    paid,
+    confirmationToken,
+    paymentId,
+    payToken,
+    orderMeta,
+    showWidget: Boolean(confirmationToken && paymentId && !paid),
+    startPay,
+    checkPaid,
+    resetPayment,
+    markPaid,
+  };
+}

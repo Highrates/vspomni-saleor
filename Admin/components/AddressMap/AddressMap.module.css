@@ -1,0 +1,114 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hint {
+  margin: 0;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  line-height: 1.4;
+  color: var(--color-gray);
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: var(--account-hairline-width) solid var(--account-hairline-color);
+  border-radius: 6px;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-body);
+  color: var(--color-ink-black);
+  background: var(--color-white);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-ink-black);
+}
+
+.searchBtn {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-ink-black);
+  color: var(--color-white);
+  font-family: var(--font-open-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-450);
+  cursor: pointer;
+}
+
+.searchBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.map {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: var(--account-hairline-width) solid var(--account-hairline-color);
+  background: var(--color-bright-snow);
+}
+
+@media (max-width: 560px) {
+  .map {
+    height: min(200px, 32svh);
+  }
+}
+
+.mapOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: var(--text-caption);
+  color: var(--color-gray);
+}
+
+.selected {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--color-bright-snow);
+}
+
+.selectedTitle {
+  margin: 0 0 4px;
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-450);
+  color: var(--color-ink-black);
+}
+
+.selectedLine {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: var(--text-body-weight);
+  line-height: 1.4;
+  color: var(--color-ink-black);
+}
+
+.error {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: rgba(255, 0, 0, 0.06);
+  font-size: var(--text-caption);
+  color: var(--color-red);
+  line-height: 1.4;
+}

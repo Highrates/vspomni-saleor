@@ -1,0 +1,110 @@
+/** `export =` из пакета; default import без esModuleInterop даёт undefined в Nest (CJS). */
+import DOMPurify = require('isomorphic-dompurify');
+
+let anchorsRelHookRegistered = false;
+
+function ensureAnchorRelNoopenerHook(): void {
+  if (anchorsRelHookRegistered) return;
+  anchorsRelHookRegistered = true;
+  try {
+    DOMPurify.addHook(
+      'afterSanitizeAttributes',
+      (node: Element & { setAttribute?: (n: string, v: string) => void }) => {
+        const name = node.nodeName?.toUpperCase?.() ?? '';
+        if (name !== 'A') return;
+        const tgt = node.getAttribute?.('target');
+        if (tgt !== '_blank') return;
+        const existing = (node.getAttribute?.('rel') ?? '').trim().split(/\s+/).filter(Boolean);
+        const need = ['noopener', 'noreferrer'];
+        const merged = [...new Set([...existing, ...need])].join(' ');
+        node.setAttribute?.('rel', merged);
+      },
+    );
+  } catch {
+    /* без хука санитайз всё равно режет XSS */
+  }
+}
+
+const SANITIZE = {
+  ALLOWED_TAGS: [
+    'p',
+    'br',
+    'strong',
+    'b',
+    'em',
+    'i',
+    'u',
+    's',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'ul',
+    'ol',
+    'li',
+    'a',
+    'img',
+    'blockquote',
+    'div',
+    'span',
+    'figure',
+    'figcaption',
+    'video',
+    'source',
+  ],
+  ALLOWED_ATTR: [
+    'href',
+    'src',
+    'alt',
+    'title',
+    'class',
+    'width',
+    'height',
+    'data-align',
+    'data-size',
+    'controls',
+    'type',
+    'target',
+    'rel',
+    'loading',
+  ],
+  ALLOW_DATA_ATTR: false,
+};
+
+/** Публичный вывод HTML тела статьи. */
+export function sanitizeBlogPostBodyHtml(html: string): string {
+  ensureAnchorRelNoopenerHook();
+  return DOMPurify.sanitize(html ?? '', SANITIZE);
+}
+
+/** Excerpt / лид: plain или лёгкий HTML без media. */
+export function sanitizeBlogExcerptHtml(html: string | null | undefined): string | null {
+  if (html == null) return null;
+  const trimmed = String(html).trim();
+  if (!trimmed) return null;
+  ensureAnchorRelNoopenerHook();
+  const out = DOMPurify.sanitize(trimmed, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOW_DATA_ATTR: false,
+  }).trim();
+  return out || null;
+}
+
+/** Запись в БД: тот же allowlist, что и на public read. */
+export function sanitizeBlogBodyForWrite(html: string): string {
+  return sanitizeBlogPostBodyHtml(html);
+}
+
+/** URL из img / video / source[src] в HTML редактора. */
+export function extractMediaUrlsFromRichHtml(html: string | null | undefined): string[] {
+  if (!html?.trim()) return [];
+  const urls = new Set<string>();
+  const re = /<(img|video|source)\b[^>]*\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const u = (m[2] ?? m[3] ?? m[4] ?? '').trim();
+    if (u) urls.add(u);
+  }
+  return [...urls];
+}

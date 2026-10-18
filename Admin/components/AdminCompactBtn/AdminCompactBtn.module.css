@@ -1,0 +1,83 @@
+.btnAsLink {
+  text-decoration: none;
+}
+
+.btn {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--text-caption, 14px);
+  font-weight: var(--text-caption-weight, 300);
+  line-height: 1;
+  color: var(--color-white, #fff);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, filter 0.15s ease;
+}
+
+.btnNeutral {
+  background: var(--color-black, #000);
+}
+
+.btnNeutral:hover:not(:disabled) {
+  filter: brightness(1.22);
+}
+
+.btnAccent {
+  background: var(--color-blue, #3d83f6);
+}
+
+.btnAccent:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.btnDanger {
+  background: var(--color-red, #ff0000);
+}
+
+.btnDanger:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.btnOutline {
+  background: var(--color-white, #fff);
+  color: var(--color-black, #000);
+  border: var(--account-hairline-width, 0.7px) solid var(--account-hairline-color, rgba(0, 0, 0, 0.2));
+}
+
+.btnOutline:hover:not(:disabled) {
+  filter: none;
+  background: #e6e6e6;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-blue, #3d83f6);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  pointer-events: none;
+  filter: none;
+  background: var(--color-bright-snow, #f6f6f6);
+  color: var(--color-gray, #9d9d9d);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+}

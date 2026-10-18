@@ -1,0 +1,112 @@
+.wrap {
+  --floating-field-focus: var(--color-brand, #111);
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top, 0px))
+    max(24px, env(safe-area-inset-right, 0px))
+    max(24px, env(safe-area-inset-bottom, 0px))
+    max(24px, env(safe-area-inset-left, 0px));
+  background: var(--color-bright-snow, #fafafa);
+}
+
+.card {
+  width: 100%;
+  max-width: 28rem;
+  padding: 40px 32px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.logo {
+  display: block;
+  width: 178px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 118 / 20;
+  margin: 0 0 40px;
+  color: var(--color-brand, #111);
+  line-height: 0;
+}
+
+.logo :global(.logo-wave) {
+  width: 100%;
+  height: 100%;
+}
+
+.brand {
+  margin: 0 0 8px;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-green, var(--color-brand));
+}
+
+.title {
+  margin: 0 0 8px;
+  font-family: var(--font-open-sans);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-ink-black);
+}
+
+.hint {
+  margin: 0 0 28px;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-body);
+  font-weight: var(--text-body-weight);
+  line-height: 1.45;
+  color: #6e6d67;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.error {
+  margin: 0;
+  font-family: var(--font-open-sans);
+  font-size: var(--text-caption);
+  font-weight: var(--text-caption-weight);
+  color: var(--color-red);
+  line-height: 1.4;
+}
+
+.submit {
+  background: var(--color-brand-green, var(--color-brand));
+  color: var(--color-white);
+}
+
+.submit:focus-visible {
+  outline-color: var(--color-brand-green, var(--color-brand));
+}
+
+@media (max-width: 648px) {
+  .wrap {
+    align-items: flex-start;
+    padding-top: max(48px, env(safe-area-inset-top, 0px));
+  }
+
+  .card {
+    padding: 18px 12px;
+  }
+
+  .logo {
+    width: 118px;
+    height: 24px;
+    margin-bottom: 32px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+}

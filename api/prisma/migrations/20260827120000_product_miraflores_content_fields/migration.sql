@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "pageShortDescriptionHtml" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "actionEffectHtml" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "importantNoteHtml" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "mirafloresNoteHtml" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "productType" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "purpose" TEXT;
+ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "shelfLife" TEXT;

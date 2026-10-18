@@ -1,0 +1,66 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-commissioner, system-ui);
+  font-size: var(--text-caption, 14px);
+  font-weight: var(--text-caption-weight, 300);
+  color: var(--color-gray, #9d9d9d);
+}
+
+.editor :global(.ql-toolbar.ql-snow) {
+  border-color: var(--account-hairline-color, #e2e6e8);
+  border-radius: 8px 8px 0 0;
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.editor :global(.ql-container.ql-snow) {
+  border-color: var(--account-hairline-color, #e2e6e8);
+  border-radius: 0 0 8px 8px;
+  font-family: var(--font-commissioner, system-ui);
+  font-size: 0.9375rem;
+  min-height: 140px;
+}
+
+.editor :global(.ql-editor) {
+  min-height: 120px;
+}
+
+.tall .editor :global(.ql-container.ql-snow) {
+  min-height: 480px;
+}
+
+.tall .editor :global(.ql-editor) {
+  min-height: 440px;
+}
+
+.compact .editor :global(.ql-container.ql-snow) {
+  min-height: 72px;
+}
+
+.compact .editor :global(.ql-editor) {
+  min-height: 56px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-red, #c53029);
+}
+
+.disabled {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.disabled .editor :global(.ql-container.ql-snow) {
+  border-radius: 8px;
+  background: var(--color-bright-snow, #f5f7f8);
+}

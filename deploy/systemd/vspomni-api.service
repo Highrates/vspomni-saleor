@@ -1,0 +1,24 @@
+[Unit]
+Description=Vspomni Nest API
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=vspomni
+Group=vspomni
+WorkingDirectory=/opt/vspomni/api
+EnvironmentFile=/opt/vspomni/api/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node dist/main
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/vspomni/api /opt/vspomni/api/.data
+
+[Install]
+WantedBy=multi-user.target

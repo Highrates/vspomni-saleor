@@ -1,0 +1,111 @@
+.categoriesPanel {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.categoriesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.categoriesHeader[aria-expanded='false'] {
+  margin-bottom: 0;
+}
+
+.categoriesHeaderMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.categoriesChevron {
+  display: inline-flex;
+  color: var(--color-gray, #9d9d9d);
+  transition: transform 0.15s ease;
+  line-height: 1;
+}
+
+.categoriesChevron[data-open] {
+  transform: rotate(180deg);
+}
+
+.categoriesTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.categoriesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.categoriesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.badge {
+  /* legacy — prefer catalogAdmin.badge / badgeOn / badgeDraft */
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.badgePublished {
+  background: #e6f4ea;
+  color: #1e6b2f;
+}
+
+.badgeDraft {
+  background: #fff6e5;
+  color: #8a5a00;
+}
+
+.publishedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+  font-size: 14px;
+}
+
+.editorNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

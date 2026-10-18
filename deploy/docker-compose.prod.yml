@@ -1,0 +1,28 @@
+# Postgres на новом VPS (только localhost).
+# Запуск из /opt/vspomni:
+#   docker compose -f deploy/docker-compose.prod.yml up -d
+#
+# DATABASE_URL в api/.env:
+#   postgresql://vspomni:CHANGE_ME@127.0.0.1:5432/vspomni?schema=public
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: vspomni_db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: vspomni
+      POSTGRES_USER: vspomni
+      POSTGRES_PASSWORD: ${VSPOMNI_PG_PASSWORD:?set VSPOMNI_PG_PASSWORD}
+    volumes:
+      - vspomni_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vspomni -d vspomni"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  vspomni_pg:

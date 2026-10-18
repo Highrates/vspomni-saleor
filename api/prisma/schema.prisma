@@ -1,0 +1,1564 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  USER
+}
+
+enum GroupCategoryPriceType {
+  PERCENT_OFF
+  FIXED_OFF
+  FIXED_PRICE
+}
+
+enum CatalogVisibilityMode {
+  HIDE_FROM_GUESTS
+  HIDE_FROM_REGISTERED
+  HIDE_FROM_GROUP
+  SHOW_ONLY_REGISTERED
+  SHOW_ONLY_GROUP
+}
+
+enum CatalogVisibilityTarget {
+  PRODUCT
+  CATEGORY
+  VARIANT
+}
+
+enum PriceRounding {
+  FLOOR
+  CEIL
+  NEAREST
+}
+
+enum OrderStatus {
+  NEW
+  AWAITING_PAYMENT
+  PAID
+  PACKING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+/// Чат покупатель ↔ staff (заказ или общая поддержка).
+enum ChatConversationKind {
+  ORDER
+  SUPPORT
+}
+
+enum ChatMessageAuthorRole {
+  CUSTOMER
+  STAFF
+}
+
+enum ChatAttachmentKind {
+  FILE
+  IMAGE
+}
+
+/// Админ / модератор / покупатель (гость checkout без User)
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  /// null после soft-delete сотрудника
+  passwordHash     String?
+  role             UserRole  @default(USER)
+  isActive         Boolean   @default(true)
+  displayName      String?
+  /// Отображаемое имя в админке (ADMIN / MODERATOR)
+  staffDisplayName String?
+  /// URL аватара сотрудника в админке
+  staffAvatarUrl   String?
+  /// Разделы админки для MODERATOR; ADMIN игнорирует (полный доступ)
+  adminSections    String[]  @default([])
+  phone            String?
+  /// Дата рождения (день поздравлений)
+  birthday         DateTime? @db.Date
+  /// Согласие на обработку ПДн (152-ФЗ) — обязательно при регистрации
+  privacyConsentAt       DateTime?
+  privacyConsentVersion  String?
+  /// Маркетинговые рассылки (opt-in, по умолчанию выкл.)
+  marketingConsent         Boolean   @default(false)
+  marketingConsentAt       DateTime?
+  marketingConsentVersion  String?
+  lastAdminLoginAt DateTime?
+  /// Soft-delete сотрудника (исключается из staff list / ACL); role при delete → USER
+  staffDeletedAt   DateTime?
+  /// Инкремент инвалидирует выданные JWT (reset пароля, deactivate, delete, смена adminSections)
+  tokenVersion     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  orders    Order[]
+  blogPosts BlogPost[]
+  addresses UserAddress[]
+  giftCertificates GiftCertificate[]
+  productReviews ProductReview[]
+  moderatedReviews ProductReview[] @relation("ReviewModerator")
+  favorites        UserFavorite[]
+  quizResult       UserQuizResult?
+  /// Кастомная группа покупателя; null → default registered group
+  groupId          String?
+  group            UserGroup? @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  chatMessages     ChatMessage[]
+  chatReadStates   ChatReadState[]
+  supportChat      ChatConversation? @relation("UserSupportChat")
+
+  @@index([staffDeletedAt])
+  @@index([groupId])
+}
+
+/// Группа покупателей (цены, видимость, промо)
+model UserGroup {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  active    Boolean  @default(true)
+  /// Системная: контекст гостя (ровно одна)
+  isDefaultGuest      Boolean @default(false)
+  /// Системная: зарег. без явного groupId (ровно одна)
+  isDefaultRegistered Boolean @default(false)
+  /// false для isDefaultGuest — пользователей не назначают
+  assignable          Boolean @default(true)
+  allowCatalogDiscounts Boolean @default(false)
+  allowPromoCodes       Boolean @default(true)
+  priceRounding         PriceRounding @default(NEAREST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           User[]
+  variantPrices   GroupVariantPrice[]
+  categoryPrices  GroupCategoryPrice[]
+  visibilityRules CatalogGroupVisibility[]
+
+  @@index([active])
+}
+
+/// Цена группы для SKU (приоритет выше категории)
+model GroupVariantPrice {
+  id        String         @id @default(cuid())
+  groupId   String
+  group     UserGroup      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  price     Int
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([groupId, variantId])
+  @@index([variantId])
+}
+
+/// Правило цены на категорию
+model GroupCategoryPrice {
+  id         String                 @id @default(cuid())
+  groupId    String
+  group      UserGroup              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category               @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  type       GroupCategoryPriceType
+  /// PERCENT_OFF: 1–100; FIXED_OFF / FIXED_PRICE: ₽
+  value      Int
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@unique([groupId, categoryId])
+  @@index([categoryId])
+}
+
+/// Видимость каталога по аудитории / группе
+model CatalogGroupVisibility {
+  id         String                  @id @default(cuid())
+  mode       CatalogVisibilityMode
+  groupId    String?
+  group      UserGroup?              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  targetType CatalogVisibilityTarget
+  targetId   String
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+
+  @@index([targetType, targetId])
+  @@index([groupId])
+  @@index([mode])
+}
+
+/// OTP при регистрации по email (до создания User)
+model RegistrationChallenge {
+  id                  String   @id @default(cuid())
+  email               String
+  /// Отображаемое имя — переносится в User при complete
+  displayName         String?
+  codeHash            String
+  expiresAt           DateTime
+  attempts            Int      @default(0)
+  consentPersonalData Boolean
+  consentMarketing    Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+/// Лог отправок OTP (cooldown / daily limit; не удаляем вместе с challenge)
+model RegistrationOtpDispatch {
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+/// One-time токен после verify OTP (jti в JWT)
+model RegistrationCompletion {
+  id                  String    @id @default(cuid())
+  email               String
+  displayName         String?
+  consentPersonalData Boolean
+  consentMarketing    Boolean   @default(false)
+  expiresAt           DateTime
+  usedAt              DateTime?
+  createdAt           DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+/// Сохранённые адреса покупателя (ЛК / checkout)
+model UserAddress {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientName String?
+  phone         String?
+  city          String
+  address       String
+  apartment     String?
+  /// Область / край (countryArea на витрине)
+  region        String?
+  /// Район города (cityArea на витрине)
+  district      String?
+  postalCode    String?
+  comment       String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  CANCELED
+  REFUNDED
+}
+
+enum ShipmentProvider {
+  CDEK
+  YANDEX
+  OZON
+  PICKUP
+}
+
+model Category {
+  id             String     @id @default(cuid())
+  slug           String     @unique
+  name           String
+  /// Обложка категории (админка / витрина)
+  coverImageUrl  String?
+  sortOrder      Int        @default(0)
+  parentId       String?
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children       Category[] @relation("CategoryTree")
+  products       Product[]
+  discountLinks  DiscountCategory[]
+  promoLinks     PromoCodeCategory[]
+  groupPrices    GroupCategoryPrice[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([parentId, sortOrder])
+}
+
+model Product {
+  id                 String           @id @default(cuid())
+  slug               String           @unique
+  name               String
+  /// Описание в карточке товара (тизер)
+  shortDescription   String?
+  /// Короткое описание на странице товара
+  pageShortDescriptionHtml String?    @db.Text
+  /// Описание (основной текст)
+  descriptionHtml    String?          @db.Text
+  /// Действие и эффект
+  actionEffectHtml   String?          @db.Text
+  /// Способ применения
+  applicationHtml    String?          @db.Text
+  /// Состав
+  compositionHtml    String?          @db.Text
+  /// Важно знать!
+  importantNoteHtml  String?          @db.Text
+  /// Комментарий Vspomni
+  /// DB column kept as mirafloresNoteHtml for migration continuity; app field is Vspomni notes.
+  vspomniNoteHtml String?          @map("mirafloresNoteHtml") @db.Text
+  /// Хранение — plain label из атрибутов (не rich HTML); синхронизируется с storageOption
+  storageHtml        String?          @db.Text
+  /// Тип продукта (denormalized label; источник — productTypeOption)
+  productType        String?
+  /// Для чего
+  purpose            String?
+  /// Срок годности
+  shelfLife          String?
+  /// FK → ProductAttributeOption (источник истины для списков)
+  productTypeOptionId String?
+  productTypeOption   ProductAttributeOption? @relation("ProductTypeAttr", fields: [productTypeOptionId], references: [id], onDelete: SetNull)
+  purposeOptionId     String?
+  purposeOption       ProductAttributeOption? @relation("ProductPurposeAttr", fields: [purposeOptionId], references: [id], onDelete: SetNull)
+  shelfLifeOptionId   String?
+  shelfLifeOption     ProductAttributeOption? @relation("ProductShelfLifeAttr", fields: [shelfLifeOptionId], references: [id], onDelete: SetNull)
+  storageOptionId     String?
+  storageOption       ProductAttributeOption? @relation("ProductStorageAttr", fields: [storageOptionId], references: [id], onDelete: SetNull)
+  /// Legacy «Дополнительно» (не используем в новых формах)
+  extraHtml          String?          @db.Text
+  categoryId         String
+  category           Category         @relation(fields: [categoryId], references: [id])
+  active             Boolean          @default(true)
+  /// Скрыт из публичного каталога/поиска/PDP; можно аттачить как подарок благодарности
+  excludeFromCatalog Boolean          @default(false)
+  /// SEO: заголовок страницы (<title>, og:title). Пусто → name.
+  metaTitle          String?
+  /// SEO: meta description / og:description. Пусто → pageShortDescriptionHtml.
+  metaDescription    String?          @db.VarChar(500)
+  /// SEO: og:image / twitter:image. Пусто → первое фото товара.
+  ogImageUrl         String?
+  /// SEO: canonical path, напр. /product/slug. Пусто → авто из slug.
+  canonicalPath      String?
+  /// SEO: meta robots noindex на PDP.
+  seoNoIndex         Boolean          @default(false)
+  /// «Выбор ⭐»: имя знаменитости (Saleor vybor-imya)
+  choiceStarName     String?
+  /// «Выбор ⭐»: дата (Saleor vybor-data)
+  choiceStarDate     DateTime?
+  /// «Выбор ⭐»: фото знаменитости (Saleor vybor-foto)
+  choiceStarImageUrl String?
+  /// Подписи ароматов на карточке/PDP со смайлами (Saleor aromaty-v-kartochke-tovara)
+  cardAromaLabels    String[]         @default([])
+  /// Лейбл на карточке (например NEW). Пусто — без бейджа.
+  badgeLabel         String?
+  aromaNotes         ProductAromaNote[]
+  variants           ProductVariant[]
+  images             ProductImage[]
+  collectionItems    CollectionItem[]
+  productSetItems    ProductSetItem[]
+  catalogTags        ProductCatalogTag[]
+  discountLinks      DiscountProduct[]
+  promoLinks         PromoCodeProduct[]
+  reviews            ProductReview[]
+  homepageSets       HomepageSet[]
+  menuSettings       MenuSettings[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([productTypeOptionId])
+  @@index([purposeOptionId])
+  @@index([shelfLifeOptionId])
+  @@index([storageOptionId])
+}
+
+/// Пирамида нот/аккордов на PDP (Saleor file-attrs bazovye-noty / srednie-noty / verhnie-akkordy)
+enum ProductAromaNoteKind {
+  BASIC
+  MIDDLE
+  HEAD
+}
+
+model ProductAromaNote {
+  id        String               @id @default(cuid())
+  productId String
+  product   Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind      ProductAromaNoteKind
+  name      String
+  imageUrl  String?
+  sortOrder Int                  @default(0)
+  createdAt DateTime             @default(now())
+
+  @@index([productId, kind, sortOrder])
+}
+
+/// Отзыв о товаре (модерация → isPublished)
+model ProductReview {
+  id            String    @id @default(cuid())
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Автор-покупатель (пусто для отзывов из админки / ETL без user)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// Saleor/Jcos order id (без FK — заказы мигрируем отдельно)
+  orderId       String?
+  rating        Int
+  text          String    @db.Text
+  /// Подпись на витрине, если нет user (например «Покупатель» / имя из админки)
+  authorName    String?
+  image1Url     String?
+  image2Url     String?
+  isPublished   Boolean   @default(false)
+  /// Порядок на витрине / в админке «Опубликованные» (меньше = выше)
+  sortOrder     Int       @default(0)
+  moderatedById String?
+  moderatedBy   User?     @relation("ReviewModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  moderatedAt   DateTime?
+  /// Soft-reject (не DELETE): снято с модерации / публикации с причиной
+  rejectedAt       DateTime?
+  rejectionReason  String?   @db.Text
+  /// UUID из Saleor product_productreview.id — идемпотентный ETL
+  saleorId      String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([productId, isPublished])
+  @@index([userId])
+  @@index([isPublished, createdAt])
+  @@index([isPublished, sortOrder])
+  @@index([rejectedAt])
+  /// Один отзыв на товар от покупателя (userId null — админ/ETL, несколько строк ок в PG)
+  @@unique([productId, userId])
+}
+
+/// Контекстные теги витрины / зоны применения (лицо, глаза…) — не путать с Category.
+/// Аромат витрины (бывш. Mira «этап ухода» / зона применения).
+model CatalogTag {
+  id             String              @id @default(cuid())
+  slug           String              @unique
+  name           String
+  /// Обложка аромата на витрине / в меню
+  coverImageUrl  String?
+  sortOrder      Int                 @default(0)
+  products       ProductCatalogTag[]
+  images         CatalogTagImage[]
+  steps          CatalogTagStep[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model CatalogTagImage {
+  id        String     @id @default(cuid())
+  tagId     String
+  tag       CatalogTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  @@index([tagId, sortOrder])
+}
+
+model CatalogTagStep {
+  id          String     @id @default(cuid())
+  tagId       String
+  tag         CatalogTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  title       String
+  description String     @db.Text
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([tagId, sortOrder])
+}
+
+model ProductCatalogTag {
+  productId String
+  tagId     String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       CatalogTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@index([tagId])
+}
+
+/// Вариант товара (объём и пр.)
+model ProductVariant {
+  id                   String    @id @default(cuid())
+  productId            String
+  product              Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Название варианта
+  name                 String
+  slug                 String
+  /// Название из Национального каталога
+  nationalCatalogName  String?
+  /// Объём, мл
+  volumeMl             Int?
+  sku                  String    @unique
+  /// UUID номенклатуры в 1С (CommerceML `<Ид>`). Техполе, только админка варианта.
+  onecId               String?   @unique
+  price                Int
+  compareAt            Int?
+  /// Лимиты оформления заказа
+  orderMinQty          Int       @default(1)
+  orderMaxQty          Int?
+  /// Габариты
+  weightGrams          Int?
+  lengthMm             Int?
+  widthMm              Int?
+  heightMm             Int?
+  /// Объём упаковки, литры (или см³ — в UI подпись «объём»)
+  packageVolume        Float?
+  /// Наличие: доступно к продаже
+  stock                Int       @default(0)
+  /// Резерв
+  stockReserve         Int       @default(0)
+  active               Boolean   @default(true)
+  /// Оттенки варианта (имя + опциональное фото)
+  shades               ProductVariantShade[]
+  galleryLinks         ProductVariantImage[]
+  orderItems           OrderItem[]
+  favoritedBy          UserFavorite[]
+  gratitudeGiftRules   GratitudeGiftRule[]
+  groupPrices          GroupVariantPrice[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([productId, slug])
+}
+
+/// Избранное покупателя (уровень варианта — как в Vspomni)
+model UserFavorite {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, variantId])
+  @@index([userId, createdAt])
+}
+
+/// Сохранённый результат квиза подбора ухода (один на покупателя)
+model UserQuizResult {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Версия payload (сейчас 1)
+  version     Int      @default(1)
+  /// face | hair
+  zone        String   @default("face")
+  answers     Json
+  result      Json
+  completedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([completedAt])
+}
+
+/// Оттенок варианта: наименование + изображение (мультивыбор в админке)
+model ProductVariantShade {
+  id         String         @id @default(cuid())
+  variantId  String
+  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  name       String
+  imageUrl   String?
+  sortOrder  Int            @default(0)
+  orderItems OrderItem[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([variantId, sortOrder])
+}
+
+model ProductImage {
+  id           String                 @id @default(cuid())
+  productId    String
+  product      Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url          String
+  /// image | video
+  mediaType    String                 @default("image")
+  sortOrder    Int                    @default(0)
+  variantLinks ProductVariantImage[]
+  createdAt    DateTime               @default(now())
+}
+
+/// Кадры варианта — подмножество галереи товара
+model ProductVariantImage {
+  id             String         @id @default(cuid())
+  variantId      String
+  variant        ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  productImageId String
+  productImage   ProductImage   @relation(fields: [productImageId], references: [id], onDelete: Cascade)
+  sortOrder      Int            @default(0)
+
+  @@unique([variantId, productImageId])
+}
+
+/// Кураторская коллекция (как Win-Win CuratedCollection, только товары)
+model Collection {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  shortDescription String?
+  coverImageUrl    String?
+  /// Превью товара в FeaturedCollections (левая колонка); обложка — coverImageUrl
+  productPreviewUrl String?
+  active           Boolean          @default(true)
+  /// На главной: true → блок FeaturedCollections, false → сетка 4 карточки
+  featuredLayout   Boolean          @default(false)
+  sortOrder        Int              @default(0)
+  items            CollectionItem[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model CollectionItem {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder    Int        @default(0)
+
+  @@unique([collectionId, productId])
+}
+
+/// Набор товаров (как Win-Win CuratedProductSet)
+model ProductSet {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  shortDescription String?
+  coverImageUrl    String?
+  active           Boolean          @default(true)
+  sortOrder        Int              @default(0)
+  items            ProductSetItem[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model ProductSetItem {
+  id          String     @id @default(cuid())
+  productSetId String
+  productSet  ProductSet @relation(fields: [productSetId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder   Int        @default(0)
+
+  @@unique([productSetId, productId])
+}
+
+enum DiscountScope {
+  CATEGORY
+  PRODUCTS
+}
+
+enum DiscountRewardType {
+  PERCENT
+  FIXED
+}
+
+enum PromoCodeType {
+  PERCENT
+  FIXED
+}
+
+/// Каталожная скидка (кампания): область + период + правила
+model Discount {
+  id          String             @id @default(cuid())
+  name        String
+  description String?            @db.Text
+  scope       DiscountScope
+  active      Boolean            @default(true)
+  startsAt    DateTime
+  endsAt      DateTime?
+  categories  DiscountCategory[]
+  products    DiscountProduct[]
+  rules       DiscountRule[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model DiscountCategory {
+  discountId String
+  categoryId String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([discountId, categoryId])
+  @@index([categoryId])
+}
+
+model DiscountProduct {
+  discountId String
+  productId  String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([discountId, productId])
+  @@index([productId])
+}
+
+model DiscountRule {
+  id          String             @id @default(cuid())
+  discountId  String
+  discount    Discount           @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  name        String
+  /// Комбинация условий: { logic: 'AND'|'OR', items: [{ kind, value }] }
+  conditions  Json?
+  description String?            @db.Text
+  rewardType  DiscountRewardType
+  /// PERCENT: 1–100; FIXED: рубли
+  rewardValue Int
+  sortOrder   Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([discountId, sortOrder])
+}
+
+model PromoCode {
+  id             String               @id @default(cuid())
+  code           String               @unique
+  /// PERCENT 1–100 или FIXED в рублях (как DiscountRule.rewardValue FIXED) — не копейки
+  type           PromoCodeType
+  value          Int
+  active         Boolean              @default(true)
+  startsAt       DateTime?
+  endsAt         DateTime?
+  /// null = без лимита
+  maxUses        Int?
+  /// один раз на email / user / guestId
+  oneShot        Boolean              @default(false)
+  /// мин. сумма корзины (₽), null = без порога
+  minOrderAmount Int?
+  /// null = весь заказ; CATEGORY / PRODUCTS — как у Discount
+  scope          DiscountScope?
+  categories     PromoCodeCategory[]
+  products       PromoCodeProduct[]
+  redemptions    PromoCodeRedemption[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model PromoCodeCategory {
+  promoCodeId String
+  categoryId  String
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([promoCodeId, categoryId])
+  @@index([categoryId])
+}
+
+model PromoCodeProduct {
+  promoCodeId String
+  productId   String
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([promoCodeId, productId])
+  @@index([productId])
+}
+
+/// История применений промокода (связка с заказом)
+model PromoCodeRedemption {
+  id             String    @id @default(cuid())
+  promoCodeId    String
+  promoCode      PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  orderId        String    @unique
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// snapshot кода на момент применения
+  code           String
+  discountAmount Int
+  email          String?
+  userId         String?
+  guestId        String?
+  createdAt      DateTime  @default(now())
+
+  @@index([promoCodeId, createdAt])
+  @@index([email])
+  @@index([userId])
+  @@index([guestId])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  number          String        @unique
+  /// Client-generated key for create idempotency (double-click / retry).
+  idempotencyKey  String?       @unique
+  status          OrderStatus   @default(NEW)
+  guestId         String?
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email           String
+  phone           String
+  customerName    String?
+  /// Комментарий покупателя к заказу (не путать с shippingAddress.comment / meta ПВЗ)
+  customerNote    String?       @db.VarChar(1000)
+  /// адрес / ПВЗ snapshot
+  shippingAddress Json?
+  shippingMethod  ShipmentProvider?
+  shippingCost    Int           @default(0)
+  promoCode       String?
+  discountTotal   Int           @default(0)
+  /// Snapshot кода подарочного сертификата (оплата заказа сертификатом)
+  giftCertificateCode   String?
+  giftCertificateId     String?
+  giftCertificate       GiftCertificate? @relation("OrderRedeemedGift", fields: [giftCertificateId], references: [id], onDelete: SetNull)
+  /// Сколько ₽ списано с баланса сертификата (hold при create → finalize при PAID)
+  giftCertificateAmount Int           @default(0)
+  /// Покупка сертификата на сайте (не товарный заказ)
+  giftPurchaseDenominationId String?
+  giftPurchaseDenomination   GiftCertificateDenomination? @relation(fields: [giftPurchaseDenominationId], references: [id], onDelete: SetNull)
+  /// Кому выслать код (если пусто — email покупателя)
+  giftPurchaseRecipientEmail String?
+  subtotal        Int
+  total           Int
+  items           OrderItem[]
+  payments        Payment[]
+  shipments       Shipment[]
+  checklistMarks  OrderChecklistMark[]
+  events          OrderEvent[]
+  promoRedemption PromoCodeRedemption?
+  /// Сумма уже возвращённых средств (₽)
+  refundedAmount  Int           @default(0)
+  /// Когда админ открыл карточку заказа (для badge в sidebar)
+  adminViewedAt   DateTime?
+  /// Когда заказ успешно принят 1С (обмен type=sale, mode=success)
+  onecExportedAt  DateTime?
+  /// Snapshot группы ценообразования
+  pricingGroupId   String?
+  pricingGroupName String?
+  /// guest | registered_default | registered_group
+  pricingContext   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  chatConversation ChatConversation?
+
+  @@index([giftCertificateId])
+  @@index([giftPurchaseDenominationId])
+  @@index([onecExportedAt, status])
+}
+
+model ChatConversation {
+  id                String               @id @default(cuid())
+  kind              ChatConversationKind @default(ORDER)
+  orderId           String?              @unique
+  order             Order?               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// Общий диалог поддержки (1 на пользователя).
+  userId            String?              @unique
+  user              User?                @relation("UserSupportChat", fields: [userId], references: [id], onDelete: Cascade)
+  retentionPurgesAt DateTime?
+  lastStaffReplyEmailAt DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  messages   ChatMessage[]
+  readStates ChatReadState[]
+
+  @@index([retentionPurgesAt])
+  @@index([kind, updatedAt(sort: Desc)])
+}
+
+model ChatMessage {
+  id                  String                @id @default(cuid())
+  conversationId      String
+  conversation        ChatConversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorUserId        String?
+  author              User?                 @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+  authorRole          ChatMessageAuthorRole
+  authorLabelSnapshot String                @default("")
+  body                String                @default("") @db.Text
+  deletedAt           DateTime?
+  clientMessageId     String?
+  createdAt           DateTime              @default(now())
+
+  attachments ChatAttachment[]
+
+  @@unique([conversationId, clientMessageId])
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@index([authorUserId])
+}
+
+model ChatAttachment {
+  id        String             @id @default(cuid())
+  messageId String
+  message   ChatMessage        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  filename  String
+  mimeType  String?
+  kind      ChatAttachmentKind @default(FILE)
+
+  @@index([messageId])
+}
+
+model ChatReadState {
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime         @default(now())
+
+  @@id([conversationId, userId])
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  shadeId   String?
+  shade     ProductVariantShade? @relation(fields: [shadeId], references: [id], onDelete: SetNull)
+  /// snapshot на момент покупки
+  title     String
+  sku       String
+  qty       Int
+  unitPrice Int
+  lineTotal Int
+  /// ProductVariant.price до групповых правил
+  baseUnitPrice  Int?
+  /// Цена после группы, до Discount/Promo
+  groupUnitPrice Int?
+  /// Бесплатная линия программы благодарности (серверный аттач)
+  isGratitudeGift Boolean @default(false)
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider          String        @default("yookassa")
+  status            PaymentStatus @default(PENDING)
+  amount            Int
+  externalId        String?
+  confirmationUrl   String?
+  raw               Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Shipment {
+  id         String           @id @default(cuid())
+  orderId    String
+  order      Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider   ShipmentProvider
+  externalId String?
+  tracking   String?
+  status     String?
+  raw        Json?
+  /// Фактическая стоимость у перевозчика (Ozon: из кабинета), ₽ — для сверки тарифной сетки
+  carrierCostRub   Int?
+  carrierCostAt    DateTime?
+  /// Оценка по своей сетке в момент ввода факта
+  estimatedCostRub Int?
+  billableGrams    Int?
+  tariffVersion    String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+/// Ручные отметки чеклиста склада (общие для всех смен); снятие отметки удаляет строку.
+model OrderChecklistMark {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// ozon — отправка Ozon Доставкой
+  checklist    String
+  stepId       String
+  doneByUserId String?
+  doneAt       DateTime @default(now())
+
+  @@unique([orderId, checklist, stepId])
+}
+
+/// Журнал действий по заказу (админ / система / оплата)
+model OrderEvent {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// STATUS_CHANGED | CANCELLED | PAID | SHIPPED | DELIVERED | REFUND | NOTE | MARK_PAID
+  type        String
+  message     String
+  actorUserId String?
+  meta        Json?
+  createdAt   DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+/// Рубрика блога
+model BlogCategory {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  name      String
+  sortOrder Int        @default(0)
+  posts     BlogPost[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+/// Статья блога
+model BlogPost {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorId    String?
+  author      User?         @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  title       String
+  excerpt     String?       @db.Text
+  body        String        @db.Text
+  coverUrl    String?
+  metaTitle          String?
+  metaDescription    String?          @db.VarChar(500)
+  ogImageUrl         String?
+  canonicalPath      String?
+  seoNoIndex         Boolean          @default(false)
+  isPublished Boolean       @default(false)
+  publishedAt DateTime?
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([isPublished, sortOrder])
+  @@index([categoryId])
+}
+
+/// Пункт FAQ (настройки сайта / главная)
+model FaqItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+/// Вид атрибута товара (выпадающие списки в карточке продукта).
+/// Значения должны совпадать с PRODUCT_ATTRIBUTE_KINDS в @vspomni/admin-types.
+enum ProductAttributeKind {
+  productType
+  purpose
+  shelfLife
+  storage
+}
+
+/// Значение выпадающего списка атрибута (Настройки → Атрибуты)
+model ProductAttributeOption {
+  id        String               @id @default(cuid())
+  kind      ProductAttributeKind
+  label     String
+  sortOrder Int                  @default(0)
+  active    Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  productsAsType      Product[] @relation("ProductTypeAttr")
+  productsAsPurpose   Product[] @relation("ProductPurposeAttr")
+  productsAsShelfLife Product[] @relation("ProductShelfLifeAttr")
+  productsAsStorage   Product[] @relation("ProductStorageAttr")
+
+  /// Case-sensitive @@unique нельзя: «Крем»/«крем». CI unique: migration …_label_ci
+  @@index([kind, active, sortOrder])
+}
+
+/// Версия каталога опций атрибутов (optimistic concurrency для replace)
+model ProductAttributeCatalog {
+  id        String   @id @default("default")
+  version   Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+/// Слайд hero на главной (настройки сайта)
+model HeroSlide {
+  id              String   @id @default(cuid())
+  /// Десктоп / большая картинка
+  imageUrl        String
+  /// Мобильная / маленькая (опционально)
+  mobileImageUrl  String?
+  /// Куда ведёт клик по большому баннеру
+  href            String   @default("/catalog")
+  sortOrder       Int      @default(0)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+/// Нижняя плашка Hero (заголовок / подзаголовок / картинка)
+model HeroSecondaryBanner {
+  id        String   @id @default("default")
+  title     String   @default("Аромат, что остаётся. История, что звучит в памяти")
+  subtitle  String   @default("Каждый аромат — это история, сотканная из чувств, мгновений и памяти.")
+  imageUrl  String   @default("/images/hero-badge.png")
+  /// Куда ведёт плашка
+  href      String   @default("/catalog/aroma/teplichka-u-babuli")
+  updatedAt DateTime @updatedAt
+}
+
+/// Сторис на главной (круги в стиле Instagram)
+model Story {
+  id        String       @id @default(cuid())
+  title     String
+  slug      String       @unique
+  /// Обложка круга; fallback — первый слайд
+  coverUrl  String?
+  sortOrder Int          @default(0)
+  active    Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  slides    StorySlide[]
+
+  @@index([active, sortOrder])
+}
+
+model StorySlide {
+  id        String   @id @default(cuid())
+  storyId   String
+  story     Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  url       String
+  /// image | video
+  mediaType String   @default("image")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storyId, sortOrder])
+}
+
+/// Набор на главной (картинка + товар; не путать с ProductSet)
+model HomepageSet {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([productId])
+}
+
+/// Заголовок блока промо на главной (НАШИ / АКЦИИ)
+model HomePromoConfig {
+  id         String   @id @default("default")
+  titleLeft  String   @default("НАШИ")
+  titleRight String   @default("АКЦИИ")
+  updatedAt  DateTime @updatedAt
+}
+
+/// Карточки веера / слайдера промо на главной
+model HomePromoBanner {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  /// Путь на витрине, напр. /catalog
+  href      String   @default("/catalog")
+  alt       String   @default("")
+  /// Треугольный вырез справа
+  notch     Boolean  @default(false)
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+/// Текст / медиа квиза подбора ухода (ключ → plain/html/media)
+model QuizContentEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  plain     String   @default("") @db.Text
+  html      String   @default("") @db.Text
+  mediaUrl  String?
+  /// image | video | null
+  mediaType String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+/// События прохождения квиза (анонимная аналитика)
+model QuizEvent {
+  id        String   @id @default(cuid())
+  /// Стабильный id сессии на клиенте (uuid)
+  sessionId String
+  /// quiz_start | zone_select | step_view | step_complete | quiz_complete
+  type      String
+  /// face | hair
+  zone      String?
+  /// Ключ шага: age | spf | … | result | hair_cleansing | …
+  stepKey   String?
+  /// Опционально привязка к buyer JWT
+  userId    String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@index([sessionId, createdAt])
+  @@index([zone, type, createdAt])
+}
+
+/// Диалог LLM-ассистента админки (на сотрудника)
+model AssistantThread {
+  id        String              @id @default(cuid())
+  staffId   String
+  title     String              @default("")
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  messages  AssistantMessage[]
+
+  @@index([staffId, updatedAt])
+}
+
+model AssistantMessage {
+  id        String          @id @default(cuid())
+  threadId  String
+  thread    AssistantThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  /// user | assistant | tool | system
+  role      String
+  content   String          @default("") @db.Text
+  /// OpenAI tool_calls / tool_call_id payload
+  meta      Json?
+  createdAt DateTime        @default(now())
+
+  @@index([threadId, createdAt])
+}
+
+/// Audit trail LLM-ассистента (без полного текста промпта — только метаданные).
+model AssistantAuditEvent {
+  id                String   @id @default(cuid())
+  staffId           String
+  threadId          String?
+  /// chat | tool | usage | error | deny_tool
+  kind              String
+  toolName          String?
+  /// Длина user message (символы), без хранения текста
+  promptChars       Int?
+  promptTokens      Int?
+  completionTokens  Int?
+  totalTokens       Int?
+  model             String?
+  meta              Json?
+  createdAt         DateTime @default(now())
+
+  @@index([staffId, createdAt])
+  @@index([createdAt])
+  @@index([kind, createdAt])
+}
+
+/// Правило подарка по сумме корзины (программа благодарности)
+model GratitudeGiftRule {
+  id        String         @id @default(cuid())
+  /// Inclusive min cart subtotal, ₽
+  minRub    Int
+  /// Inclusive max; null = no upper bound
+  maxRub    Int?
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  active    Boolean        @default(true)
+  sortOrder Int            @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([variantId])
+}
+
+/// Singleton настройки программы благодарности
+model GratitudeProgramSettings {
+  id          String   @id @default("default")
+  /// Optional article slug link
+  articleSlug String?
+  updatedAt   DateTime @updatedAt
+}
+
+/// Блоки landing программы благодарности (tiers 1–4)
+model GratitudeGiftTier {
+  id        String   @id @default(cuid())
+  sortOrder Int      @default(0)
+  title     String   @default("")
+  infoHtml  String   @default("") @db.Text
+  imageUrl  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+/// Добавочная стоимость доставки по перевозчикам (singleton id=default)
+model DeliverySettings {
+  id                 String   @id @default("default")
+  /// Плюсуется к тарифу на checkout (СДЭК), ₽
+  cdekSurchargeRub   Int      @default(0)
+  ozonSurchargeRub   Int      @default(0)
+  yandexSurchargeRub Int      @default(0)
+  updatedAt          DateTime @updatedAt
+}
+
+/// Настройки корзины: progress-bar + legal/accordion текст (singleton id=default)
+model CartSettings {
+  id                       String   @id @default("default")
+  /// Порог бесплатной доставки в ПВЗ, ₽
+  freeShippingThresholdRub Int      @default(10000)
+  /// Текст до порога: «{остаток}₽ {contentText}»
+  progressContentText      String   @default("до бесплатной доставки в ПВЗ")
+  /// Текст при достижении порога
+  progressSuccessText      String   @default("Бесплатная доставка!")
+  /// HTML текста в корзине (accordion / legal info)
+  legalHtml                String   @default("<p></p>") @db.Text
+  updatedAt                DateTime @updatedAt
+}
+
+/// Featured-товар и подпись в desktop-меню витрины
+model MenuSettings {
+  id             String   @id @default("default")
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// Подпись к карточке (Bimbo, зелёный)
+  annotationText String   @default("") @db.Text
+  updatedAt      DateTime @updatedAt
+
+  @@index([productId])
+}
+
+/// Глобальные SEO-настройки сайта (singleton id=default)
+model SiteSettings {
+  id                     String   @id @default("default")
+  /// Базовый URL сайта для canonical, напр. https://vspomni.store
+  siteUrl                String?
+  /// Суффикс заголовка: «{title} — {titleSuffix}»
+  titleSuffix            String   @default("Vspomni")
+  /// Fallback meta description для страниц без своего описания
+  defaultMetaDescription String?  @db.Text
+  /// Fallback og:image
+  defaultOgImageUrl      String?
+  /// Главная: meta title (пусто → titleSuffix)
+  homeMetaTitle          String?
+  /// Главная: meta description
+  homeMetaDescription    String?  @db.Text
+  /// Главная: og:image (пусто → defaultOgImageUrl)
+  homeOgImageUrl         String?
+  updatedAt              DateTime @updatedAt
+}
+
+/// Редактируемые шаблоны transactional-писем (admin/settings).
+/// eventKey — стабильный ключ события; subject/body с плейсхолдерами {{order.number}}.
+model EmailNotificationTemplate {
+  id                 String    @id @default(cuid())
+  eventKey           String    @unique
+  enabled            Boolean   @default(true)
+  subject            String
+  body               String    @db.Text
+  /// skipped_disabled | rendered_db | rendered_legacy | failed
+  lastSendPath       String?
+  lastSendAt         DateTime?
+  lastEditedByUserId String?
+  lastEditedByEmail  String?
+  lastEditedAt       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+/// История правок шаблона (снимок ДО изменения).
+model EmailNotificationTemplateRevision {
+  id          String   @id @default(cuid())
+  eventKey    String
+  subject     String
+  body        String   @db.Text
+  enabled     Boolean
+  actorUserId String?
+  actorEmail  String?
+  createdAt   DateTime @default(now())
+
+  @@index([eventKey, createdAt])
+}
+
+/// Юридические / информационные страницы (оферта, политика, оплата/доставка)
+model CmsPage {
+  id          String    @id @default(cuid())
+  /// privacy | terms | delivery …
+  slug        String    @unique
+  title       String
+  bodyHtml    String    @db.Text
+  isPublished Boolean   @default(true)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isPublished])
+}
+
+enum GiftCertificateStatus {
+  ACTIVE
+  USED_UP
+  EXPIRED
+  REVOKED
+}
+
+enum GiftCertificateLedgerKind {
+  ISSUE
+  CAPTURE
+  RELEASE
+  ADJUST
+  REVOKE
+}
+
+enum GiftCertificateSource {
+  ADMIN
+  PURCHASE
+}
+
+/// Шаблон номинала (500 / 1000 / …); покупка на сайте и admin issue.
+model GiftCertificateDenomination {
+  id            String            @id @default(cuid())
+  name          String
+  /// Номинал в рублях
+  faceValue     Int
+  /// Срок с момента выпуска (дней); null = без авто-срока
+  validityDays  Int?
+  active        Boolean           @default(true)
+  sortOrder     Int               @default(0)
+  images        GiftCertificateDenominationImage[]
+  certificates  GiftCertificate[]
+  purchaseOrders Order[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([faceValue])
+}
+
+/// Галерея номинала (обложка = sortOrder 0).
+model GiftCertificateDenominationImage {
+  id             String                       @id @default(cuid())
+  denominationId String
+  denomination   GiftCertificateDenomination  @relation(fields: [denominationId], references: [id], onDelete: Cascade)
+  url            String
+  /// image | video
+  mediaType      String                       @default("image")
+  sortOrder      Int                          @default(0)
+  createdAt      DateTime                     @default(now())
+
+  @@index([denominationId, sortOrder])
+}
+
+/// Экземпляр сертификата с остатком баланса (предоплата, не скидка).
+model GiftCertificate {
+  id               String                   @id @default(cuid())
+  code             String                   @unique
+  denominationId   String?
+  denomination     GiftCertificateDenomination? @relation(fields: [denominationId], references: [id], onDelete: SetNull)
+  /// Snapshot номинала на момент выпуска
+  faceValue        Int
+  balance          Int
+  status           GiftCertificateStatus    @default(ACTIVE)
+  source           GiftCertificateSource    @default(ADMIN)
+  issuedAt         DateTime                 @default(now())
+  expiresAt        DateTime?
+  recipientEmail   String?
+  recipientUserId  String?
+  recipientUser    User?                    @relation(fields: [recipientUserId], references: [id], onDelete: SetNull)
+  issuedByUserId   String?
+  note             String?                  @db.Text
+  /// Будущая связь с заказом покупки сертификата
+  purchaseOrderId  String?
+  ledger           GiftCertificateLedger[]
+  orders           Order[]                  @relation("OrderRedeemedGift")
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  @@index([status, createdAt])
+  @@index([recipientEmail])
+  @@index([recipientUserId])
+  @@index([expiresAt])
+  @@index([denominationId])
+  @@index([purchaseOrderId])
+}
+
+model GiftCertificateLedger {
+  id             String                     @id @default(cuid())
+  certificateId  String
+  certificate    GiftCertificate            @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  kind           GiftCertificateLedgerKind
+  /// Знаковая сумма: ISSUE/RELEASE/ADJUST(+) > 0; CAPTURE/REVOKE/ADJUST(-) < 0
+  amount         Int
+  balanceAfter   Int
+  orderId        String?
+  actorUserId    String?
+  note           String?
+  createdAt      DateTime                   @default(now())
+
+  @@index([certificateId, createdAt])
+  @@index([orderId])
+}
+
+/// OAuth частного приложения «Ozon Доставка» (singleton id=default).
+/// RLS: только bypass (staff / системные операции).
+model OzonIntegration {
+  id                String    @id @default("default")
+  /// AES-256-GCM (ключ из OZON_CLIENT_SECRET), base64url iv.tag.data
+  refreshTokenEnc   String?   @db.Text
+  connectedAt       DateTime?
+  connectedByUserId String?
+  lastRefreshAt     DateTime?
+  lastError         String?
+  /// Мониторинг (OzonHealthService)
+  lastCheckAt         DateTime?
+  lastCheckOk         Boolean?
+  lastPointCount      Int?
+  consecutiveFailures Int       @default(0)
+  /// ok | failing — для алерта о падении и восстановлении
+  alertState          String?
+  lastAlertAt         DateTime?
+  updatedAt         DateTime  @updatedAt
+}
+
+/// История проверок Ozon (дашборд «Службы доставки»), храним ~14 дней.
+model OzonHealthCheck {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  ok         Boolean
+  connected  Boolean
+  pointCount Int?
+  durationMs Int
+  /// disconnected | refresh_failed | points_failed | points_empty
+  failure    String?
+  error      String?
+  /// scheduled | manual
+  trigger    String
+
+  @@index([createdAt])
+}
+
+/// Подписка с homepage-формы (email может ещё не быть User).
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  source         String    @default("homepage")
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  /// Если покупатель с таким email уже есть / зарегистрировался позже
+  userId         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([subscribedAt])
+  @@index([userId])
+  @@index([unsubscribedAt])
+}
