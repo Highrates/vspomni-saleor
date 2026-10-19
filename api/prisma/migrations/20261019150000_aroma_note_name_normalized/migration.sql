@@ -5,7 +5,8 @@ UPDATE "AromaNoteDefinition"
 SET "nameNormalized" = lower(trim("name"))
 WHERE "nameNormalized" IS NULL OR "nameNormalized" = '';
 
--- Merge case-duplicates: keep earliest id, re-point product notes, drop extras
+-- Merge case-duplicates into temp table (CTE не переживает отдельные statements)
+CREATE TEMP TABLE "_aroma_note_dupes" ON COMMIT DROP AS
 WITH ranked AS (
   SELECT
     id,
@@ -15,16 +16,15 @@ WITH ranked AS (
 ),
 keepers AS (
   SELECT id, "nameNormalized" FROM ranked WHERE rn = 1
-),
-dupes AS (
-  SELECT r.id AS dupe_id, k.id AS keep_id
-  FROM ranked r
-  JOIN keepers k ON k."nameNormalized" = r."nameNormalized"
-  WHERE r.rn > 1
 )
+SELECT r.id AS dupe_id, k.id AS keep_id
+FROM ranked r
+JOIN keepers k ON k."nameNormalized" = r."nameNormalized"
+WHERE r.rn > 1;
+
 UPDATE "ProductAromaNote" n
 SET "definitionId" = d.keep_id
-FROM dupes d
+FROM "_aroma_note_dupes" d
 WHERE n."definitionId" = d.dupe_id
   AND NOT EXISTS (
     SELECT 1 FROM "ProductAromaNote" x
@@ -33,13 +33,12 @@ WHERE n."definitionId" = d.dupe_id
       AND x."kind" = n."kind"
   );
 
--- Drop product notes that would violate unique after merge
 DELETE FROM "ProductAromaNote" n
-USING dupes d
+USING "_aroma_note_dupes" d
 WHERE n."definitionId" = d.dupe_id;
 
 DELETE FROM "AromaNoteDefinition" a
-USING dupes d
+USING "_aroma_note_dupes" d
 WHERE a.id = d.dupe_id;
 
 DROP INDEX IF EXISTS "AromaNoteDefinition_name_key";
