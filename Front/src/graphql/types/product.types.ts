@@ -87,6 +87,14 @@ export interface ProductDetailNode extends Omit<ProductNode, 'category'> {
   shelfLife?: string;
   extraHtml?: string;
   catalogTags?: Array<{ id: string; name: string; slug: string; sortOrder: number }>;
+  /** Пирамида нот (Nest ProductAromaNote) */
+  aromaNotes?: Array<{
+    id: string;
+    kind: 'BASIC' | 'MIDDLE' | 'HEAD';
+    name: string;
+    imageUrl: string | null;
+    sortOrder: number;
+  }>;
   metaTitle?: string | null;
   metaDescription?: string | null;
   ogImageUrl?: string | null;

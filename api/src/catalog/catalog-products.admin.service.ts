@@ -1,11 +1,12 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, ProductAromaNoteKind } from '@prisma/client';
 import type { ProductAttributeKind } from '@vspomni/admin-types';
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalStorageService } from '../storage/local-storage.service';
 import { ADMIN_LIST_DEFAULT_LIMIT, ADMIN_LIST_MAX_LIMIT } from './catalog.constants';
 import {
   dedupeIdsPreserveOrder,
+  normalizeAromaNoteName,
   normalizeCanonicalPath,
   normalizeCardAromaLabels,
   trimOrNull,
@@ -24,6 +25,7 @@ import { slugify, volumeSlugPart } from './slug.util';
 import type {
   CreateProductDto,
   CreateVariantDto,
+  ProductAromaNoteInputDto,
   UpdateProductDto,
   UpdateVariantDto,
   VariantInputDto,
@@ -302,6 +304,9 @@ export class CatalogProductsAdminService {
       await this.syncProductCatalogTags(tx, product.id, dto.catalogTagIds ?? []);
       await this.syncProductCollections(tx, product.id, dto.collectionIds ?? []);
       await this.syncProductSets(tx, product.id, dto.productSetIds ?? []);
+      if (dto.aromaNotes !== undefined) {
+        await this.syncProductAromaNotes(tx, product.id, dto.aromaNotes);
+      }
 
       const full = await tx.product.findUniqueOrThrow({
         where: { id: product.id },
@@ -419,6 +424,9 @@ export class CatalogProductsAdminService {
       }
       if (dto.productSetIds !== undefined) {
         await this.syncProductSets(tx, id, dto.productSetIds);
+      }
+      if (dto.aromaNotes !== undefined) {
+        await this.syncProductAromaNotes(tx, id, dto.aromaNotes);
       }
     });
 
@@ -886,6 +894,178 @@ export class CatalogProductsAdminService {
         })),
       });
     }
+  }
+
+  /**
+   * Upsert пирамиды нот. Порядок в массиве → sortOrder внутри kind.
+   * Пустой массив удаляет все ноты товара. id сохраняется при повторном save.
+   */
+  private async syncProductAromaNotes(
+    tx: Prisma.TransactionClient,
+    productId: string,
+    raw: ProductAromaNoteInputDto[],
+  ) {
+    const existing = await tx.productAromaNote.findMany({
+      where: { productId },
+      select: { id: true, imageUrl: true },
+    });
+    const existingById = new Map(existing.map((e) => [e.id, e]));
+    const previousOverrideUrls = existing
+      .map((e) => e.imageUrl)
+      .filter((u): u is string => Boolean(u?.trim()));
+
+    const reuseIds = new Set(
+      raw
+        .map((item) => item.id?.trim())
+        .filter((id): id is string => Boolean(id && existingById.has(id))),
+    );
+    const toDelete = existing.filter((e) => !reuseIds.has(e.id));
+    if (toDelete.length) {
+      await tx.productAromaNote.deleteMany({
+        where: { id: { in: toDelete.map((e) => e.id) } },
+      });
+    }
+
+    const kindSort = new Map<ProductAromaNoteKind, number>([
+      [ProductAromaNoteKind.BASIC, 0],
+      [ProductAromaNoteKind.MIDDLE, 0],
+      [ProductAromaNoteKind.HEAD, 0],
+    ]);
+    const seenPair = new Set<string>();
+
+    for (const item of raw) {
+      const kind = item.kind as ProductAromaNoteKind;
+      if (
+        kind !== ProductAromaNoteKind.BASIC &&
+        kind !== ProductAromaNoteKind.MIDDLE &&
+        kind !== ProductAromaNoteKind.HEAD
+      ) {
+        throw new BadRequestException('Неизвестный слой ноты');
+      }
+
+      const definitionId = await this.resolveAromaNoteDefinitionId(tx, item);
+      const pairKey = `${definitionId}:${kind}`;
+      if (seenPair.has(pairKey)) {
+        throw new BadRequestException('Одна и та же нота дважды в одном слое');
+      }
+      seenPair.add(pairKey);
+
+      const next = kindSort.get(kind) ?? 0;
+      kindSort.set(kind, next + 1);
+      const sortOrder =
+        item.sortOrder != null && Number.isFinite(item.sortOrder)
+          ? Math.trunc(item.sortOrder)
+          : next;
+      const overrideImageUrl = trimOrNull(item.imageUrl);
+
+      const reuseId =
+        item.id && existingById.has(item.id) && reuseIds.has(item.id)
+          ? item.id
+          : undefined;
+
+      if (reuseId) {
+        await tx.productAromaNote.update({
+          where: { id: reuseId },
+          data: {
+            definitionId,
+            kind,
+            imageUrl: overrideImageUrl,
+            sortOrder,
+          },
+        });
+      } else {
+        await tx.productAromaNote.create({
+          data: {
+            productId,
+            definitionId,
+            kind,
+            imageUrl: overrideImageUrl,
+            sortOrder,
+          },
+        });
+      }
+    }
+
+    const remainingOverrides = await tx.productAromaNote.findMany({
+      where: { productId },
+      select: { imageUrl: true },
+    });
+    const stillUsed = new Set(
+      remainingOverrides
+        .map((r) => r.imageUrl?.trim())
+        .filter((u): u is string => Boolean(u)),
+    );
+
+    const orphanCandidates = [
+      ...previousOverrideUrls.filter((u) => !stillUsed.has(u.trim())),
+      ...toDelete
+        .map((e) => e.imageUrl?.trim())
+        .filter((u): u is string => Boolean(u)),
+    ];
+    const uniqueOrphans = [...new Set(orphanCandidates.map((u) => u.trim()))];
+    for (const url of uniqueOrphans) {
+      if (stillUsed.has(url)) continue;
+      const refCount = await this.countAromaImageRefs(tx, url);
+      if (refCount === 0) {
+        await this.storage.deleteManagedUpload(url);
+      }
+    }
+  }
+
+  private async resolveAromaNoteDefinitionId(
+    tx: Prisma.TransactionClient,
+    item: ProductAromaNoteInputDto,
+  ): Promise<string> {
+    const defId = item.definitionId?.trim();
+    if (defId) {
+      const found = await tx.aromaNoteDefinition.findUnique({
+        where: { id: defId },
+        select: { id: true },
+      });
+      if (!found) throw new BadRequestException('Нота из справочника не найдена');
+      return found.id;
+    }
+    const { name, nameNormalized } = normalizeAromaNoteName(item.name ?? '');
+    if (!name) {
+      throw new BadRequestException('Укажите definitionId или название ноты');
+    }
+    const existing = await tx.aromaNoteDefinition.findUnique({
+      where: { nameNormalized },
+      select: { id: true },
+    });
+    if (existing) return existing.id;
+    try {
+      const created = await tx.aromaNoteDefinition.create({
+        data: { name, nameNormalized },
+        select: { id: true },
+      });
+      return created.id;
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        const again = await tx.aromaNoteDefinition.findUnique({
+          where: { nameNormalized },
+          select: { id: true },
+        });
+        if (again) return again.id;
+      }
+      throw e;
+    }
+  }
+
+  private async countAromaImageRefs(
+    tx: Prisma.TransactionClient,
+    url: string,
+  ): Promise<number> {
+    const t = url.trim();
+    if (!t) return 0;
+    const [asOverride, asDefault] = await Promise.all([
+      tx.productAromaNote.count({ where: { imageUrl: t } }),
+      tx.aromaNoteDefinition.count({ where: { imageUrl: t } }),
+    ]);
+    return asOverride + asDefault;
   }
 
   private async syncProductCatalogTags(

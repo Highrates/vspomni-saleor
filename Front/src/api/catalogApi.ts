@@ -7,6 +7,7 @@ import type { ProductDetailNode } from '@/graphql/types/product.types'
 import type { ProductCardItem, StarChoiceItem } from '@/types/product'
 import { htmlToRawEditorJsonString } from '@/lib/nestContent'
 import { formatDate } from '@/lib/functions'
+import { buildProductNotes } from '@/lib/product/aromaNotes'
 
 // ——— Nest raw types ———
 
@@ -105,7 +106,7 @@ export type NestProductDetail = {
   catalogTags?: Array<{ id: string; name: string; slug: string; sortOrder: number }>
   cardAromaLabels?: string[]
   badgeLabel?: string | null
-  /** Пирамида нот: BASIC / MIDDLE / HEAD (Saleor bazovye-noty / srednie-noty / verhnie-akkordy) */
+  /** Пирамида нот: BASIC / MIDDLE / HEAD */
   aromaNotes?: Array<{
     id: string
     kind: 'BASIC' | 'MIDDLE' | 'HEAD' | string
@@ -389,46 +390,7 @@ export function adaptProductDetail(p: NestProductDetail): ProductDetailNode {
     .map((s) => String(s).trim())
     .filter(Boolean)
 
-  const NOTE_KIND_SLUG = {
-    BASIC: { slug: 'bazovye-noty', name: 'Базовые ноты' },
-    MIDDLE: { slug: 'srednie-noty', name: 'Средние ноты' },
-    HEAD: { slug: 'verhnie-akkordy', name: 'Верхние аккорды' },
-  } as const
-
-  function notesAttr(
-    kind: keyof typeof NOTE_KIND_SLUG,
-  ): NonNullable<ProductDetailNode['attributes']>[number] | null {
-    const meta = NOTE_KIND_SLUG[kind]
-    const values = (p.aromaNotes ?? [])
-      .filter((n) => String(n.kind).toUpperCase() === kind)
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((n) => {
-        const url = uploadsUrl(n.imageUrl) || ''
-        return {
-          boolean: null,
-          date: null,
-          dateTime: null,
-          externalReference: null,
-          inputType: 'FILE',
-          name: n.name,
-          plainText: null,
-          reference: null,
-          richText: null,
-          slug: n.id,
-          file: url ? { url, contentType: null } : null,
-        }
-      })
-    if (!values.length) return null
-    return {
-      attribute: {
-        id: meta.slug,
-        name: meta.name,
-        slug: meta.slug,
-        metadata: [] as unknown[],
-      },
-      values,
-    }
-  }
+  const aromaNotes = buildProductNotes(p.aromaNotes, uploadsUrl)
 
   const attributes = [
     htmlAttr('korotkoe-opisanie-tovara', 'Короткое описание', p.shortDescription),
@@ -454,9 +416,6 @@ export function adaptProductDetail(p: NestProductDetail): ProductDetailNode {
           })),
         }
       : null,
-    notesAttr('BASIC'),
-    notesAttr('MIDDLE'),
-    notesAttr('HEAD'),
     htmlAttr('sostav', 'Состав', p.compositionHtml),
     htmlAttr('harakteristiki', 'Характеристики', p.actionEffectHtml),
   ].filter(Boolean) as NonNullable<ProductDetailNode['attributes']>
@@ -506,6 +465,7 @@ export function adaptProductDetail(p: NestProductDetail): ProductDetailNode {
     shelfLife: p.shelfLife || '',
     extraHtml: p.extraHtml || '',
     catalogTags: p.catalogTags ?? [],
+    aromaNotes,
     metaTitle: p.metaTitle,
     metaDescription: p.metaDescription,
     ogImageUrl: p.ogImageUrl ? absUrl(p.ogImageUrl) : null,

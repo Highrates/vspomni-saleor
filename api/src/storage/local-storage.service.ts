@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { toRelativeMediaPath } from '@vspomni/hero-types';
 import { mkdir, readdir, stat, unlink, writeFile } from 'fs/promises';
 import { join, extname } from 'path';
 import { randomBytes } from 'crypto';
@@ -184,12 +185,40 @@ export class LocalStorageService {
 
   tryPublicUrlToKey(url: string): string | null {
     const u = url.trim();
+    if (!u) return null;
+    const relative = toRelativeMediaPath(u);
+    if (relative.startsWith('/uploads/')) {
+      try {
+        const key = decodeURIComponent(relative.slice('/uploads/'.length));
+        if (!key || key.includes('..') || key.startsWith('/')) return null;
+        return key;
+      } catch {
+        return null;
+      }
+    }
     const prefix = `${this.publicBase()}/uploads/`;
+    if (!prefix || prefix === '/uploads/') return null;
     if (!u.startsWith(prefix)) return null;
     try {
       return decodeURIComponent(u.slice(prefix.length));
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Удаляет файл из LOCAL_UPLOADS по public URL или `/uploads/…`.
+   * В отличие от deleteByPublicUrl — без chat-prefix (каталог, hero, ноты).
+   */
+  async deleteManagedUpload(url: string): Promise<boolean> {
+    const key = this.tryPublicUrlToKey(url);
+    if (!key) return false;
+    const root = this.uploadRoot();
+    try {
+      await unlink(join(root, key));
+      return true;
+    } catch {
+      return false;
     }
   }
 

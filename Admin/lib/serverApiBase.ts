@@ -11,6 +11,7 @@ export function getServerApiBase(): string {
     process.env.API_URL ??
     process.env.BACKEND_INTERNAL_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
-    'http://127.0.0.1:3001/api/v1';
+    // Nest API (не Front :3000/:3001)
+    'http://127.0.0.1:3011/api/v1';
   return normalizeApiV1Base(raw);
 }

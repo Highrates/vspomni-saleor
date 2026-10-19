@@ -593,7 +593,7 @@ const NOTE_ATTR_KIND = {
   "verhnie-akkordy": "HEAD",
 };
 
-/** PDP notes/accords (file attrs) → ProductAromaNote */
+/** PDP notes/accords (file attrs) → AromaNoteDefinition + ProductAromaNote */
 async function planProductNotes() {
   const { rows } = await saleor.query(`
     SELECT
@@ -611,6 +611,39 @@ async function planProductNotes() {
   `);
   console.log(`\n[product-notes] saleor note values=${rows.length}`);
   return rows;
+}
+
+async function ensureAromaNoteDefinition(name, imageUrl) {
+  const trimmed = String(name || "—")
+    .trim()
+    .slice(0, 200);
+  const nameNormalized = trimmed.toLocaleLowerCase("ru");
+  const { rows } = await jcos.query(
+    `SELECT id, "imageUrl" FROM "AromaNoteDefinition" WHERE "nameNormalized" = $1 LIMIT 1`,
+    [nameNormalized],
+  );
+  if (rows[0]) {
+    if (!rows[0].imageUrl && imageUrl) {
+      await jcos.query(
+        `UPDATE "AromaNoteDefinition" SET "imageUrl" = $1, "updatedAt" = NOW() WHERE id = $2`,
+        [imageUrl, rows[0].id],
+      );
+    }
+    return rows[0].id;
+  }
+  const id = newId();
+  await jcos.query(
+    `INSERT INTO "AromaNoteDefinition" (id, name, "nameNormalized", "imageUrl", "createdAt", "updatedAt")
+     VALUES ($1,$2,$3,$4,NOW(),NOW())
+     ON CONFLICT ("nameNormalized") DO UPDATE SET "updatedAt" = NOW()
+     RETURNING id`,
+    [id, trimmed, nameNormalized, imageUrl],
+  );
+  const { rows: again } = await jcos.query(
+    `SELECT id FROM "AromaNoteDefinition" WHERE "nameNormalized" = $1 LIMIT 1`,
+    [nameNormalized],
+  );
+  return again[0]?.id ?? id;
 }
 
 async function applyProductNotes() {
@@ -641,26 +674,36 @@ async function applyProductNotes() {
     ]);
 
     let sort = 0;
+    const seenPair = new Set();
     for (const r of list) {
       const kind = NOTE_ATTR_KIND[r.attr_slug];
       if (!kind) continue;
       let imageUrl = null;
+      const noteName = String(r.name || "—").trim() || "—";
       const rel = saleorMediaRel(r.file_url);
       if (rel) {
         const destRel = join(
           "notes",
           "etl",
-          slug,
-          `${kind.toLowerCase()}-${sort}${safeExt(rel)}`,
+          "defs",
+          `${String(noteName)
+            .toLowerCase()
+            .replace(/[^a-zа-яё0-9]+/gi, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 80) || "note"}${safeExt(rel)}`,
         );
         imageUrl = await resolveMediaFile(rel, destRel, "product-notes");
         if (!imageUrl) failed++;
       }
+      const definitionId = await ensureAromaNoteDefinition(noteName, imageUrl);
+      const pairKey = `${definitionId}:${kind}`;
+      if (seenPair.has(pairKey)) continue;
+      seenPair.add(pairKey);
       await jcos.query(
         `INSERT INTO "ProductAromaNote"
-          (id, "productId", kind, name, "imageUrl", "sortOrder", "createdAt")
-         VALUES ($1,$2,$3::"ProductAromaNoteKind",$4,$5,$6,NOW())`,
-        [newId(), productId, kind, r.name || "—", imageUrl, sort++],
+          (id, "productId", "definitionId", kind, "imageUrl", "sortOrder", "createdAt")
+         VALUES ($1,$2,$3,$4::"ProductAromaNoteKind",$5,$6,NOW())`,
+        [newId(), productId, definitionId, kind, null, sort++],
       );
       notes++;
     }

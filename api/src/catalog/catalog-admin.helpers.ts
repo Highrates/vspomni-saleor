@@ -9,6 +9,18 @@ export function trimOrNull(v: NullableStr): string | null {
   return t || null;
 }
 
+/** Display name (trim, max 200) + case-insensitive key for AromaNoteDefinition. */
+export function normalizeAromaNoteName(raw: string): {
+  name: string;
+  nameNormalized: string;
+} {
+  const name = raw.trim().slice(0, 200);
+  return {
+    name,
+    nameNormalized: name.toLocaleLowerCase('ru'),
+  };
+}
+
 /** SEO canonical path — относительный URL, начинается с /. */
 export function normalizeCanonicalPath(v: NullableStr): string | null {
   const t = trimOrNull(v);

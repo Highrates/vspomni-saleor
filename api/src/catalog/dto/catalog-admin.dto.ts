@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
@@ -11,6 +12,62 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+
+/** Пирамида нот на PDP: BASIC / MIDDLE / HEAD. definitionId или name (find-or-create). */
+export class ProductAromaNoteInputDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsIn(['BASIC', 'MIDDLE', 'HEAD'])
+  kind!: 'BASIC' | 'MIDDLE' | 'HEAD';
+
+  @IsOptional()
+  @IsString()
+  definitionId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name?: string;
+
+  /** Override; null/пусто → фото из справочника */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  imageUrl?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  sortOrder?: number;
+}
+
+export class CreateAromaNoteDefinitionDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  imageUrl?: string | null;
+}
+
+export class UpdateAromaNoteDefinitionDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  imageUrl?: string | null;
+}
 
 export class CreateCategoryDto {
   @IsString()
@@ -403,6 +460,16 @@ export class CreateProductDto {
   @IsString({ each: true })
   productSetIds?: string[];
 
+  /**
+   * Пирамида нот (replace-all при передаче).
+   * Пустой массив очищает ноты товара.
+   */
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductAromaNoteInputDto)
+  aromaNotes?: ProductAromaNoteInputDto[];
+
   /** Опционально: варианты можно добавить отдельно через POST products/:id/variants. */
   @IsOptional()
   @IsArray()
@@ -554,6 +621,16 @@ export class UpdateProductDto {
   @IsArray()
   @IsString({ each: true })
   productSetIds?: string[];
+
+  /**
+   * Пирамида нот (replace-all при передаче).
+   * Пустой массив очищает ноты товара.
+   */
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductAromaNoteInputDto)
+  aromaNotes?: ProductAromaNoteInputDto[];
 }
 
 export class CreateVariantDto extends VariantInputDto {}

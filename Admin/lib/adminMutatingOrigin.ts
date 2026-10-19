@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/** localhost ↔ 127.0.0.1 — часто ломает Origin CSRF при локальной админке. */
+function expandLocalDevOrigins(url: string, into: Set<string>) {
+  into.add(url);
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'localhost') {
+      u.hostname = '127.0.0.1';
+      into.add(u.origin);
+    } else if (u.hostname === '127.0.0.1') {
+      u.hostname = 'localhost';
+      into.add(u.origin);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 /** CSRF: мутирующие запросы к BFF только с нашего Origin (cookie + SameSite=Lax недостаточно). */
 export function rejectForeignOriginMutations(request: NextRequest): NextResponse | null {
   const method = request.method.toUpperCase();
@@ -19,9 +36,11 @@ export function rejectForeignOriginMutations(request: NextRequest): NextResponse
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
 
-  const allowed = new Set([`https://${host}`, `http://${host}`]);
+  const allowed = new Set<string>();
+  expandLocalDevOrigins(`https://${host}`, allowed);
+  expandLocalDevOrigins(`http://${host}`, allowed);
   const extra = process.env.ADMIN_APP_ORIGIN?.trim();
-  if (extra) allowed.add(extra.replace(/\/$/, ''));
+  if (extra) expandLocalDevOrigins(extra.replace(/\/$/, ''), allowed);
 
   if (!allowed.has(origin)) {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });

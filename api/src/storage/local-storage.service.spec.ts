@@ -58,6 +58,7 @@ describe('LocalStorageService', () => {
     const url = svc.getPublicUrlForKey('products/a/b.jpg');
     expect(url).toBe('http://127.0.0.1:3001/uploads/products/a/b.jpg');
     expect(svc.tryPublicUrlToKey(url)).toBe('products/a/b.jpg');
+    expect(svc.tryPublicUrlToKey('/uploads/products/a/b.jpg')).toBe('products/a/b.jpg');
     expect(svc.tryPublicUrlToKey('https://other/x')).toBeNull();
   });
 });

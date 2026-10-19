@@ -289,9 +289,9 @@ export class CatalogPublicService {
           select: {
             id: true,
             kind: true,
-            name: true,
             imageUrl: true,
             sortOrder: true,
+            definition: { select: { name: true, imageUrl: true } },
           },
         },
         variants: {
@@ -407,8 +407,8 @@ export class CatalogPublicService {
       aromaNotes: row.aromaNotes.map((n) => ({
         id: n.id,
         kind: n.kind,
-        name: n.name,
-        imageUrl: n.imageUrl,
+        name: n.definition.name,
+        imageUrl: n.imageUrl ?? n.definition.imageUrl,
         sortOrder: n.sortOrder,
       })),
       images: productImages,

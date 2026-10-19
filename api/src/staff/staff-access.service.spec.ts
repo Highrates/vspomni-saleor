@@ -69,6 +69,36 @@ describe('StaffAccessService', () => {
     ).toBe(false);
   });
 
+  it('media_upload: settings/blog/catalog; не orders', async () => {
+    prisma = makePrisma({
+      role: UserRole.MODERATOR,
+      isActive: true,
+      adminSections: ['settings'],
+    });
+    svc = new StaffAccessService(prisma as never);
+    expect(
+      await svc.canAccessApiPath(
+        'm1',
+        UserRole.MODERATOR,
+        '/api/v1/catalog/admin/upload-rich-media?type=image',
+      ),
+    ).toBe(true);
+
+    prisma = makePrisma({
+      role: UserRole.MODERATOR,
+      isActive: true,
+      adminSections: ['orders'],
+    });
+    svc = new StaffAccessService(prisma as never);
+    expect(
+      await svc.canAccessApiPath(
+        'm1',
+        UserRole.MODERATOR,
+        '/api/v1/catalog/admin/upload-rich-media',
+      ),
+    ).toBe(false);
+  });
+
   it('orders_finance split: mark-paid/refund vs packing', async () => {
     prisma = makePrisma({
       role: UserRole.MODERATOR,

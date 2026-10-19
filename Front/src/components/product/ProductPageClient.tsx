@@ -18,16 +18,13 @@ import {
 } from '@/lib/product/buildProductCartFormat'
 import { variantShippingFromSaleorVariant } from '@/lib/saleorVariantShipping'
 import { formatVariantVolumeLabel } from '@/lib/product/variantVolumeLabel'
-import {
-  getAttributeBySlug,
-  NOTE_ATTRIBUTE_SLUGS,
-  NOTE_LABELS,
-} from '@/lib/product/productPageContent'
+import { getAttributeBySlug } from '@/lib/product/productPageContent'
 import { isSelectedVariantInStock, isVariantSellable } from '@/lib/product/stock'
 import { normalizeAromaLabel } from '@/lib/normalizeAromaLabel'
 import { ProductDetailNode } from '@/graphql/types/product.types'
 import { ProductCardItem, StarChoiceItem } from '@/types/product'
 import { useMobile } from '@/lib/hooks'
+import ProductNotesPyramid from '@/components/product/ProductNotesPyramid'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination } from 'swiper/modules'
 import 'swiper/css'
@@ -194,13 +191,6 @@ export default function ProductPageClient({
     'aromaty-v-kartochke-tovara',
   )
   const aromas = aromaAttribute?.values || []
-
-  /** Значения нот из атрибутов Saleor (bazovye-noty, srednie-noty, verhnie-akkordy) */
-  const noteAttributes = {
-    basic: getAttributeBySlug(product.attributes || [], NOTE_ATTRIBUTE_SLUGS.basic)?.values || [],
-    middle: getAttributeBySlug(product.attributes || [], NOTE_ATTRIBUTE_SLUGS.middle)?.values || [],
-    head: getAttributeBySlug(product.attributes || [], NOTE_ATTRIBUTE_SLUGS.head)?.values || [],
-  }
 
   const characteristicsAttr = getAttributeBySlug(
     product.attributes || [],
@@ -467,158 +457,7 @@ export default function ProductPageClient({
         {/* Остальной контент */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-4">
           <div className="flex flex-col gap-3 sm:gap-4">
-            {/* Ноты по скрин 2: Базовые и Средние — в две колонки, Верхние аккорды — ниже на всю ширину */}
-            <div className="flex flex-col gap-4">
-              {/* Базовые + Средние ноты в две колонки (как на скрин 2) */}
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Базовые ноты */}
-                <div className="flex-1 flex flex-col gap-1.5 sm:gap-2">
-                  <h5 className="font-semibold text-base sm:text-lg text-black select-none">
-                    {NOTE_LABELS.basic}
-                  </h5>
-                  {noteAttributes.basic.length > 0 ? (
-                    <div className="flex flex-row flex-wrap gap-3 sm:gap-4">
-                      {noteAttributes.basic.map((val: any) => (
-                        <div
-                          key={val.slug || val.name}
-                          className="flex flex-col items-center gap-2 w-[84px] shrink-0"
-                        >
-                          <div className="w-[84px] h-[84px] rounded-[12px] overflow-hidden bg-gray-100 flex-shrink-0 relative">
-                            {val.file?.url ? (
-                              (typeof val.file.url === 'string' &&
-                                (val.file.url.startsWith('/') || val.file.url.includes('vspomni.store'))) ? (
-                                <Image
-                                  src={val.file.url}
-                                  alt={val.name || ''}
-                                  width={84}
-                                  height={84}
-                                  sizes="84px"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <img
-                                  src={val.file.url}
-                                  alt={val.name || ''}
-                                  className="w-full h-full object-cover"
-                                />
-                              )
-                            ) : null}
-                            {!val.file?.url && (
-                              <span className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">
-                                {val.name || '—'}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs font-normal text-center text-black w-full">
-                            {val.name || '—'}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">—</p>
-                  )}
-                </div>
-
-                {/* Средние ноты */}
-                <div className="flex-1 flex flex-col gap-1.5 sm:gap-2">
-                  <h5 className="font-semibold text-base sm:text-lg text-black select-none">
-                    {NOTE_LABELS.middle}
-                  </h5>
-                  {noteAttributes.middle.length > 0 ? (
-                    <div className="flex flex-row flex-wrap gap-3 sm:gap-4">
-                      {noteAttributes.middle.map((val: any) => (
-                        <div
-                          key={val.slug || val.name}
-                          className="flex flex-col items-center gap-2 w-[84px] shrink-0"
-                        >
-                          <div className="w-[84px] h-[84px] rounded-[12px] overflow-hidden bg-gray-100 flex-shrink-0 relative">
-                            {val.file?.url ? (
-                              (typeof val.file.url === 'string' &&
-                                (val.file.url.startsWith('/') || val.file.url.includes('vspomni.store'))) ? (
-                                <Image
-                                  src={val.file.url}
-                                  alt={val.name || ''}
-                                  width={84}
-                                  height={84}
-                                  sizes="84px"
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <img
-                                  src={val.file.url}
-                                  alt={val.name || ''}
-                                  className="w-full h-full object-cover"
-                                />
-                              )
-                            ) : null}
-                            {!val.file?.url && (
-                              <span className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">
-                                {val.name || '—'}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs font-normal text-center text-black w-full">
-                            {val.name || '—'}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">—</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Верхние аккорды — ниже на всю ширину */}
-              <div className="flex flex-col gap-1.5 sm:gap-2">
-                <h5 className="font-semibold text-base sm:text-lg text-black select-none">
-                  {NOTE_LABELS.head}
-                </h5>
-                {noteAttributes.head.length > 0 ? (
-                  <div className="flex flex-row flex-wrap gap-3 sm:gap-4">
-                    {noteAttributes.head.map((val: any) => (
-                      <div
-                        key={val.slug || val.name}
-                        className="flex flex-col items-center gap-2 w-[84px] shrink-0"
-                      >
-                        <div className="w-[84px] h-[84px] rounded-[12px] overflow-hidden bg-gray-100 flex-shrink-0 relative">
-                          {val.file?.url ? (
-                            (typeof val.file.url === 'string' &&
-                              (val.file.url.startsWith('/') || val.file.url.includes('vspomni.store'))) ? (
-                              <Image
-                                src={val.file.url}
-                                alt={val.name || ''}
-                                width={84}
-                                height={84}
-                                sizes="84px"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <img
-                                src={val.file.url}
-                                alt={val.name || ''}
-                                className="w-full h-full object-cover"
-                              />
-                            )
-                          ) : null}
-                          {!val.file?.url && (
-                            <span className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">
-                              {val.name || '—'}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs font-normal text-center text-black w-full">
-                          {val.name || '—'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">—</p>
-                )}
-              </div>
-            </div>
+            <ProductNotesPyramid notes={product.aromaNotes ?? []} />
 
             <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
               <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 mt-40">

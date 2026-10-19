@@ -17,6 +17,7 @@ import { memoryStorage } from 'multer';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { parseOptionalPositiveInt } from '../common/parse-positive-int';
+import { CatalogAromaNotesAdminService } from './catalog-aroma-notes.admin.service';
 import { CatalogCategoriesAdminService } from './catalog-categories.admin.service';
 import { CatalogCollectionsAdminService } from './catalog-collections.admin.service';
 import { CatalogProductSetsAdminService } from './catalog-product-sets.admin.service';
@@ -24,6 +25,7 @@ import { CatalogProductsAdminService } from './catalog-products.admin.service';
 import { CatalogTagsAdminService } from './catalog-tags.admin.service';
 import { SettingsAdminService } from '../settings/settings.service';
 import {
+  CreateAromaNoteDefinitionDto,
   CreateCatalogTagDto,
   CreateCategoryDto,
   CreateCollectionDto,
@@ -33,6 +35,7 @@ import {
   ReorderCategoriesDto,
   ReorderIdsDto,
   ReorderProductImagesDto,
+  UpdateAromaNoteDefinitionDto,
   UpdateCatalogTagDto,
   UpdateCategoryDto,
   UpdateCollectionDto,
@@ -47,6 +50,7 @@ export class CatalogAdminController {
   constructor(
     private readonly categories: CatalogCategoriesAdminService,
     private readonly tags: CatalogTagsAdminService,
+    private readonly aromaNotes: CatalogAromaNotesAdminService,
     private readonly products: CatalogProductsAdminService,
     private readonly collections: CatalogCollectionsAdminService,
     private readonly productSets: CatalogProductSetsAdminService,
@@ -160,6 +164,34 @@ export class CatalogAdminController {
   @Delete('catalog-tags/:id')
   deleteCatalogTag(@Param('id') id: string) {
     return this.tags.deleteCatalogTag(id);
+  }
+
+  @Get('aroma-note-definitions')
+  listAromaNoteDefinitions(@Query('q') q?: string) {
+    return this.aromaNotes.listDefinitions(q);
+  }
+
+  @Get('aroma-note-definitions/:id')
+  getAromaNoteDefinition(@Param('id') id: string) {
+    return this.aromaNotes.getDefinition(id);
+  }
+
+  @Post('aroma-note-definitions')
+  createAromaNoteDefinition(@Body() dto: CreateAromaNoteDefinitionDto) {
+    return this.aromaNotes.createDefinition(dto);
+  }
+
+  @Patch('aroma-note-definitions/:id')
+  updateAromaNoteDefinition(
+    @Param('id') id: string,
+    @Body() dto: UpdateAromaNoteDefinitionDto,
+  ) {
+    return this.aromaNotes.updateDefinition(id, dto);
+  }
+
+  @Delete('aroma-note-definitions/:id')
+  deleteAromaNoteDefinition(@Param('id') id: string) {
+    return this.aromaNotes.deleteDefinition(id);
   }
 
   @Get('products')

@@ -65,7 +65,15 @@ export const ADMIN_SECTION_LABELS_RU: Record<AdminSectionId, string> = {
   settings: 'Настройки',
 };
 
-export type AdminApiAccessTarget = AdminSectionId | 'staff' | 'certificates_read';
+/**
+ * - certificates_read — GET номиналов/списка сертификатов
+ * - media_upload — общий `catalog/admin/upload-rich-media` (Hero/Stories/каталог/CMS)
+ */
+export type AdminApiAccessTarget =
+  | AdminSectionId
+  | 'staff'
+  | 'certificates_read'
+  | 'media_upload';
 
 export const ADMIN_BACKEND_BFF_PREFIXES: ReadonlyArray<readonly [string, string]> = [
   ['catalog', 'admin'],
@@ -138,6 +146,8 @@ export function resolveAdminSectionFromApiPath(
   }
   if (p.includes('/dashboard/admin')) return 'dashboard';
   if (p.includes('/settings/admin/')) return 'settings';
+  // Shared upload: страницы Hero/Stories (settings) и CMS (blog) бьют сюда же.
+  if (p.includes('/catalog/admin/upload-rich-media')) return 'media_upload';
   if (p.includes('/catalog/admin')) return 'catalog';
   if (p.includes('/auth/admin/me') || p.endsWith('/auth/me')) return 'dashboard';
 

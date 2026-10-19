@@ -106,6 +106,11 @@ if [[ "\$DO_API" -eq 1 ]]; then
   echo "==> prisma generate + build api"
   npx prisma generate --schema api/prisma/schema.prisma
   npm run build -w vspomni-api
+  # LOCAL_UPLOADS: systemd User=vspomni; каталог мог остаться от root/rsync (UID 501)
+  echo "==> ensure uploads writable by vspomni"
+  mkdir -p api/.data/local-uploads
+  chown -R vspomni:vspomni api/.data
+  chmod -R u+rwX,g+rX api/.data
   echo "==> restart vspomni-api"
   systemctl restart vspomni-api
   sleep 2

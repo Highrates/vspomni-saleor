@@ -5,6 +5,7 @@ import {
   ADMIN_SECTION_DASHBOARD,
   normalizeStoredAdminSections,
   resolveAdminSectionFromApiPath,
+  type AdminApiAccessTarget,
   type AdminSectionId,
 } from '@vspomni/admin-sections';
 import { UserRole } from '@prisma/client';
@@ -140,7 +141,10 @@ export class StaffAccessService implements OnModuleInit, OnModuleDestroy {
   ): Promise<boolean> {
     if (role !== UserRole.ADMIN && role !== UserRole.MODERATOR) return false;
 
-    const target = resolveAdminSectionFromApiPath(pathOnly, method);
+    const target: AdminApiAccessTarget | null = resolveAdminSectionFromApiPath(
+      pathOnly,
+      method,
+    );
     if (target == null) return false;
     if (target === 'staff') return role === UserRole.ADMIN;
 
@@ -154,7 +158,14 @@ export class StaffAccessService implements OnModuleInit, OnModuleDestroy {
         sections.includes('certificates') || sections.includes('certificates_finance')
       );
     }
-    return sections.includes(target);
+    if (target === 'media_upload') {
+      return (
+        sections.includes('catalog') ||
+        sections.includes('settings') ||
+        sections.includes('blog')
+      );
+    }
+    return sections.includes(target as AdminSectionId);
   }
 
   async isStaffAccountActive(userId: string, tokenVersion?: number): Promise<boolean> {

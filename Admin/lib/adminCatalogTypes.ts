@@ -58,6 +58,30 @@ export type AdminVariant = {
   updatedAt: string;
 };
 
+export type AdminAromaNoteKind = 'BASIC' | 'MIDDLE' | 'HEAD';
+
+export type AdminAromaNoteDefinition = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  productCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminAromaNote = {
+  id: string;
+  kind: AdminAromaNoteKind;
+  definitionId: string;
+  name: string;
+  /** Effective image (override ?? definition) */
+  imageUrl: string | null;
+  /** Product-level override; null → definition image */
+  overrideImageUrl?: string | null;
+  definitionImageUrl?: string | null;
+  sortOrder: number;
+};
+
 export type AdminProduct = {
   id: string;
   name: string;
@@ -81,6 +105,8 @@ export type AdminProduct = {
   extraHtml: string | null;
   /** Ароматы со смайликами в карточке / PDP (одна строка на элемент) */
   cardAromaLabels?: string[];
+  /** Пирамида нот на PDP */
+  aromaNotes?: AdminAromaNote[];
   /** Лейбл на карточке витрины (NEW и т.п.) */
   badgeLabel?: string | null;
   metaTitle: string | null;

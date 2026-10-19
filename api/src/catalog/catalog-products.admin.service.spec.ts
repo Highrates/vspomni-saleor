@@ -77,10 +77,36 @@ function makePrisma() {
       update: vi.fn(),
       deleteMany: vi.fn(),
     },
+    productAromaNote: {
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+      count: vi.fn(),
+    },
+    aromaNoteDefinition: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      count: vi.fn(),
+    },
     orderItem: { count: vi.fn() },
     $transaction: vi.fn(),
   };
 }
+
+type SyncNotes = (
+  tx: unknown,
+  productId: string,
+  raw: Array<{
+    id?: string;
+    kind: 'BASIC' | 'MIDDLE' | 'HEAD';
+    definitionId?: string;
+    name?: string;
+    imageUrl?: string | null;
+    sortOrder?: number;
+  }>,
+) => Promise<void>;
 
 describe('CatalogProductsAdminService', () => {
   let prisma: ReturnType<typeof makePrisma>;
@@ -88,10 +114,13 @@ describe('CatalogProductsAdminService', () => {
   const storage = {
     saveImage: vi.fn(),
     deleteByPublicUrl: vi.fn(),
+    deleteManagedUpload: vi.fn(),
   };
 
   beforeEach(() => {
     prisma = makePrisma();
+    storage.deleteManagedUpload.mockReset();
+    storage.deleteByPublicUrl.mockReset();
     const categories = new CatalogCategoriesAdminService(prisma as never);
     svc = new CatalogProductsAdminService(prisma as never, storage as never, categories);
   });
@@ -435,6 +464,127 @@ describe('CatalogProductsAdminService', () => {
     expect(prisma.productVariant.update).toHaveBeenCalledWith({
       where: { id: 'v1' },
       data: { name: 'Новое' },
+    });
+  });
+
+  describe('syncProductAromaNotes', () => {
+    function sync(): SyncNotes {
+      return (
+        svc as unknown as { syncProductAromaNotes: SyncNotes }
+      ).syncProductAromaNotes.bind(svc);
+    }
+
+    it('upsert сохраняет id при повторном save', async () => {
+      prisma.productAromaNote.findMany
+        .mockResolvedValueOnce([
+          { id: 'n1', imageUrl: '/uploads/old-override.jpg' },
+        ])
+        .mockResolvedValueOnce([
+          { imageUrl: '/uploads/old-override.jpg' },
+        ]);
+      prisma.aromaNoteDefinition.findUnique.mockResolvedValue({ id: 'd1' });
+      prisma.productAromaNote.update.mockResolvedValue({});
+      prisma.productAromaNote.count.mockResolvedValue(1);
+      prisma.aromaNoteDefinition.count.mockResolvedValue(0);
+
+      await sync()(prisma, 'p1', [
+        {
+          id: 'n1',
+          kind: 'BASIC',
+          definitionId: 'd1',
+          imageUrl: '/uploads/old-override.jpg',
+        },
+      ]);
+
+      expect(prisma.productAromaNote.deleteMany).not.toHaveBeenCalled();
+      expect(prisma.productAromaNote.update).toHaveBeenCalledWith({
+        where: { id: 'n1' },
+        data: {
+          definitionId: 'd1',
+          kind: 'BASIC',
+          imageUrl: '/uploads/old-override.jpg',
+          sortOrder: 0,
+        },
+      });
+      expect(prisma.productAromaNote.create).not.toHaveBeenCalled();
+      expect(storage.deleteManagedUpload).not.toHaveBeenCalled();
+    });
+
+    it('удалённая нота чистит orphan override', async () => {
+      prisma.productAromaNote.findMany
+        .mockResolvedValueOnce([
+          { id: 'n1', imageUrl: '/uploads/orphan.jpg' },
+        ])
+        .mockResolvedValueOnce([]);
+      prisma.productAromaNote.deleteMany.mockResolvedValue({ count: 1 });
+      prisma.productAromaNote.count.mockResolvedValue(0);
+      prisma.aromaNoteDefinition.count.mockResolvedValue(0);
+
+      await sync()(prisma, 'p1', []);
+
+      expect(prisma.productAromaNote.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: ['n1'] } },
+      });
+      expect(storage.deleteManagedUpload).toHaveBeenCalledWith(
+        '/uploads/orphan.jpg',
+      );
+    });
+
+    it('замена override удаляет старый файл, definition.imageUrl не трогает', async () => {
+      prisma.productAromaNote.findMany
+        .mockResolvedValueOnce([
+          { id: 'n1', imageUrl: '/uploads/old.jpg' },
+        ])
+        .mockResolvedValueOnce([{ imageUrl: '/uploads/new.jpg' }]);
+      prisma.aromaNoteDefinition.findUnique.mockResolvedValue({ id: 'd1' });
+      prisma.productAromaNote.update.mockResolvedValue({});
+      prisma.productAromaNote.count.mockResolvedValue(0);
+      prisma.aromaNoteDefinition.count.mockResolvedValue(0);
+
+      await sync()(prisma, 'p1', [
+        {
+          id: 'n1',
+          kind: 'MIDDLE',
+          definitionId: 'd1',
+          imageUrl: '/uploads/new.jpg',
+        },
+      ]);
+
+      expect(storage.deleteManagedUpload).toHaveBeenCalledWith('/uploads/old.jpg');
+      expect(storage.deleteManagedUpload).not.toHaveBeenCalledWith(
+        expect.stringContaining('definition'),
+      );
+    });
+
+    it('find-or-create definition по имени (case-insensitive)', async () => {
+      prisma.productAromaNote.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ imageUrl: null }]);
+      prisma.aromaNoteDefinition.findUnique.mockResolvedValue(null);
+      prisma.aromaNoteDefinition.create.mockResolvedValue({ id: 'd-new' });
+      prisma.productAromaNote.create.mockResolvedValue({ id: 'n-new' });
+
+      await sync()(prisma, 'p1', [
+        { kind: 'HEAD', name: '  Ваниль  ', imageUrl: null },
+      ]);
+
+      expect(prisma.aromaNoteDefinition.findUnique).toHaveBeenCalledWith({
+        where: { nameNormalized: 'ваниль' },
+        select: { id: true },
+      });
+      expect(prisma.aromaNoteDefinition.create).toHaveBeenCalledWith({
+        data: { name: 'Ваниль', nameNormalized: 'ваниль' },
+        select: { id: true },
+      });
+      expect(prisma.productAromaNote.create).toHaveBeenCalledWith({
+        data: {
+          productId: 'p1',
+          definitionId: 'd-new',
+          kind: 'HEAD',
+          imageUrl: null,
+          sortOrder: 0,
+        },
+      });
     });
   });
 });

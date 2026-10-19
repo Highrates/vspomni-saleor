@@ -55,6 +55,11 @@ export const ADMIN_NAV: NavItem[] = [
       { href: '/admin/catalog/products', label: 'Товары', section: 'catalog' },
       { href: '/admin/catalog/categories', label: 'Категории', section: 'catalog' },
       { href: '/admin/catalog/tags', label: 'Ароматы', section: 'catalog' },
+      {
+        href: '/admin/catalog/aroma-note-definitions',
+        label: 'Справочник нот',
+        section: 'catalog',
+      },
       { href: '/admin/collections', label: 'Коллекции', section: 'catalog' },
       { href: '/admin/product-sets', label: 'Наборы', section: 'catalog' },
       { href: '/admin/certificates', label: 'Сертификаты', section: 'certificates' },

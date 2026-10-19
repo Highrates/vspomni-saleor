@@ -1,19 +1,8 @@
 import { decodeUnicode } from '@/lib/functions'
 import { normalizeAromaLabel } from '@/lib/normalizeAromaLabel'
 import type { ProductDetailNode } from '@/graphql/types/product.types'
+import { noteLayersForSeo } from '@/lib/product/aromaNotes'
 import { isProductInStock } from '@/lib/product/stock'
-
-export const NOTE_ATTRIBUTE_SLUGS = {
-  basic: 'bazovye-noty',
-  middle: 'srednie-noty',
-  head: 'verhnie-akkordy',
-} as const
-
-export const NOTE_LABELS: Record<keyof typeof NOTE_ATTRIBUTE_SLUGS, string> = {
-  basic: 'Базовые ноты',
-  middle: 'Средние ноты',
-  head: 'Верхние аккорды',
-}
 
 type AttributeLike = NonNullable<ProductDetailNode['attributes']>[number]
 
@@ -58,16 +47,6 @@ function attributePlainText(
   return (value.name || value.plainText || value.value || '').trim()
 }
 
-function noteNames(
-  attributes: AttributeLike[] | undefined,
-  slug: string,
-): string[] {
-  const values = getAttributeBySlug(attributes, slug)?.values || []
-  return values
-    .map((v) => (v.name || v.value || '').trim())
-    .filter(Boolean)
-}
-
 export type ProductSeoContent = {
   name: string
   shortDescription: string
@@ -95,12 +74,7 @@ export function extractProductSeoContent(
       ?.map((v) => normalizeAromaLabel((v.name || v.value || '').trim()))
       .filter(Boolean) ?? []
 
-  const notes = (
-    Object.keys(NOTE_ATTRIBUTE_SLUGS) as (keyof typeof NOTE_ATTRIBUTE_SLUGS)[]
-  ).map((key) => ({
-    label: NOTE_LABELS[key],
-    names: noteNames(attributes, NOTE_ATTRIBUTE_SLUGS[key]),
-  }))
+  const notes = noteLayersForSeo(product.aromaNotes ?? [])
 
   const imageUrls = [
     ...(product.media?.map((m) => m.url).filter(Boolean) ?? []),

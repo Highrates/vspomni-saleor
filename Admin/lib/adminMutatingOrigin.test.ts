@@ -14,6 +14,17 @@ describe('rejectForeignOriginMutations', () => {
     expect(rejectForeignOriginMutations(req)).toBeNull();
   });
 
+  it('allows localhost Origin when Host is 127.0.0.1', () => {
+    const req = new NextRequest('http://127.0.0.1:3020/api/admin/backend/x', {
+      method: 'POST',
+      headers: {
+        origin: 'http://localhost:3020',
+        host: '127.0.0.1:3020',
+      },
+    });
+    expect(rejectForeignOriginMutations(req)).toBeNull();
+  });
+
   it('blocks foreign origin POST', () => {
     const req = new NextRequest('http://localhost:3010/api/admin/backend/x', {
       method: 'POST',

@@ -25,6 +25,12 @@ import { adminBackendListAllPages } from '@/lib/adminListAll';
 import { revalidateCatalogStorefront } from '@/lib/revalidateCatalogStorefront';
 import styles from '@/app/(admin)/admin/catalog/catalogAdmin.module.css';
 import { ProductGalleryEditor, type GalleryImage } from './ProductGalleryEditor';
+import {
+  ProductAromaNotesEditor,
+  aromaNotesFromApi,
+  aromaNotesToPayload,
+  type AromaNoteDraft,
+} from './ProductAromaNotesEditor';
 import pn from './productNew.module.css';
 
 type PickRow = { id: string; name: string };
@@ -111,6 +117,10 @@ export function ProductFormClient({ productId }: { productId?: string }) {
   /** Ароматы со смайликами — по одному на строку в textarea */
   const [cardAromaLabelsText, setCardAromaLabelsText] = useState('');
   const [badgeLabel, setBadgeLabel] = useState('');
+  /** Пирамида нот (верхние / средние / базовые) */
+  const [aromaNotes, setAromaNotes] = useState<AromaNoteDraft[]>([]);
+  /** После save — refetch справочника нот в редакторе */
+  const [aromaDefsReloadToken, setAromaDefsReloadToken] = useState(0);
 
   const [catalogTagIds, setCatalogTagIds] = useState<Set<string>>(() => new Set());
   const [collectionIds, setCollectionIds] = useState<Set<string>>(() => new Set());
@@ -171,6 +181,7 @@ export function ProductFormClient({ productId }: { productId?: string }) {
           setImages(p.images ?? []);
           setCardAromaLabelsText((p.cardAromaLabels ?? []).join('\n'));
           setBadgeLabel(p.badgeLabel ?? '');
+          setAromaNotes(aromaNotesFromApi(p.aromaNotes));
           setCatalogTagIds(new Set(p.catalogTagIds ?? []));
           setCollectionIds(new Set(p.collectionIds ?? []));
           setProductSetIds(new Set(p.productSetIds ?? []));
@@ -243,6 +254,7 @@ export function ProductFormClient({ productId }: { productId?: string }) {
         .map((s) => s.trim())
         .filter(Boolean),
       badgeLabel: badgeLabel.trim() || null,
+      aromaNotes: aromaNotesToPayload(aromaNotes),
       catalogTagIds: Array.from(catalogTagIds),
       collectionIds: Array.from(collectionIds),
       productSetIds: Array.from(productSetIds),
@@ -252,6 +264,19 @@ export function ProductFormClient({ productId }: { productId?: string }) {
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    const unnamedNotes = aromaNotes.filter(
+      (n) => !n.definitionId && !n.name.trim(),
+    );
+    if (unnamedNotes.length > 0) {
+      showToast(
+        unnamedNotes.length === 1
+          ? 'Есть нота без названия — заполните или удалите'
+          : `Есть ${unnamedNotes.length} нот без названия — заполните или удалите`,
+      );
+      return;
+    }
+
     setSaving(true);
     try {
       if (!name.trim()) throw new Error('Укажите название');
@@ -287,6 +312,8 @@ export function ProductFormClient({ productId }: { productId?: string }) {
       setProductSetIds(new Set(refreshed.productSetIds ?? []));
       setCardAromaLabelsText((refreshed.cardAromaLabels ?? []).join('\n'));
       setBadgeLabel(refreshed.badgeLabel ?? '');
+      setAromaNotes(aromaNotesFromApi(refreshed.aromaNotes));
+      setAromaDefsReloadToken((t) => t + 1);
       setDirty(false);
       await revalidateCatalogStorefront({ productSlug: refreshed.slug });
       showToast('Сохранено');
@@ -553,6 +580,18 @@ export function ProductFormClient({ productId }: { productId?: string }) {
               onChange={(v) => {
                 markDirty();
                 setCompositionHtml(v);
+              }}
+            />
+          </AdminAccordion>
+
+          <AdminAccordion title="Пирамида нот" defaultOpen>
+            <ProductAromaNotesEditor
+              notes={aromaNotes}
+              disabled={saving || productBusy}
+              definitionsReloadToken={aromaDefsReloadToken}
+              onChange={(next, meta) => {
+                if (!meta?.silent) markDirty();
+                setAromaNotes(next);
               }}
             />
           </AdminAccordion>

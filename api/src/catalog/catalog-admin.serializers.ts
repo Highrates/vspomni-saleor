@@ -27,6 +27,12 @@ export const productInclude = {
   catalogTags: { select: { tagId: true } },
   collectionItems: { select: { collectionId: true } },
   productSetItems: { select: { productSetId: true } },
+  aromaNotes: {
+    orderBy: [{ kind: 'asc' as const }, { sortOrder: 'asc' as const }],
+    include: {
+      definition: { select: { id: true, name: true, imageUrl: true } },
+    },
+  },
 } satisfies Prisma.ProductInclude;
 
 /** Лёгкий include для admin list — без HTML, галерей вариантов и shades. */
@@ -166,6 +172,16 @@ export function serializeProduct(
     catalogTagIds: p.catalogTags.map((t) => t.tagId),
     collectionIds: p.collectionItems.map((c) => c.collectionId),
     productSetIds: p.productSetItems.map((s) => s.productSetId),
+    aromaNotes: (p.aromaNotes ?? []).map((n) => ({
+      id: n.id,
+      kind: n.kind,
+      definitionId: n.definitionId,
+      name: n.definition.name,
+      imageUrl: n.imageUrl ?? n.definition.imageUrl,
+      overrideImageUrl: n.imageUrl,
+      definitionImageUrl: n.definition.imageUrl,
+      sortOrder: n.sortOrder,
+    })),
     variants,
     variantCount: variants.length,
     minPrice: pricesForMin.length ? Math.min(...pricesForMin) : null,

@@ -150,6 +150,143 @@
   gap: 8px;
 }
 
+.notesEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.notesDictLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.notesDictLink:hover {
+  opacity: 0.85;
+}
+
+.noteKindBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.noteKindHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.noteKindTitle {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.noteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.noteRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--color-bright-snow, #f5f7f8);
+}
+
+.noteThumbCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.noteThumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+
+.noteThumbEmpty {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #eceff1;
+  color: #9d9d9d;
+  font-size: 0.75rem;
+}
+
+.noteThumbActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.noteFields {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.noteSuggestList {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: calc(100% - 4px);
+  max-height: 200px;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.noteSuggestItem,
+.noteSuggestActive {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.noteSuggestItem:hover,
+.noteSuggestActive {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.noteRowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 @media (max-width: 960px) {
   .productFormGrid {
     grid-template-columns: 1fr;

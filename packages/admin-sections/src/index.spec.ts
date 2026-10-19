@@ -20,6 +20,9 @@ describe('admin-sections ACL', () => {
 
   it('maps API paths', () => {
     expect(resolveAdminSectionFromApiPath('/api/v1/catalog/admin/products')).toBe('catalog');
+    expect(
+      resolveAdminSectionFromApiPath('/api/v1/catalog/admin/upload-rich-media?type=image'),
+    ).toBe('media_upload');
     expect(resolveAdminSectionFromApiPath('/api/v1/orders/admin/1/mark-paid')).toBe(
       'orders_finance',
     );
@@ -28,6 +31,9 @@ describe('admin-sections ACL', () => {
   it('maps pathnames', () => {
     expect(resolveAdminSectionFromPathname('/admin')).toBe('dashboard');
     expect(resolveAdminSectionFromPathname('/admin/catalog/tags')).toBe('catalog');
+    expect(
+      resolveAdminSectionFromPathname('/admin/catalog/aroma-note-definitions'),
+    ).toBe('catalog');
     expect(resolveAdminSectionFromPathname('/admin/quiz')).toBe(null);
   });
 

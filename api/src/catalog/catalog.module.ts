@@ -10,6 +10,7 @@ import { CatalogProductSetsAdminService } from './catalog-product-sets.admin.ser
 import { CatalogProductsAdminService } from './catalog-products.admin.service';
 import { CatalogPublicController } from './catalog.public.controller';
 import { CatalogPublicService } from './catalog.public.service';
+import { CatalogAromaNotesAdminService } from './catalog-aroma-notes.admin.service';
 import { CatalogTagsAdminService } from './catalog-tags.admin.service';
 
 @Module({
@@ -18,6 +19,7 @@ import { CatalogTagsAdminService } from './catalog-tags.admin.service';
   providers: [
     CatalogCategoriesAdminService,
     CatalogTagsAdminService,
+    CatalogAromaNotesAdminService,
     CatalogProductsAdminService,
     CatalogCollectionsAdminService,
     CatalogProductSetsAdminService,

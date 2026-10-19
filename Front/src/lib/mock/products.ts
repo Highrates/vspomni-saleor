@@ -211,26 +211,3 @@ export const mockProductsGrid: productsGrid = [
 ];
 
 
-
-export const mockAromaNotes = [
-  {
-    id: 1,
-    title: 'Душистый табак',
-    image: '/images/aromaNote1.png',
-  },
-  {
-    id: 2,
-    title: 'Кофе-мускат',
-    image: '/images/aromaNote2.png',
-  },
-  {
-    id: 3,
-    title: 'Бергамот',
-    image: '/images/aromaNote3.png',
-  },
-  {
-    id: 4,
-    title: 'Лаванда',
-    image: '/images/aromaNote4.png',
-  },
-]

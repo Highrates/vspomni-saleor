@@ -377,24 +377,41 @@ model Product {
   @@index([storageOptionId])
 }
 
-/// Пирамида нот/аккордов на PDP (Saleor file-attrs bazovye-noty / srednie-noty / verhnie-akkordy)
+/// Слой пирамиды нот на PDP: базовые / средние / верхние.
 enum ProductAromaNoteKind {
   BASIC
   MIDDLE
   HEAD
 }
 
-model ProductAromaNote {
-  id        String               @id @default(cuid())
-  productId String
-  product   Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
-  kind      ProductAromaNoteKind
-  name      String
-  imageUrl  String?
-  sortOrder Int                  @default(0)
-  createdAt DateTime             @default(now())
+/// Справочник нот (имя + фото по умолчанию). Товар ссылается сюда и может задать override image.
+model AromaNoteDefinition {
+  id             String   @id @default(cuid())
+  /// Отображаемое имя (регистр как ввели).
+  name           String
+  /// lower(trim(name)) — unique, case-insensitive.
+  nameNormalized String   @unique
+  imageUrl       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  productNotes   ProductAromaNote[]
+}
 
+model ProductAromaNote {
+  id           String               @id @default(cuid())
+  productId    String
+  product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  definitionId String
+  definition   AromaNoteDefinition  @relation(fields: [definitionId], references: [id], onDelete: Restrict)
+  kind         ProductAromaNoteKind
+  /// Override; null → definition.imageUrl
+  imageUrl     String?
+  sortOrder    Int                  @default(0)
+  createdAt    DateTime             @default(now())
+
+  @@unique([productId, definitionId, kind])
   @@index([productId, kind, sortOrder])
+  @@index([definitionId])
 }
 
 /// Отзыв о товаре (модерация → isPublished)
