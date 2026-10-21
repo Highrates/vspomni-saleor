@@ -79,18 +79,38 @@ function fromApi(items: StoryApiItem[], openKeys?: Set<string>): StoryDraft[] {
   }));
 }
 
-async function uploadImage(file: File): Promise<string> {
+function isVideoFile(file: File): boolean {
+  if (file.type.startsWith('video/')) return true;
+  return /\.(mp4|mov|m4v)$/i.test(file.name);
+}
+
+async function uploadMedia(
+  file: File,
+  kind: 'image' | 'video',
+): Promise<{ url: string; mediaType: 'image' | 'video' }> {
   const fd = new FormData();
   fd.append('file', file);
-  const res = await adminBackendFetch('catalog/admin/upload-rich-media?type=image', {
-    method: 'POST',
-    body: fd,
-  });
-  const data = (await res.json()) as { url?: string };
+  const res = await adminBackendFetch(
+    `catalog/admin/upload-rich-media?type=${kind}`,
+    { method: 'POST', body: fd },
+  );
+  const data = (await res.json().catch(() => ({}))) as {
+    url?: string;
+    mediaType?: string;
+    message?: string;
+  };
   if (!res.ok || !data.url) {
-    throw new Error('Не удалось загрузить изображение');
+    throw new Error(
+      data.message ||
+        (kind === 'video'
+          ? 'Не удалось загрузить видео (MP4/MOV, до 80 МБ)'
+          : 'Не удалось загрузить изображение (до 6 МБ)'),
+    );
   }
-  return data.url;
+  return {
+    url: data.url,
+    mediaType: data.mediaType === 'video' || kind === 'video' ? 'video' : 'image',
+  };
 }
 
 function SlideRow({
@@ -148,12 +168,12 @@ function SlideRow({
             }
           >
             <option value="image">Картинка</option>
-            <option value="video">Видео (по URL)</option>
+            <option value="video">Видео</option>
           </select>
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,.mp4,.mov"
             disabled={disabled}
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -401,12 +421,17 @@ export function StoriesAdminClient() {
     });
   }
 
-  async function withUpload(file: File, apply: (url: string) => void) {
+  async function withUpload(
+    file: File,
+    apply: (url: string, mediaType: 'image' | 'video') => void,
+    forceKind?: 'image' | 'video',
+  ) {
     setUploading(true);
     setActionError(null);
     try {
-      const url = await uploadImage(file);
-      apply(url);
+      const kind = forceKind ?? (isVideoFile(file) ? 'video' : 'image');
+      const { url, mediaType } = await uploadMedia(file, kind);
+      apply(url, mediaType);
     } catch (err) {
       showToast(failAction(err, 'Ошибка загрузки'));
     } finally {
@@ -466,7 +491,8 @@ export function StoriesAdminClient() {
     <div>
       <h1 className={catalogStyles.title}>Сторис</h1>
       <p className={catalogStyles.lead}>
-        Круги на главной (как в Instagram): обложка, название и набор слайдов.
+        Круги на главной (как в Instagram): обложка (картинка), название и слайды —
+        картинки или видео MP4/MOV (до 80 МБ).
       </p>
 
       <AdminSettingsListErrors
@@ -490,7 +516,7 @@ export function StoriesAdminClient() {
           className={`${catalogStyles.form} ${catalogStyles.formWide}`}
         >
           {dirty ? <p className={catalogStyles.lead}>Несохранённые изменения</p> : null}
-          {uploading ? <p className={catalogStyles.lead}>Загрузка изображения…</p> : null}
+          {uploading ? <p className={catalogStyles.lead}>Загрузка файла…</p> : null}
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext
@@ -509,7 +535,11 @@ export function StoriesAdminClient() {
                       setItems((prev) => prev.filter((_, i) => i !== index));
                     }}
                     onUploadCover={(file) =>
-                      withUpload(file, (url) => patchStory(index, { coverUrl: url }))
+                      withUpload(
+                        file,
+                        (url) => patchStory(index, { coverUrl: url }),
+                        'image',
+                      )
                     }
                     onSlideChange={(si, patch) =>
                       patchSlides(index, (sl) =>
@@ -530,10 +560,10 @@ export function StoriesAdminClient() {
                     }
                     onSlideRemove={(si) => patchSlides(index, (sl) => sl.filter((_, j) => j !== si))}
                     onSlideUpload={(si, file) =>
-                      withUpload(file, (url) =>
+                      withUpload(file, (url, mediaType) =>
                         patchSlides(index, (sl) =>
                           sl.map((s, j) =>
-                            j === si ? { ...s, url, mediaType: 'image' } : s,
+                            j === si ? { ...s, url, mediaType } : s,
                           ),
                         ),
                       )

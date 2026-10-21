@@ -67,7 +67,8 @@ export class CatalogAdminController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 6 * 1024 * 1024 },
+      // VIDEO_MAX 80 МБ; картинки режет LocalStorageService.assertImage (6 МБ)
+      limits: { fileSize: 80 * 1024 * 1024 },
     }),
   )
   uploadRichMedia(
@@ -75,10 +76,12 @@ export class CatalogAdminController {
     @Query('type') type?: string,
   ) {
     if (!file) throw new BadRequestException('Файл не передан');
-    if (type != null && type !== 'image') {
-      throw new BadRequestException('Поддерживается только type=image');
+    const kind =
+      type === 'video' ? 'video' : type === 'image' || type == null ? 'image' : null;
+    if (!kind) {
+      throw new BadRequestException('Поддерживается type=image или type=video');
     }
-    return this.products.uploadRichMedia(file);
+    return this.products.uploadRichMedia(file, kind);
   }
 
   @Get('categories')

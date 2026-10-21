@@ -83,6 +83,13 @@ describe('StaffAccessService', () => {
         '/api/v1/catalog/admin/upload-rich-media?type=image',
       ),
     ).toBe(true);
+    expect(
+      await svc.canAccessApiPath(
+        'm1',
+        UserRole.MODERATOR,
+        '/api/v1/catalog/admin/upload-rich-media?type=video',
+      ),
+    ).toBe(true);
 
     prisma = makePrisma({
       role: UserRole.MODERATOR,

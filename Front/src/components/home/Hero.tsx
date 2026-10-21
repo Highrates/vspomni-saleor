@@ -51,12 +51,8 @@ const SWIPER_CLASS = 'hero-swiper w-full h-[70vh] sm:h-[80vh] md:h-[85vh] lg:h-[
 function HeroPlaqueOverlay({ plaque }: { plaque: HeroPlaque }) {
   const href = plaque.href.trim() || HERO_PLAQUE_HREF_DEFAULT
   const shellClass =
-    'pointer-events-auto absolute z-20 flex max-h-[40%] cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[12px] p-2 shadow-[0_8px_28px_rgba(0,0,0,0.18)] sm:max-h-none sm:gap-4 sm:rounded-2xl sm:p-2.5 md:gap-5 md:rounded-[20px]'
+    'pointer-events-auto absolute bottom-3 left-3 z-20 flex max-h-[40%] w-[calc(100%-24px)] cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[12px] p-2 shadow-[0_8px_28px_rgba(0,0,0,0.18)] sm:max-h-none sm:gap-4 sm:rounded-2xl sm:p-2.5 md:w-1/2 md:gap-5 md:rounded-[20px]'
   const shellStyle = {
-    left: 12,
-    right: 12,
-    bottom: 12,
-    width: 'auto',
     boxSizing: 'border-box' as const,
     backgroundColor: 'rgba(255, 255, 255, 0.85)',
     backdropFilter: 'blur(16px)',

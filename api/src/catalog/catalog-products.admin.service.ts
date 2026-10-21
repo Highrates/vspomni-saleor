@@ -698,14 +698,24 @@ export class CatalogProductsAdminService {
     return { ok: true };
   }
 
-  async uploadRichMedia(file: {
-    buffer: Buffer;
-    mimetype: string;
-    size: number;
-    originalname?: string;
-  }) {
+  async uploadRichMedia(
+    file: {
+      buffer: Buffer;
+      mimetype: string;
+      size: number;
+      originalname?: string;
+    },
+    kind: 'image' | 'video' = 'image',
+  ) {
+    if (kind === 'video') {
+      const saved = await this.storage.saveGalleryMedia(file, 'rich');
+      if (saved.mediaType !== 'video') {
+        throw new BadRequestException('Ожидалось видео MP4 или MOV');
+      }
+      return { url: saved.url, mediaType: 'video' as const };
+    }
     const { url } = await this.storage.saveImage(file, 'rich');
-    return { url };
+    return { url, mediaType: 'image' as const };
   }
 
   // --- helpers ---
