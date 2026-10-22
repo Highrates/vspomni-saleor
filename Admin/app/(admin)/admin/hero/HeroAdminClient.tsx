@@ -23,11 +23,11 @@ import {
   HERO_PLAQUE_TEMPLATE_SEED_HREF,
   HERO_SLIDE_HREF_DEFAULT,
   normalizeHeroPlaque,
-  toRelativeMediaPath,
   type HeroPlaque,
   type HeroPlaqueTemplate,
   type HeroSlideAdmin,
 } from '@vspomni/hero-types';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { AdminCheckbox } from '@/components/admin/AdminCheckbox/AdminCheckbox';
 import { AdminCompactBtn } from '@/components/AdminCompactBtn/AdminCompactBtn';
 import { AdminSettingsListErrors } from '@/components/admin/AdminSettingsListErrors/AdminSettingsListErrors';

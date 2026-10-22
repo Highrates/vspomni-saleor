@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ProductAromaNoteKind } from '@prisma/client';
 import type { ProductAttributeKind } from '@vspomni/admin-types';
+import { CHOICE_COLLECTION_SLUG } from '@vspomni/catalog-constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalStorageService } from '../storage/local-storage.service';
 import { ADMIN_LIST_DEFAULT_LIMIT, ADMIN_LIST_MAX_LIMIT } from './catalog.constants';
@@ -9,6 +10,8 @@ import {
   normalizeAromaNoteName,
   normalizeCanonicalPath,
   normalizeCardAromaLabels,
+  normalizeStoredUploadUrl,
+  parseOptionalDateOnly,
   trimOrNull,
 } from './catalog-admin.helpers';
 import { CatalogCategoriesAdminService } from './catalog-categories.admin.service';
@@ -286,6 +289,11 @@ export class CatalogProductsAdminService {
           extraHtml: sanitizeRichHtmlOrNull(dto.extraHtml),
           cardAromaLabels: normalizeCardAromaLabels(dto.cardAromaLabels),
           badgeLabel: trimOrNull(dto.badgeLabel),
+          choiceStarName: trimOrNull(dto.choiceStarName),
+          choiceStarDate: parseOptionalDateOnly(dto.choiceStarDate) ?? null,
+          choiceStarImageUrl: normalizeStoredUploadUrl(
+            trimOrNull(dto.choiceStarImageUrl),
+          ),
           categoryId: dto.categoryId,
           active: dto.active ?? true,
           excludeFromCatalog: dto.excludeFromCatalog ?? false,
@@ -307,6 +315,7 @@ export class CatalogProductsAdminService {
       if (dto.aromaNotes !== undefined) {
         await this.syncProductAromaNotes(tx, product.id, dto.aromaNotes);
       }
+      await this.assertChoiceStarNameIfInVybor(tx, product.id);
 
       const full = await tx.product.findUniqueOrThrow({
         where: { id: product.id },
@@ -389,6 +398,17 @@ export class CatalogProductsAdminService {
       if (dto.badgeLabel !== undefined) {
         data.badgeLabel = trimOrNull(dto.badgeLabel);
       }
+      if (dto.choiceStarName !== undefined) {
+        data.choiceStarName = trimOrNull(dto.choiceStarName);
+      }
+      if (dto.choiceStarDate !== undefined) {
+        data.choiceStarDate = parseOptionalDateOnly(dto.choiceStarDate) ?? null;
+      }
+      if (dto.choiceStarImageUrl !== undefined) {
+        data.choiceStarImageUrl = normalizeStoredUploadUrl(
+          trimOrNull(dto.choiceStarImageUrl),
+        );
+      }
       if (dto.active !== undefined) data.active = dto.active;
       if (dto.excludeFromCatalog !== undefined) {
         data.excludeFromCatalog = dto.excludeFromCatalog;
@@ -428,7 +448,16 @@ export class CatalogProductsAdminService {
       if (dto.aromaNotes !== undefined) {
         await this.syncProductAromaNotes(tx, id, dto.aromaNotes);
       }
+      await this.assertChoiceStarNameIfInVybor(tx, id);
     });
+
+    if (dto.choiceStarImageUrl !== undefined) {
+      const prev = existing.choiceStarImageUrl?.trim() || null;
+      const next = normalizeStoredUploadUrl(trimOrNull(dto.choiceStarImageUrl));
+      if (prev && prev !== next) {
+        await this.gcChoiceStarImageIfUnused(prev);
+      }
+    }
 
     return this.getProduct(id);
   }
@@ -455,11 +484,77 @@ export class CatalogProductsAdminService {
       }
     }
 
+    const choiceStarUrl = product.choiceStarImageUrl?.trim() || null;
     await this.prisma.product.delete({ where: { id } });
     for (const img of product.images) {
       await this.storage.deleteByPublicUrl(img.url);
     }
+    if (choiceStarUrl) {
+      await this.gcChoiceStarImageIfUnused(choiceStarUrl);
+    }
     return { ok: true };
+  }
+
+  private async gcChoiceStarImageIfUnused(url: string): Promise<void> {
+    const t = url.trim();
+    if (!t) return;
+    const n = await this.prisma.product.count({
+      where: { choiceStarImageUrl: t },
+    });
+    if (n > 0) return;
+    await this.storage.deleteManagedUpload(t);
+  }
+
+  /**
+   * Товар в коллекции «Выбор ⭐» (slug vybor) обязан иметь choiceStarName.
+   * Вызывать после sync коллекций / записи полей звезды.
+   */
+  private async assertChoiceStarNameIfInVybor(
+    tx: Prisma.TransactionClient,
+    productId: string,
+  ): Promise<void> {
+    const choice = await tx.collection.findFirst({
+      where: { slug: CHOICE_COLLECTION_SLUG },
+      select: { id: true },
+    });
+    if (!choice) return;
+    const link = await tx.collectionItem.findFirst({
+      where: { productId, collectionId: choice.id },
+      select: { productId: true },
+    });
+    if (!link) return;
+    const row = await tx.product.findUnique({
+      where: { id: productId },
+      select: { choiceStarName: true },
+    });
+    if (!row?.choiceStarName?.trim()) {
+      throw new BadRequestException(
+        'Для коллекции «Выбор ⭐» укажите имя знаменитости (choiceStarName)',
+      );
+    }
+  }
+
+  /** Best-effort: удалить URL, если не ссылается ни один product / ProductImage. */
+  async discardUploads(urls: string[]): Promise<{ deleted: number }> {
+    const candidates = [
+      ...new Set(
+        (urls ?? [])
+          .map((u) => normalizeStoredUploadUrl(String(u ?? '').trim()) || String(u ?? '').trim())
+          .filter((u) => Boolean(u) && Boolean(this.storage.tryPublicUrlToKey(u))),
+      ),
+    ].slice(0, 50);
+    if (!candidates.length) return { deleted: 0 };
+
+    let deleted = 0;
+    for (const url of candidates) {
+      const [asStar, asGallery] = await Promise.all([
+        this.prisma.product.count({ where: { choiceStarImageUrl: url } }),
+        this.prisma.productImage.count({ where: { url } }),
+      ]);
+      if (asStar > 0 || asGallery > 0) continue;
+      if (await this.storage.deleteManagedUpload(url)) deleted += 1;
+    }
+    return { deleted };
   }
 
   // --- Variants ---

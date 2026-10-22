@@ -32,6 +32,7 @@ import {
   CreateProductDto,
   CreateProductSetDto,
   CreateVariantDto,
+  DiscardCatalogUploadsDto,
   ReorderCategoriesDto,
   ReorderIdsDto,
   ReorderProductImagesDto,
@@ -82,6 +83,12 @@ export class CatalogAdminController {
       throw new BadRequestException('Поддерживается type=image или type=video');
     }
     return this.products.uploadRichMedia(file, kind);
+  }
+
+  /** Best-effort GC: удаляет /uploads URL, если ни на что не ссылаются. */
+  @Post('discard-uploads')
+  discardUploads(@Body() dto: DiscardCatalogUploadsDto) {
+    return this.products.discardUploads(dto.urls);
   }
 
   @Get('categories')

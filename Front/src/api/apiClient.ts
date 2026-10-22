@@ -9,7 +9,7 @@
 
 import { notifyUnauthorized } from '@/api/authSession'
 import { clearRegisterPassword } from '@/api/registerSession'
-import { toRelativeMediaPath } from '@vspomni/hero-types'
+import { toRelativeMediaPath } from '@vspomni/media-path'
 
 const DEFAULT_API_URL = 'http://127.0.0.1:3011/api/v1'
 

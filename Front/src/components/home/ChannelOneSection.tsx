@@ -1,17 +1,19 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * Сюжет Первого канала («Доброе утро»).
  * Desktop: видео слева, текст справа (высота = «Скоро свечи» + 25%).
  * Mobile: колонка — видео сверху (с постером), текст снизу.
  *
- * Web-версия: H.264 Main + AAC, moov в начале (`1-ch-web.mp4`) —
- * исходный 1-ch.MP4 ~59MB плохо стартует на мобильном Safari/проде.
+ * Медиа: WebM VP9 ~12MB + MP4 fallback ~29MB.
+ * `<video>` монтируется по IntersectionObserver (preload=none до play).
  */
-const VIDEO_SRC = '/videos/1-ch-web.mp4'
-const VIDEO_POSTER = '/images/video-cover.png'
+const VIDEO_WEBM = '/videos/1-ch-web.webm'
+const VIDEO_MP4 = '/videos/1-ch-web.mp4'
+/** ~68KB WebP (было 1.8MB PNG). */
+const VIDEO_POSTER = '/images/video-cover.webp'
 
 const LINES = [
   'Первый канал увидел Вспомни. в социальных сетях 🤩',
@@ -23,10 +25,33 @@ const LINE_CLASS =
   'm-0 font-semibold text-brand text-[12px] sm:text-base lg:text-lg leading-[1.4]'
 
 export default function ChannelOneSection() {
+  const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const playAfterMount = useRef(false)
+  const [mountVideo, setMountVideo] = useState(false)
   const [playing, setPlaying] = useState(false)
 
-  const handlePlayClick = async () => {
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || mountVideo) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setMountVideo(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setMountVideo(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '240px 0px', threshold: 0.01 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [mountVideo])
+
+  const playVideo = async () => {
     const video = videoRef.current
     if (!video) return
     try {
@@ -34,7 +59,6 @@ export default function ChannelOneSection() {
       await video.play()
       setPlaying(true)
     } catch {
-      // iOS иногда требует muted для старта — пробуем без звука, пользователь включит
       try {
         video.muted = true
         await video.play()
@@ -45,13 +69,30 @@ export default function ChannelOneSection() {
     }
   }
 
+  useEffect(() => {
+    if (!mountVideo || !playAfterMount.current) return
+    playAfterMount.current = false
+    void playVideo()
+  }, [mountVideo])
+
+  const handlePlayClick = () => {
+    if (!mountVideo) {
+      playAfterMount.current = true
+      setMountVideo(true)
+      return
+    }
+    void playVideo()
+  }
+
   return (
-    <section className="w-full px-0 mt-4 sm:mt-6 md:mt-8 lg:mt-10 mb-4 sm:mb-6 md:mb-8 lg:mb-10">
+    <section
+      ref={sectionRef}
+      className="w-full px-0 mt-4 sm:mt-6 md:mt-8 lg:mt-10 mb-4 sm:mb-6 md:mb-8 lg:mb-10"
+    >
       <style>{`
         .channel-one-card {
           background: #f5f5f5;
         }
-        /* Скоро свечи 170/240/300/340 → +25% от sm */
         @media (min-width: 640px) {
           .channel-one-card {
             height: 300px !important;
@@ -70,28 +111,36 @@ export default function ChannelOneSection() {
       `}</style>
 
       <div className="channel-one-card flex w-full flex-col overflow-hidden rounded-[16px] sm:flex-row">
-        {/*
-          Mobile: block-video + aspect-ratio (absolute на iOS часто даёт 0×0).
-          Desktop: absolute fill в половине карточки.
-        */}
         <div className="relative w-full shrink-0 overflow-hidden bg-black sm:h-full sm:w-1/2">
-          <video
-            ref={videoRef}
-            className="block w-full aspect-video object-cover sm:absolute sm:inset-0 sm:aspect-auto sm:h-full sm:w-full"
-            poster={VIDEO_POSTER}
-            controls={playing}
-            playsInline
-            preload="metadata"
-            controlsList="nodownload"
-            aria-label="Сюжет о Вспомни на Первом канале, программа Доброе утро"
-            onPlay={() => setPlaying(true)}
-            onPause={() => {
-              const v = videoRef.current
-              if (v && v.currentTime > 0 && !v.ended) setPlaying(true)
-            }}
-          >
-            <source src={VIDEO_SRC} type="video/mp4" />
-          </video>
+          {mountVideo ? (
+            <video
+              ref={videoRef}
+              className="block w-full aspect-video object-cover sm:absolute sm:inset-0 sm:aspect-auto sm:h-full sm:w-full"
+              poster={VIDEO_POSTER}
+              controls={playing}
+              playsInline
+              preload="none"
+              controlsList="nodownload"
+              aria-label="Сюжет о Вспомни на Первом канале, программа Доброе утро"
+              onPlay={() => setPlaying(true)}
+              onPause={() => {
+                const v = videoRef.current
+                if (v && v.currentTime > 0 && !v.ended) setPlaying(true)
+              }}
+            >
+              <source src={VIDEO_WEBM} type="video/webm" />
+              <source src={VIDEO_MP4} type="video/mp4" />
+            </video>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={VIDEO_POSTER}
+              alt=""
+              className="block w-full aspect-video object-cover sm:absolute sm:inset-0 sm:aspect-auto sm:h-full sm:w-full"
+              decoding="async"
+              loading="lazy"
+            />
+          )}
 
           {!playing ? (
             <button

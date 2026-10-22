@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { toRelativeMediaPath } from '@vspomni/hero-types';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { AdminCompactBtn, AdminCompactBtnLink } from '@/components/AdminCompactBtn/AdminCompactBtn';
 import { AdminTextField } from '@/components/AdminTextField/AdminTextField';
 import {

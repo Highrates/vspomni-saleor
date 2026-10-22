@@ -404,6 +404,56 @@
   border-radius: 3px !important;
 }
 
+/* Hero plaque — CSS вместо framer-motion на LCP */
+@keyframes hero-plaque-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes hero-plaque-thumb {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes hero-plaque-text {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.hero-plaque-in {
+  animation: hero-plaque-in 0.8s ease-out 0.2s both;
+}
+.hero-plaque-thumb {
+  animation: hero-plaque-thumb 0.5s ease-out 0.3s both;
+}
+.hero-plaque-text {
+  animation: hero-plaque-text 0.5s ease-out 0.35s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-plaque-in,
+  .hero-plaque-thumb,
+  .hero-plaque-text {
+    animation: none;
+  }
+}
+
 .Toastify__toast-container.vspomni-toast-container {
   top: 20% !important;
   left: 50% !important;

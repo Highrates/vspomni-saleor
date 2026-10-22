@@ -15,6 +15,7 @@ import { loadAllCategories } from '@/lib/category/loadAllCategories'
 import { breadcrumbCatalogPage } from '@/lib/seo/breadcrumbItems'
 import { buildPageMetadata } from '@/lib/seo/buildPageMetadata'
 import { catalogPageJsonLd } from '@/lib/seo/catalogJsonLd'
+import { getAllAromas } from '@/graphql/queries/allAromas.service'
 import { getCatalogProductsPage } from '@/graphql/queries/product.service'
 
 export const metadata: Metadata = buildPageMetadata({
@@ -27,13 +28,14 @@ export const metadata: Metadata = buildPageMetadata({
 export const revalidate = 60
 
 export default async function CatalogPage() {
-  const [productsPage, categories] = await Promise.all([
+  const [productsPage, categories, allAromas] = await Promise.all([
     getCatalogProductsPage(CATALOG_PAGE_SIZE).catch(() => ({
       products: [],
       hasNextPage: false,
       endCursor: null,
     })),
     loadAllCategories(),
+    getAllAromas().catch(() => []),
   ])
 
   const sortedCategories = sortCatalogCategories(categories)
@@ -58,7 +60,7 @@ export default async function CatalogPage() {
           className="relative z-10 mb-4 sm:mb-6"
         />
         <CatalogCategoryBannersView categories={sortedCategories} />
-        <ProductGrid />
+        <ProductGrid initialItems={allAromas} />
         <CatalogAllProductsSection
           initialProducts={productsPage.products}
           initialHasNextPage={productsPage.hasNextPage}

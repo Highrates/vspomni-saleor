@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { CHOICE_COLLECTION_SLUG } from '@vspomni/catalog-constants';
 import { CatalogCategoriesAdminService } from './catalog-categories.admin.service';
 import { CatalogProductsAdminService } from './catalog-products.admin.service';
 
@@ -33,6 +34,7 @@ function makePrisma() {
       delete: vi.fn(),
     },
     productImage: {
+      count: vi.fn(),
       findMany: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -53,12 +55,14 @@ function makePrisma() {
     },
     collection: {
       count: vi.fn(),
+      findFirst: vi.fn(),
     },
     collectionItem: {
       createMany: vi.fn(),
       create: vi.fn(),
       deleteMany: vi.fn(),
       findMany: vi.fn(),
+      findFirst: vi.fn(),
       aggregate: vi.fn(),
     },
     productSet: {
@@ -115,12 +119,19 @@ describe('CatalogProductsAdminService', () => {
     saveImage: vi.fn(),
     deleteByPublicUrl: vi.fn(),
     deleteManagedUpload: vi.fn(),
+    tryPublicUrlToKey: vi.fn(),
   };
 
   beforeEach(() => {
     prisma = makePrisma();
     storage.deleteManagedUpload.mockReset();
     storage.deleteByPublicUrl.mockReset();
+    storage.tryPublicUrlToKey = vi.fn((u: string) =>
+      u.includes('/uploads/') ? u.replace(/^.*\/uploads\//, '') : null,
+    );
+    prisma.collection.findFirst.mockResolvedValue(null);
+    prisma.collectionItem.findFirst.mockResolvedValue(null);
+    prisma.collectionItem.findMany.mockResolvedValue([]);
     const categories = new CatalogCategoriesAdminService(prisma as never);
     svc = new CatalogProductsAdminService(prisma as never, storage as never, categories);
   });
@@ -218,6 +229,255 @@ describe('CatalogProductsAdminService', () => {
 
     await expect(svc.deleteVariant('v1')).resolves.toEqual({ ok: true });
     expect(prisma.productVariant.delete).toHaveBeenCalledWith({ where: { id: 'v1' } });
+  });
+
+  function productDetailRow(
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> {
+    return {
+      id: 'p1',
+      slug: 'p',
+      name: 'P',
+      categoryId: 'c1',
+      shortDescription: null,
+      pageShortDescriptionHtml: null,
+      descriptionHtml: null,
+      actionEffectHtml: null,
+      applicationHtml: null,
+      compositionHtml: null,
+      importantNoteHtml: null,
+      vspomniNoteHtml: null,
+      storageHtml: null,
+      productType: null,
+      purpose: null,
+      shelfLife: null,
+      productTypeOptionId: null,
+      purposeOptionId: null,
+      shelfLifeOptionId: null,
+      storageOptionId: null,
+      extraHtml: null,
+      cardAromaLabels: [],
+      badgeLabel: null,
+      choiceStarName: null,
+      choiceStarDate: null,
+      choiceStarImageUrl: null,
+      active: true,
+      excludeFromCatalog: false,
+      metaTitle: null,
+      metaDescription: null,
+      ogImageUrl: null,
+      canonicalPath: null,
+      seoNoIndex: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      category: null,
+      variants: [],
+      images: [],
+      catalogTags: [],
+      collectionItems: [],
+      productSetItems: [],
+      aromaNotes: [],
+      ...overrides,
+    };
+  }
+
+  it('createProduct пишет choiceStar* (дата UTC noon, URL relative)', async () => {
+    prisma.category.findUnique.mockResolvedValue({ id: 'c1', name: 'Cat' });
+    prisma.product.findUnique.mockResolvedValue(null);
+
+    let createData: Record<string, unknown> | undefined;
+    prisma.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => {
+      const tx = {
+        productAttributeOption: { findFirst: vi.fn() },
+        product: {
+          create: vi.fn().mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
+            createData = data;
+            return { id: 'p1', ...data };
+          }),
+          findUniqueOrThrow: vi.fn().mockImplementation(async () =>
+            productDetailRow({
+              choiceStarName: createData?.choiceStarName,
+              choiceStarDate: createData?.choiceStarDate,
+              choiceStarImageUrl: createData?.choiceStarImageUrl,
+            }),
+          ),
+        },
+        productCatalogTag: {
+          deleteMany: prisma.productCatalogTag.deleteMany,
+          createMany: prisma.productCatalogTag.createMany,
+        },
+        catalogTag: { count: prisma.catalogTag.count },
+        collection: {
+          count: prisma.collection.count,
+          findFirst: prisma.collection.findFirst,
+        },
+        collectionItem: {
+          deleteMany: prisma.collectionItem.deleteMany,
+          createMany: prisma.collectionItem.createMany,
+          findMany: vi.fn().mockResolvedValue([]),
+          findFirst: prisma.collectionItem.findFirst,
+          create: prisma.collectionItem.create,
+          aggregate: prisma.collectionItem.aggregate,
+        },
+        productSet: { count: prisma.productSet.count },
+        productSetItem: {
+          deleteMany: prisma.productSetItem.deleteMany,
+          createMany: prisma.productSetItem.createMany,
+          findMany: vi.fn().mockResolvedValue([]),
+          create: prisma.productSetItem.create,
+          aggregate: prisma.productSetItem.aggregate,
+        },
+      };
+      return fn(tx);
+    });
+
+    const row = await svc.createProduct({
+      name: 'Диффузор',
+      categoryId: 'c1',
+      choiceStarName: ' Анна ',
+      choiceStarDate: '2026-03-15',
+      choiceStarImageUrl: 'http://127.0.0.1:3011/uploads/stars/anna.jpg',
+    });
+
+    expect(createData).toMatchObject({
+      choiceStarName: 'Анна',
+      choiceStarImageUrl: '/uploads/stars/anna.jpg',
+    });
+    expect(createData?.choiceStarDate).toBeInstanceOf(Date);
+    expect((createData?.choiceStarDate as Date).toISOString()).toBe(
+      '2026-03-15T12:00:00.000Z',
+    );
+    expect(row.choiceStarName).toBe('Анна');
+    expect(row.choiceStarDate).toBe('2026-03-15');
+    expect(row.choiceStarImageUrl).toBe('/uploads/stars/anna.jpg');
+  });
+
+  it('updateProduct обновляет choiceStar* и GC старого фото', async () => {
+    prisma.product.findUnique
+      .mockResolvedValueOnce(
+        productDetailRow({
+          choiceStarName: 'Старое',
+          choiceStarImageUrl: '/uploads/stars/old.jpg',
+        }),
+      )
+      .mockResolvedValueOnce(
+        productDetailRow({
+          choiceStarName: 'Новое',
+          choiceStarDate: new Date('2026-04-01T12:00:00.000Z'),
+          choiceStarImageUrl: '/uploads/stars/new.jpg',
+        }),
+      );
+
+    prisma.product.update.mockResolvedValue({});
+    prisma.product.count.mockResolvedValue(0);
+    prisma.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+      fn(prisma),
+    );
+
+    const row = await svc.updateProduct('p1', {
+      choiceStarName: 'Новое',
+      choiceStarDate: '2026-04-01',
+      choiceStarImageUrl: 'https://vspomni.store/uploads/stars/new.jpg',
+    });
+
+    expect(prisma.product.update).toHaveBeenCalledWith({
+      where: { id: 'p1' },
+      data: expect.objectContaining({
+        choiceStarName: 'Новое',
+        choiceStarImageUrl: '/uploads/stars/new.jpg',
+        choiceStarDate: new Date('2026-04-01T12:00:00.000Z'),
+      }),
+    });
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith('/uploads/stars/old.jpg');
+    expect(row.choiceStarName).toBe('Новое');
+    expect(row.choiceStarDate).toBe('2026-04-01');
+  });
+
+  it('updateProduct очищает choiceStar и удаляет файл', async () => {
+    prisma.product.findUnique
+      .mockResolvedValueOnce(
+        productDetailRow({
+          choiceStarName: 'Анна',
+          choiceStarImageUrl: '/uploads/stars/anna.jpg',
+        }),
+      )
+      .mockResolvedValueOnce(productDetailRow());
+
+    prisma.product.update.mockResolvedValue({});
+    prisma.product.count.mockResolvedValue(0);
+    prisma.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+      fn(prisma),
+    );
+
+    await svc.updateProduct('p1', {
+      choiceStarName: null,
+      choiceStarDate: null,
+      choiceStarImageUrl: null,
+    });
+
+    expect(prisma.product.update).toHaveBeenCalledWith({
+      where: { id: 'p1' },
+      data: expect.objectContaining({
+        choiceStarName: null,
+        choiceStarDate: null,
+        choiceStarImageUrl: null,
+      }),
+    });
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith(
+      '/uploads/stars/anna.jpg',
+    );
+  });
+
+  it('updateProduct в vybor без choiceStarName → 400', async () => {
+    prisma.product.findUnique
+      .mockResolvedValueOnce(productDetailRow({ choiceStarName: null }))
+      .mockResolvedValueOnce(productDetailRow({ choiceStarName: null }));
+    prisma.product.update.mockResolvedValue({});
+    prisma.collection.count.mockResolvedValue(1);
+    prisma.collectionItem.findMany.mockResolvedValue([]);
+    prisma.collectionItem.aggregate.mockResolvedValue({ _max: { sortOrder: 0 } });
+    prisma.collectionItem.create.mockResolvedValue({});
+    prisma.collection.findFirst.mockResolvedValue({
+      id: 'col-vybor',
+      slug: CHOICE_COLLECTION_SLUG,
+    });
+    prisma.collectionItem.findFirst.mockResolvedValue({
+      productId: 'p1',
+      collectionId: 'col-vybor',
+    });
+    prisma.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) =>
+      fn(prisma),
+    );
+
+    await expect(
+      svc.updateProduct('p1', {
+        collectionIds: ['col-vybor'],
+        choiceStarName: null,
+      }),
+    ).rejects.toThrow(/Выбор/);
+  });
+
+  it('discardUploads удаляет непривязанный URL', async () => {
+    prisma.product.count.mockResolvedValue(0);
+    prisma.productImage.count.mockResolvedValue(0);
+    storage.deleteManagedUpload.mockResolvedValue(true);
+
+    const res = await svc.discardUploads([
+      'http://127.0.0.1:3011/uploads/stars/orphan.jpg',
+    ]);
+    expect(res.deleted).toBe(1);
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith(
+      '/uploads/stars/orphan.jpg',
+    );
+  });
+
+  it('discardUploads не трогает URL, на который ссылается товар', async () => {
+    prisma.product.count.mockResolvedValue(1);
+    prisma.productImage.count.mockResolvedValue(0);
+
+    const res = await svc.discardUploads(['/uploads/stars/used.jpg']);
+    expect(res.deleted).toBe(0);
+    expect(storage.deleteManagedUpload).not.toHaveBeenCalled();
   });
 
   it('updateProduct sync коллекций сохраняет sortOrder существующих связей', async () => {

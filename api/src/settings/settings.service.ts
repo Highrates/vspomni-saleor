@@ -8,8 +8,8 @@ import {
   HERO_PLAQUE_TEMPLATE_SEED_HREF,
   HERO_SLIDE_HREF_DEFAULT,
   plaqueFromFlatColumns,
-  toRelativeMediaPath,
 } from '@vspomni/hero-types';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { extractMediaUrlsFromRichHtml } from '../blog/blog-html.util';
 import { sanitizeProductRichHtml } from '../catalog/catalog-html.util';
 import { sanitizeFaqTextForWrite } from './faq-html.util';

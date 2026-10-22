@@ -7,7 +7,12 @@ import {
   uploadsUrl,
 } from '@/api/apiClient'
 import {
+  CHOICE_CAROUSEL_LIMIT,
   CHOICE_COLLECTION_SLUG as NEST_CHOICE_COLLECTION_SLUG,
+  NOSE_HOME_LIMIT,
+  POPULAR_HOME_LIMIT,
+} from '@vspomni/catalog-constants'
+import {
   NEW_COLLECTION_SLUG,
   POPULAR_COLLECTION_SLUG,
   adaptProductDetail,
@@ -19,6 +24,7 @@ import {
   fetchProductList,
   resolveCollectionSlug,
 } from '@/api/catalogApi'
+import { interleaveProductsByCategoryAndAroma } from '@/lib/product/interleaveProducts'
 import type { Connection, WarehouseNode } from '../types/core.types'
 import type { ProductDetailNode, ProductNode } from '../types/product.types'
 import type { ProductCardItem, StarChoiceItem } from '@/types/product'
@@ -166,12 +172,34 @@ export async function getGreedProducts(): Promise<any> {
 }
 
 /** «Популярное»: коллекция `populiarnye`, fallback — `koe-chto-novoe-dlia-vas`. */
-export async function getPopularProducts(): Promise<any> {
-  let res = await fetchProductList({ collection: POPULAR_COLLECTION_SLUG, limit: 5, page: 1 })
+export async function getPopularProducts(
+  limit: number = POPULAR_HOME_LIMIT,
+): Promise<ProductCardItem[]> {
+  const cap = Math.min(Math.max(1, limit), 12)
+  let res = await fetchProductList({
+    collection: POPULAR_COLLECTION_SLUG,
+    limit: cap,
+    page: 1,
+  })
   if (!res.items?.length) {
-    res = await fetchProductList({ collection: NEW_COLLECTION_SLUG, limit: 5, page: 1 })
+    res = await fetchProductList({
+      collection: NEW_COLLECTION_SLUG,
+      limit: cap,
+      page: 1,
+    })
   }
-  return filterValidProductCards((res.items ?? []).map((c) => cardToProductCardItem(c)))
+  return filterValidProductCards(
+    (res.items ?? []).map((c) => cardToProductCardItem(c)),
+  ).slice(0, cap)
+}
+
+/** «Носовые сосочки» на главной — лимит + чередование категорий. */
+export async function getNoseHomeProducts(
+  limit: number = NOSE_HOME_LIMIT,
+): Promise<ProductCardItem[]> {
+  const cap = Math.min(Math.max(1, limit), 24)
+  const data = await getProductsByCollectionId('Q29sbGVjdGlvbjo1', cap)
+  return interleaveProductsByCategoryAndAroma(data, cap)
 }
 
 export type CatalogProductsPage = {
@@ -210,10 +238,17 @@ export async function getCatalogAllProducts(
 /** Коллекция «Выбор ⭐» */
 export const CHOICE_COLLECTION_SLUG = NEST_CHOICE_COLLECTION_SLUG
 
-/** Товары коллекции «Выбор ⭐» (slug: vybor). */
-export async function getChoiceProducts(): Promise<StarChoiceItem[]> {
-  const cards = await fetchAllProductCards({ collection: CHOICE_COLLECTION_SLUG }, 200)
-  return cards
+/** Товары коллекции «Выбор ⭐» (slug: vybor) — лимит под карусель, не весь каталог. */
+export async function getChoiceProducts(
+  limit: number = CHOICE_CAROUSEL_LIMIT,
+): Promise<StarChoiceItem[]> {
+  const cap = Math.min(Math.max(1, limit), 24)
+  const { items } = await fetchProductList({
+    collection: CHOICE_COLLECTION_SLUG,
+    page: 1,
+    limit: cap,
+  })
+  return (items ?? [])
     .filter((c) => c.imageUrl || (c.imageUrls?.length ?? 0) > 0)
     .map(cardToStarChoiceItem)
 }

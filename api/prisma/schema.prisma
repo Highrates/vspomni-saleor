@@ -347,13 +347,13 @@ model Product {
   canonicalPath      String?
   /// SEO: meta robots noindex на PDP.
   seoNoIndex         Boolean          @default(false)
-  /// «Выбор ⭐»: имя знаменитости (Saleor vybor-imya)
+  /// «Выбор ⭐»: имя знаменитости на карточке блока
   choiceStarName     String?
-  /// «Выбор ⭐»: дата (Saleor vybor-data)
+  /// «Выбор ⭐»: дата на карточке (день без времени)
   choiceStarDate     DateTime?
-  /// «Выбор ⭐»: фото знаменитости (Saleor vybor-foto)
+  /// «Выбор ⭐»: фото знаменитости (фон карточки; иначе фото товара)
   choiceStarImageUrl String?
-  /// Подписи ароматов на карточке/PDP со смайлами (Saleor aromaty-v-kartochke-tovara)
+  /// Подписи ароматов со смайлами на карточке / PDP
   cardAromaLabels    String[]         @default([])
   /// Лейбл на карточке (например NEW). Пусто — без бейджа.
   badgeLabel         String?

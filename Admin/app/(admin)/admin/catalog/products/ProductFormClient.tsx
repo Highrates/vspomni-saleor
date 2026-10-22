@@ -1,19 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CHOICE_COLLECTION_SLUG } from '@vspomni/catalog-constants';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { AdminAccordion } from '@/components/admin/AdminAccordion/AdminAccordion';
 import { AdminCheckbox } from '@/components/admin/AdminCheckbox/AdminCheckbox';
 import { AdminCompactBtn, AdminCompactBtnLink } from '@/components/AdminCompactBtn/AdminCompactBtn';
 import { AdminPillChip, AdminPillChipList } from '@/components/AdminPillChip/AdminPillChip';
 import { AdminRichField } from '@/components/admin/AdminRichField/AdminRichField';
 import { AdminSelect, AdminTextArea, AdminTextField } from '@/components/AdminTextField/AdminTextField';
+import { adminConfirm } from '@/components/admin/AdminModal/adminConfirm';
 import { AdminConfirmDialog } from '@/components/admin/AdminModal/AdminConfirmDialog';
 import { useToast } from '@/components/Toast/ToastProvider';
 import {
   AdminBackendRequestError,
+  adminBackendFetch,
   adminBackendJson,
+  adminBackendPath,
+  readAdminApiError,
 } from '@/lib/adminBackendFetch';
 import type {
   AdminCatalogTag,
@@ -31,9 +37,42 @@ import {
   aromaNotesToPayload,
   type AromaNoteDraft,
 } from './ProductAromaNotesEditor';
+import { ChoiceStarPreview } from './ChoiceStarPreview';
 import pn from './productNew.module.css';
 
-type PickRow = { id: string; name: string };
+type PickRow = { id: string; name: string; slug?: string };
+
+async function uploadChoiceStarFile(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await adminBackendFetch(
+    'catalog/admin/upload-rich-media?type=image',
+    { method: 'POST', body: fd },
+  );
+  if (!res.ok) {
+    throw new AdminBackendRequestError(await readAdminApiError(res), res.status);
+  }
+  const json = (await res.json()) as { url?: string };
+  if (!json.url) throw new Error('Сервер не вернул URL');
+  return toRelativeMediaPath(json.url) || json.url.trim();
+}
+
+/** Best-effort GC, если upload прошёл, а PATCH/POST товара упал. */
+function discardCatalogUploads(urls: string[]) {
+  const unique = [...new Set(urls.map((u) => u.trim()).filter(Boolean))];
+  if (!unique.length) return;
+  try {
+    void fetch(adminBackendPath('catalog/admin/discard-uploads'), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: unique }),
+      keepalive: true,
+    });
+  } catch {
+    /* ignore */
+  }
+}
 
 function categoryOptionLabel(c: AdminCategory): string {
   if (c.parent?.name) return `${c.parent.name} → ${c.name}`;
@@ -117,6 +156,14 @@ export function ProductFormClient({ productId }: { productId?: string }) {
   /** Ароматы со смайликами — по одному на строку в textarea */
   const [cardAromaLabelsText, setCardAromaLabelsText] = useState('');
   const [badgeLabel, setBadgeLabel] = useState('');
+  const [choiceStarName, setChoiceStarName] = useState('');
+  const [choiceStarDate, setChoiceStarDate] = useState('');
+  /** Сохранённый URL (relative). Upload на сервер — только при save. */
+  const [choiceStarImageUrl, setChoiceStarImageUrl] = useState<string | null>(null);
+  const [choiceStarImageFile, setChoiceStarImageFile] = useState<File | null>(null);
+  const [choiceStarObjectUrl, setChoiceStarObjectUrl] = useState<string | null>(null);
+  const [uploadingChoiceStar, setUploadingChoiceStar] = useState(false);
+  const choiceStarInputRef = useRef<HTMLInputElement>(null);
   /** Пирамида нот (верхние / средние / базовые) */
   const [aromaNotes, setAromaNotes] = useState<AromaNoteDraft[]>([]);
   /** После save — refetch справочника нот в редакторе */
@@ -148,7 +195,9 @@ export function ProductFormClient({ productId }: { productId?: string }) {
         const [cats, tags, cols, sets, p] = await Promise.all([
           adminBackendJson<AdminCategory[]>('catalog/admin/categories'),
           adminBackendJson<AdminCatalogTag[]>('catalog/admin/catalog-tags'),
-          adminBackendListAllPages<PickRow>('catalog/admin/collections'),
+          adminBackendListAllPages<PickRow & { slug?: string }>(
+            'catalog/admin/collections',
+          ),
           adminBackendListAllPages<PickRow>('catalog/admin/product-sets'),
           productId
             ? adminBackendJson<AdminProduct>(`catalog/admin/products/${productId}`)
@@ -157,7 +206,9 @@ export function ProductFormClient({ productId }: { productId?: string }) {
         if (cancelled) return;
         setCategories(cats);
         setCatalogTags(tags);
-        setCollections(cols.map((c) => ({ id: c.id, name: c.name })));
+        setCollections(
+          cols.map((c) => ({ id: c.id, name: c.name, slug: c.slug })),
+        );
         setProductSets(sets.map((s) => ({ id: s.id, name: s.name })));
         if (!isEdit && cats[0]) setCategoryId(cats[0].id);
 
@@ -181,6 +232,16 @@ export function ProductFormClient({ productId }: { productId?: string }) {
           setImages(p.images ?? []);
           setCardAromaLabelsText((p.cardAromaLabels ?? []).join('\n'));
           setBadgeLabel(p.badgeLabel ?? '');
+          setChoiceStarName(p.choiceStarName ?? '');
+          setChoiceStarDate(
+            p.choiceStarDate ? String(p.choiceStarDate).slice(0, 10) : '',
+          );
+          setChoiceStarImageFile(null);
+          setChoiceStarImageUrl(
+            p.choiceStarImageUrl
+              ? toRelativeMediaPath(p.choiceStarImageUrl) || p.choiceStarImageUrl
+              : null,
+          );
           setAromaNotes(aromaNotesFromApi(p.aromaNotes));
           setCatalogTagIds(new Set(p.catalogTagIds ?? []));
           setCollectionIds(new Set(p.collectionIds ?? []));
@@ -211,20 +272,106 @@ export function ProductFormClient({ productId }: { productId?: string }) {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [dirty]);
 
+  useEffect(() => {
+    if (!choiceStarImageFile) {
+      setChoiceStarObjectUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(choiceStarImageFile);
+    setChoiceStarObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [choiceStarImageFile]);
+
   const tagsAvailable = useMemo(
     () => catalogTags.filter((t) => !catalogTagIds.has(t.id)),
     [catalogTags, catalogTagIds],
   );
+  const choiceCollection = useMemo(
+    () => collections.find((c) => c.slug === CHOICE_COLLECTION_SLUG) ?? null,
+    [collections],
+  );
+  const inChoiceCollection = Boolean(
+    choiceCollection && collectionIds.has(choiceCollection.id),
+  );
+
+  /** vybor управляется чекбоксом «Выбор ⭐», не пикером коллекций */
   const collectionsAvailable = useMemo(
-    () => collections.filter((c) => !collectionIds.has(c.id)),
-    [collections, collectionIds],
+    () =>
+      collections.filter(
+        (c) =>
+          !collectionIds.has(c.id) &&
+          c.slug !== CHOICE_COLLECTION_SLUG &&
+          c.id !== choiceCollection?.id,
+      ),
+    [collections, collectionIds, choiceCollection?.id],
+  );
+  const collectionsForChips = useMemo(
+    () =>
+      [...collectionIds]
+        .map((id) => collections.find((c) => c.id === id))
+        .filter((c): c is PickRow => Boolean(c))
+        .filter(
+          (c) => c.slug !== CHOICE_COLLECTION_SLUG && c.id !== choiceCollection?.id,
+        ),
+    [collectionIds, collections, choiceCollection?.id],
   );
   const setsAvailable = useMemo(
     () => productSets.filter((s) => !productSetIds.has(s.id)),
     [productSets, productSetIds],
   );
 
-  function productPayload() {
+  const productCoverUrl = useMemo(() => {
+    const img = images.find((i) => i.mediaType !== 'video' && i.url?.trim());
+    return img?.url?.trim() || null;
+  }, [images]);
+
+  const previewPrice = useMemo(() => {
+    const prices = variants
+      .filter((v) => v.active !== false)
+      .map((v) => v.price)
+      .filter((p): p is number => typeof p === 'number' && Number.isFinite(p));
+    if (!prices.length) return null;
+    return Math.min(...prices);
+  }, [variants]);
+
+  function setInChoiceCollection(on: boolean) {
+    if (!choiceCollection) {
+      showToast('Коллекция «Выбор ⭐» (slug vybor) не найдена в каталоге');
+      return;
+    }
+    markDirty();
+    setCollectionIds((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(choiceCollection.id);
+      else next.delete(choiceCollection.id);
+      return next;
+    });
+  }
+
+  function pickChoiceStarImage(file: File | null) {
+    if (!file) return;
+    markDirty();
+    setChoiceStarImageFile(file);
+    if (choiceStarInputRef.current) choiceStarInputRef.current.value = '';
+  }
+
+  function clearChoiceStarImage() {
+    markDirty();
+    setChoiceStarImageFile(null);
+    setChoiceStarImageUrl(null);
+    if (choiceStarInputRef.current) choiceStarInputRef.current.value = '';
+  }
+
+  const choiceStarPreviewSrc =
+    choiceStarObjectUrl ||
+    (choiceStarImageUrl
+      ? toRelativeMediaPath(choiceStarImageUrl) || choiceStarImageUrl
+      : null);
+
+  function productPayload(
+    collectionIdsOverride?: string[],
+    choiceStarImageOverride?: string | null,
+  ) {
     return {
       name: name.trim(),
       slug: slug.trim() || undefined,
@@ -254,9 +401,15 @@ export function ProductFormClient({ productId }: { productId?: string }) {
         .map((s) => s.trim())
         .filter(Boolean),
       badgeLabel: badgeLabel.trim() || null,
+      choiceStarName: choiceStarName.trim() || null,
+      choiceStarDate: choiceStarDate.trim() || null,
+      choiceStarImageUrl:
+        choiceStarImageOverride !== undefined
+          ? choiceStarImageOverride
+          : choiceStarImageUrl?.trim() || null,
       aromaNotes: aromaNotesToPayload(aromaNotes),
       catalogTagIds: Array.from(catalogTagIds),
-      collectionIds: Array.from(collectionIds),
+      collectionIds: collectionIdsOverride ?? Array.from(collectionIds),
       productSetIds: Array.from(productSetIds),
     };
   }
@@ -277,6 +430,34 @@ export function ProductFormClient({ productId }: { productId?: string }) {
       return;
     }
 
+    const nextCollectionIds = Array.from(collectionIds);
+    const inChoiceNow = Boolean(
+      choiceCollection && nextCollectionIds.includes(choiceCollection.id),
+    );
+    const hasStarPhoto = Boolean(choiceStarImageFile || choiceStarImageUrl?.trim());
+    if (inChoiceNow) {
+      if (!choiceStarName.trim()) {
+        showToast('Для «Выбор ⭐» укажите имя знаменитости');
+        return;
+      }
+      if (!hasStarPhoto) {
+        if (!productCoverUrl) {
+          showToast(
+            'Для «Выбор ⭐» загрузите фото знаменитости или фото товара',
+          );
+          return;
+        }
+        const ok = await adminConfirm({
+          title: 'Фото знаменитости не выбрано',
+          message:
+            'На карточке «Выбор ⭐» будет использовано фото товара. Сохранить?',
+          confirmLabel: 'Сохранить с фото товара',
+          cancelLabel: 'Отмена',
+        });
+        if (!ok) return;
+      }
+    }
+
     setSaving(true);
     try {
       if (!name.trim()) throw new Error('Укажите название');
@@ -285,39 +466,79 @@ export function ProductFormClient({ productId }: { productId?: string }) {
         throw new Error('Slug нельзя очищать — укажите значение или верните прежний');
       }
 
-      if (!isEdit) {
-        const created = await adminBackendJson<AdminProduct>('catalog/admin/products', {
-          method: 'POST',
-          body: JSON.stringify(productPayload()),
-        });
-        await revalidateCatalogStorefront({ productSlug: created.slug });
-        showToast('Товар создан');
-        router.replace(`/admin/catalog/products/${created.id}`);
-        router.refresh();
-        return;
+      let starImageForSave: string | null = choiceStarImageUrl?.trim() || null;
+      /** URL, залитый в этом save и ещё не записанный в БД — откатить при ошибке. */
+      let uploadedThisSave: string | null = null;
+      if (choiceStarImageFile) {
+        setUploadingChoiceStar(true);
+        try {
+          starImageForSave = await uploadChoiceStarFile(choiceStarImageFile);
+          uploadedThisSave = starImageForSave;
+        } finally {
+          setUploadingChoiceStar(false);
+        }
       }
 
-      const refreshed = await adminBackendJson<AdminProduct>(
-        `catalog/admin/products/${productId}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(productPayload()),
-        },
-      );
-      setSlug(refreshed.slug);
-      setVariants(refreshed.variants ?? []);
-      setImages(refreshed.images ?? []);
-      setCatalogTagIds(new Set(refreshed.catalogTagIds ?? []));
-      setCollectionIds(new Set(refreshed.collectionIds ?? []));
-      setProductSetIds(new Set(refreshed.productSetIds ?? []));
-      setCardAromaLabelsText((refreshed.cardAromaLabels ?? []).join('\n'));
-      setBadgeLabel(refreshed.badgeLabel ?? '');
-      setAromaNotes(aromaNotesFromApi(refreshed.aromaNotes));
-      setAromaDefsReloadToken((t) => t + 1);
-      setDirty(false);
-      await revalidateCatalogStorefront({ productSlug: refreshed.slug });
-      showToast('Сохранено');
-      router.refresh();
+      try {
+        if (!isEdit) {
+          const created = await adminBackendJson<AdminProduct>(
+            'catalog/admin/products',
+            {
+              method: 'POST',
+              body: JSON.stringify(
+                productPayload(nextCollectionIds, starImageForSave),
+              ),
+            },
+          );
+          uploadedThisSave = null;
+          await revalidateCatalogStorefront({ productSlug: created.slug });
+          showToast('Товар создан');
+          router.replace(`/admin/catalog/products/${created.id}`);
+          router.refresh();
+          return;
+        }
+
+        const refreshed = await adminBackendJson<AdminProduct>(
+          `catalog/admin/products/${productId}`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify(
+              productPayload(nextCollectionIds, starImageForSave),
+            ),
+          },
+        );
+        uploadedThisSave = null;
+        setSlug(refreshed.slug);
+        setVariants(refreshed.variants ?? []);
+        setImages(refreshed.images ?? []);
+        setCatalogTagIds(new Set(refreshed.catalogTagIds ?? []));
+        setCollectionIds(new Set(refreshed.collectionIds ?? []));
+        setProductSetIds(new Set(refreshed.productSetIds ?? []));
+        setCardAromaLabelsText((refreshed.cardAromaLabels ?? []).join('\n'));
+        setBadgeLabel(refreshed.badgeLabel ?? '');
+        setChoiceStarName(refreshed.choiceStarName ?? '');
+        setChoiceStarDate(
+          refreshed.choiceStarDate
+            ? String(refreshed.choiceStarDate).slice(0, 10)
+            : '',
+        );
+        setChoiceStarImageFile(null);
+        setChoiceStarImageUrl(
+          refreshed.choiceStarImageUrl
+            ? toRelativeMediaPath(refreshed.choiceStarImageUrl) ||
+                refreshed.choiceStarImageUrl
+            : null,
+        );
+        setAromaNotes(aromaNotesFromApi(refreshed.aromaNotes));
+        setAromaDefsReloadToken((t) => t + 1);
+        setDirty(false);
+        await revalidateCatalogStorefront({ productSlug: refreshed.slug });
+        showToast('Сохранено');
+        router.refresh();
+      } catch (saveErr) {
+        if (uploadedThisSave) discardCatalogUploads([uploadedThisSave]);
+        throw saveErr;
+      }
     } catch (err) {
       setError(
         err instanceof AdminBackendRequestError || err instanceof Error
@@ -326,6 +547,7 @@ export function ProductFormClient({ productId }: { productId?: string }) {
       );
     } finally {
       setSaving(false);
+      setUploadingChoiceStar(false);
     }
   }
 
@@ -849,6 +1071,106 @@ export function ProductFormClient({ productId }: { productId?: string }) {
           </div>
 
           <div className={pn.placementBlock}>
+            <h3 className={`${styles.groupHeading} ${pn.placementGroupHeading}`}>
+              Выбор ⭐
+            </h3>
+            <div className={styles.labelCheckboxRow}>
+              <AdminCheckbox
+                id="product-in-choice"
+                className={styles.adminCheckboxForm}
+                checked={inChoiceCollection}
+                disabled={!choiceCollection}
+                onChange={(e) => setInChoiceCollection(e.target.checked)}
+                aria-label="Показывать в блоке Выбор"
+              />
+              <label htmlFor="product-in-choice">Показывать в блоке Выбор ⭐</label>
+            </div>
+            {!choiceCollection ? (
+              <p className={pn.placementHint}>
+                Коллекция со slug <code>vybor</code> не найдена — создайте её в
+                каталоге коллекций.
+              </p>
+            ) : (
+              <p className={pn.placementHint}>
+                Один клик добавляет или убирает товар из коллекции «
+                {choiceCollection.name}».
+              </p>
+            )}
+
+            {inChoiceCollection ? (
+              <>
+                <AdminTextField
+                  label="Имя знаменитости"
+                  value={choiceStarName}
+                  onChange={(e) => {
+                    markDirty();
+                    setChoiceStarName(e.target.value);
+                  }}
+                  maxLength={200}
+                  placeholder="Анна"
+                  required
+                />
+                <AdminTextField
+                  label="Дата"
+                  type="date"
+                  value={choiceStarDate}
+                  onChange={(e) => {
+                    markDirty();
+                    setChoiceStarDate(e.target.value);
+                  }}
+                />
+                <div className={styles.coverBlock}>
+                  <p className={styles.coverLabel}>Фото знаменитости</p>
+                  {choiceStarPreviewSrc ? (
+                    <div className={styles.coverPreviewRow}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className={styles.coverPreview}
+                        src={choiceStarPreviewSrc}
+                        alt=""
+                      />
+                      <AdminCompactBtn
+                        type="button"
+                        variant="outline"
+                        onClick={clearChoiceStarImage}
+                        disabled={uploadingChoiceStar || saving}
+                      >
+                        Убрать
+                      </AdminCompactBtn>
+                    </div>
+                  ) : (
+                    <p className={styles.muted}>
+                      Не выбрано — возьмётся фото товара. Файл уйдёт на сервер
+                      только при сохранении.
+                    </p>
+                  )}
+                  <input
+                    ref={choiceStarInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className={styles.coverFileInput}
+                    disabled={uploadingChoiceStar || saving}
+                    onChange={(e) =>
+                      pickChoiceStarImage(e.target.files?.[0] ?? null)
+                    }
+                  />
+                  {uploadingChoiceStar ? (
+                    <p className={styles.muted}>Загрузка на сервер…</p>
+                  ) : null}
+                </div>
+                <ChoiceStarPreview
+                  productName={name}
+                  price={previewPrice}
+                  productImageUrl={productCoverUrl}
+                  starName={choiceStarName}
+                  starDate={choiceStarDate}
+                  starImageUrl={choiceStarPreviewSrc}
+                />
+              </>
+            ) : null}
+          </div>
+
+          <div className={pn.placementBlock}>
             <h3 className={`${styles.groupHeading} ${pn.placementGroupHeading}`}>Коллекции</h3>
             <div className={pn.additionalCatsWrap}>
               <AdminSelect
@@ -870,28 +1192,24 @@ export function ProductFormClient({ productId }: { productId?: string }) {
                   </option>
                 ))}
               </AdminSelect>
-              {collectionIds.size > 0 ? (
+              {collectionsForChips.length > 0 ? (
                 <AdminPillChipList aria-label="Выбранные коллекции">
-                  {Array.from(collectionIds).map((id) => {
-                    const row = collections.find((x) => x.id === id);
-                    if (!row) return null;
-                    return (
-                      <AdminPillChip
-                        key={id}
-                        onRemove={() => {
-                          markDirty();
-                          setCollectionIds((prev) => {
-                            const next = new Set(prev);
-                            next.delete(id);
-                            return next;
-                          });
-                        }}
-                        removeAriaLabel={`Убрать «${row.name}»`}
-                      >
-                        {row.name}
-                      </AdminPillChip>
-                    );
-                  })}
+                  {collectionsForChips.map((row) => (
+                    <AdminPillChip
+                      key={row.id}
+                      onRemove={() => {
+                        markDirty();
+                        setCollectionIds((prev) => {
+                          const next = new Set(prev);
+                          next.delete(row.id);
+                          return next;
+                        });
+                      }}
+                      removeAriaLabel={`Убрать «${row.name}»`}
+                    >
+                      {row.name}
+                    </AdminPillChip>
+                  ))}
                 </AdminPillChipList>
               ) : (
                 <p className={styles.muted} style={{ marginTop: 0 }}>

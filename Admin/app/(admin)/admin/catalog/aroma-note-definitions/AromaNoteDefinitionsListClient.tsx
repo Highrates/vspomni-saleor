@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
-import { toRelativeMediaPath } from '@vspomni/hero-types';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { AdminCompactBtn, AdminCompactBtnLink } from '@/components/AdminCompactBtn/AdminCompactBtn';
 import { AdminListShell } from '@/components/admin/AdminListShell/AdminListShell';
 import { AdminSearchBox } from '@/components/SearchBox/SearchBox';

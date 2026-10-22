@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { catalogSellablePrices } from './catalog-price.util';
 
 export const variantInclude = {
@@ -151,6 +152,13 @@ export function serializeProduct(
     extraHtml: p.extraHtml,
     cardAromaLabels: p.cardAromaLabels ?? [],
     badgeLabel: p.badgeLabel ?? null,
+    choiceStarName: p.choiceStarName ?? null,
+    choiceStarDate: p.choiceStarDate
+      ? p.choiceStarDate.toISOString().slice(0, 10)
+      : null,
+    choiceStarImageUrl: p.choiceStarImageUrl
+      ? toRelativeMediaPath(p.choiceStarImageUrl) || p.choiceStarImageUrl
+      : null,
     active: p.active,
     excludeFromCatalog: p.excludeFromCatalog,
     metaTitle: p.metaTitle,

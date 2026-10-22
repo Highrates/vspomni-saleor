@@ -107,9 +107,6 @@ export default function Footer() {
               {item.label}
             </Link>
           ))}
-          <Link href="/#vse-aromaty" className={footerNavLinkClass}>
-            Все ароматы
-          </Link>
         </nav>
 
         <div className="text-left flex flex-col gap-3 md:gap-4 items-start min-w-0 shrink-0">

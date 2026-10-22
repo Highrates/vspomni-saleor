@@ -8,27 +8,38 @@ import { getAllArticles } from '@/graphql/queries/articles.service'
 import { ArticleNode } from '@/graphql/queries/articles.service'
 import { formatArticleDate, extractArticleText } from '@/lib/articles'
 
-export default function NewsBlock() {
-  const [articles, setArticles] = useState<ArticleNode[]>([]);
-  const [loading, setLoading] = useState(true);
+type Props = {
+  /** Статьи с RSC (обычно 2) — без client waterfall. */
+  initialArticles?: ArticleNode[]
+}
+
+export default function NewsBlock({ initialArticles }: Props) {
+  const fromServer = initialArticles !== undefined
+  const [articles, setArticles] = useState<ArticleNode[]>(initialArticles ?? [])
+  const [loading, setLoading] = useState(!fromServer)
 
   useEffect(() => {
+    if (fromServer) {
+      setArticles(initialArticles ?? [])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
     async function fetchArticles() {
       try {
-        setLoading(true);
-        // Получаем статьи, можно передать slug типа страницы для фильтрации
-        // Например: getAllArticles(2, 'article') или getAllArticles(2, 'news')
-        const data = await getAllArticles(2);
-        setArticles(data);
+        const data = await getAllArticles(2)
+        if (!cancelled) setArticles(data)
       } catch (error) {
-        console.error('Error fetching articles:', error);
+        console.error('Error fetching articles:', error)
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false)
       }
     }
-
-    fetchArticles();
-  }, []);
+    void fetchArticles()
+    return () => {
+      cancelled = true
+    }
+  }, [fromServer, initialArticles])
 
   if (loading) {
     return (
@@ -77,9 +88,9 @@ export default function NewsBlock() {
 
       <div className="grid md:grid-cols-2 grid-cols-1 gap-5">
         {articles.map((article) => {
-          const date = formatArticleDate(article.publishedAt || article.created);
-          const shortText = extractArticleText(article.content);
-          const imageUrl = article.imageUrl ?? '';
+          const date = formatArticleDate(article.publishedAt || article.created)
+          const shortText = extractArticleText(article.content)
+          const imageUrl = article.imageUrl ?? ''
 
           return (
             <NewsCard
@@ -90,7 +101,7 @@ export default function NewsBlock() {
               imageUrl={imageUrl}
               articleUrl={`/article/${article.slug}`}
             />
-          );
+          )
         })}
       </div>
     </section>

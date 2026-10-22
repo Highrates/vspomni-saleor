@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { DiscountsPublicService } from '../discounts/discounts-public.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CatalogVisibilityService } from '../user-groups/catalog-visibility.service';
@@ -142,7 +143,9 @@ function toProductCard(p: ProductCardSource) {
     choiceStarDate: p.choiceStarDate
       ? p.choiceStarDate.toISOString().slice(0, 10)
       : null,
-    choiceStarImageUrl: p.choiceStarImageUrl ?? null,
+    choiceStarImageUrl: p.choiceStarImageUrl
+      ? toRelativeMediaPath(p.choiceStarImageUrl) || p.choiceStarImageUrl
+      : null,
     cardAromaLabels: p.cardAromaLabels ?? [],
     badgeLabel: p.badgeLabel?.trim() || null,
   };
@@ -803,9 +806,19 @@ export class CatalogPublicService {
     };
   }
 
-  async listCategories() {
+  /**
+   * Дерево категорий (или плоский subset по `slugs` — для home picks без полного payload).
+   */
+  async listCategories(slugs?: string[]) {
+    const hidden = new Set<string>(PUBLIC_HIDDEN_CATEGORY_SLUGS);
+    const slugFilter = (slugs ?? [])
+      .map((s) => s.trim())
+      .filter((s) => Boolean(s) && !hidden.has(s))
+      .slice(0, 20);
     const rows = await this.prisma.category.findMany({
-      where: { slug: { notIn: [...PUBLIC_HIDDEN_CATEGORY_SLUGS] } },
+      where: slugFilter.length
+        ? { slug: { in: slugFilter } }
+        : { slug: { notIn: [...PUBLIC_HIDDEN_CATEGORY_SLUGS] } },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       select: {
         id: true,
@@ -827,6 +840,24 @@ export class CatalogPublicService {
         },
       },
     });
+
+    /** Узкий ответ: только запрошенные slug, без дерева children. */
+    if (slugFilter.length) {
+      const bySlug = new Map(rows.map((r) => [r.slug, r]));
+      return {
+        items: slugFilter
+          .map((slug) => bySlug.get(slug))
+          .filter((r): r is (typeof rows)[number] => Boolean(r))
+          .map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            parentId: c.parentId,
+            imageUrl: c.coverImageUrl?.trim() || c.products[0]?.images[0]?.url || null,
+            children: [] as [],
+          })),
+      };
+    }
 
     const roots = rows.filter((r) => !r.parentId);
     const byParent = new Map<string, typeof rows>();

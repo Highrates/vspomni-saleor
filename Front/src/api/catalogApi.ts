@@ -2,11 +2,16 @@
  * Каталог Nest `/api/v1/catalog/*` + адаптеры под типы Vspomni Front
  * (`ProductCardItem`, `StarChoiceItem`, `ProductDetailNode`).
  */
+import {
+  CHOICE_COLLECTION_SLUG as SHARED_CHOICE_COLLECTION_SLUG,
+  NEW_COLLECTION_SLUG as SHARED_NEW_COLLECTION_SLUG,
+  POPULAR_COLLECTION_SLUG as SHARED_POPULAR_COLLECTION_SLUG,
+  formatChoiceStarDate,
+} from '@vspomni/catalog-constants'
 import { ApiError, apiFetch, apiJson, uploadsUrl } from '@/api/apiClient'
 import type { ProductDetailNode } from '@/graphql/types/product.types'
 import type { ProductCardItem, StarChoiceItem } from '@/types/product'
 import { htmlToRawEditorJsonString } from '@/lib/nestContent'
-import { formatDate } from '@/lib/functions'
 import { buildProductNotes } from '@/lib/product/aromaNotes'
 
 // ——— Nest raw types ———
@@ -196,11 +201,11 @@ export type CartSyncResponse = {
 // ——— Слаги коллекций витрины ———
 
 /** Коллекция «Выбор ⭐» */
-export const CHOICE_COLLECTION_SLUG = 'vybor'
+export const CHOICE_COLLECTION_SLUG = SHARED_CHOICE_COLLECTION_SLUG
 /** Популярное (диффузоры) */
-export const POPULAR_COLLECTION_SLUG = 'populiarnye'
+export const POPULAR_COLLECTION_SLUG = SHARED_POPULAR_COLLECTION_SLUG
 /** Кое-что новое для вас */
-export const NEW_COLLECTION_SLUG = 'koe-chto-novoe-dlia-vas'
+export const NEW_COLLECTION_SLUG = SHARED_NEW_COLLECTION_SLUG
 
 // ——— Caches ———
 
@@ -294,7 +299,7 @@ export function cardToStarChoiceItem(card: NestProductCard): StarChoiceItem {
     oldPrice:
       card.oldPrice != null && card.oldPrice > card.price ? card.oldPrice : 0,
     star: (card.choiceStarName || '').trim(),
-    date: formatDate(card.choiceStarDate),
+    date: formatChoiceStarDate(card.choiceStarDate),
     slug: card.slug,
     categorySlug: card.categorySlug?.trim() || card.category?.slug?.trim() || undefined,
   }
@@ -537,6 +542,21 @@ export async function fetchCategories(): Promise<{ items: NestCategory[] }> {
       })
   }
   return categoriesInflight
+}
+
+/** Узкий список по slug (home Coming Soon / gift) — без полного дерева. */
+export async function fetchCategoriesBySlugs(
+  slugs: string[],
+): Promise<{ items: NestCategory[] }> {
+  const unique = [...new Set(slugs.map((s) => s.trim()).filter(Boolean))].slice(
+    0,
+    20,
+  )
+  if (!unique.length) return { items: [] }
+  const res = await apiFetch<{ items: NestCategory[] }>('/catalog/categories', {
+    query: { slugs: unique.join(',') },
+  })
+  return { items: res.items ?? [] }
 }
 
 /** Meta (slug/name/cover). Backend по умолчанию без products — чипы каталога. */

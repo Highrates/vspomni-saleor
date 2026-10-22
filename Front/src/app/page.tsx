@@ -1,29 +1,66 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { buildPageMetadata } from '@/lib/seo/buildPageMetadata'
 import { faqPageJsonLd } from '@/lib/seo/faqJsonLd'
 import Hero from '@/components/home/Hero'
-import ProductGrid from '@/components/home/ProductGrid'
 import GiftPackagesBanner from '@/components/home/GiftPackagesBanner'
 import CollectionNoseBlock from '@/components/home/CollectionNoseBlock'
 import StoryBlock from '@/components/features/StoryBlock'
 import PopularScentsAlt from '@/components/features/PopularScentsAlt'
 import ComingSoon from '@/components/features/ComingSoon'
 import Choice from '@/components/home/Choice'
-import ChannelOneSection from '@/components/home/ChannelOneSection'
-import NewsBlock from '@/components/news/NewsBlock'
 import FaqBlock from '@/components/home/FaqBlock'
 import FaqNoscript from '@/components/home/FaqNoscript'
-import HistoryLine from '@/components/home/HistoryLine'
 import CandlesSoonBanner from '@/components/home/CandlesSoonBanner'
-import {
-  pickComingSoonCategories,
-  pickGiftPackagesCategory,
-} from '@/lib/category/catalogCategories'
-import { loadAllCategories } from '@/lib/category/loadAllCategories'
+import { loadHomeCategoryPicks } from '@/lib/category/loadHomeCategoryPicks'
 import { getCandlesSoonBanner } from '@/graphql/queries/candlesSoon.service'
-import { getChoiceProducts } from '@/graphql/queries/product.service'
+import {
+  getChoiceProducts,
+  getNoseHomeProducts,
+  getPopularProducts,
+} from '@/graphql/queries/product.service'
 import { getAllFaqs } from '@/graphql/queries/faq.service'
+import { getAllStories } from '@/graphql/queries/stories.service'
+import { getAllAromas } from '@/graphql/queries/allAromas.service'
+import { getAllArticles } from '@/graphql/queries/articles.service'
 import { loadHeroSlides } from '@/lib/hero/loadHeroSlides'
+
+const ChannelOneSection = dynamic(
+  () => import('@/components/home/ChannelOneSection'),
+  {
+    loading: () => (
+      <section
+        className="mt-4 mb-4 min-h-[200px] sm:mt-6 sm:mb-6 sm:min-h-[300px] md:mt-8 md:mb-8 lg:mt-10 lg:mb-10"
+        aria-hidden
+      />
+    ),
+  },
+)
+
+const HistoryLine = dynamic(() => import('@/components/home/HistoryLine'), {
+  loading: () => (
+    <section
+      className="mt-4 mb-4 min-h-[170px] sm:mt-6 sm:mb-6 sm:min-h-[240px] md:mt-8 md:mb-8 md:min-h-[300px] lg:mt-10 lg:mb-10 lg:min-h-[340px]"
+      aria-hidden
+    />
+  ),
+})
+
+const ProductGrid = dynamic(() => import('@/components/home/ProductGrid'), {
+  loading: () => (
+    <section
+      id="vse-aromaty"
+      className="mt-4 mb-2 min-h-[120px] scroll-mt-20 sm:mt-6 sm:mb-3 md:mt-8 md:mb-4 lg:mt-10 lg:mb-5"
+      aria-hidden
+    />
+  ),
+})
+
+const NewsBlock = dynamic(() => import('@/components/news/NewsBlock'), {
+  loading: () => (
+    <section className="mb-4 min-h-[200px] sm:mb-6 md:mb-8 lg:mb-10" aria-hidden />
+  ),
+})
 
 // Обновляем главную страницу по данным моделей раз в минуту
 export const revalidate = 60
@@ -40,17 +77,30 @@ export const metadata: Metadata = buildPageMetadata({
 })
 
 export default async function Home() {
-  const [candlesSoon, choiceProducts, allCategories, faqs, heroSlides] =
-    await Promise.all([
-      getCandlesSoonBanner().catch(() => null),
-      getChoiceProducts().catch(() => []),
-      loadAllCategories(),
-      getAllFaqs().catch(() => []),
-      loadHeroSlides().catch(() => []),
-    ])
+  const [
+    candlesSoon,
+    choiceProducts,
+    categoryPicks,
+    faqs,
+    heroSlides,
+    stories,
+    popularProducts,
+    allAromas,
+    noseProducts,
+    newsArticles,
+  ] = await Promise.all([
+    getCandlesSoonBanner().catch(() => null),
+    getChoiceProducts().catch(() => []),
+    loadHomeCategoryPicks(),
+    getAllFaqs().catch(() => []),
+    loadHeroSlides().catch(() => []),
+    getAllStories().catch(() => []),
+    getPopularProducts().catch(() => []),
+    getAllAromas().catch(() => []),
+    getNoseHomeProducts().catch(() => []),
+    getAllArticles(2).catch(() => []),
+  ])
 
-  const comingSoonCategories = pickComingSoonCategories(allCategories)
-  const giftPackagesCategory = pickGiftPackagesCategory(allCategories)
   const faqJsonLd = faqPageJsonLd(faqs)
 
   return (
@@ -63,20 +113,24 @@ export default async function Home() {
       ) : null}
       <FaqNoscript faqs={faqs} />
       <Hero initialSlides={heroSlides} />
-      <StoryBlock />
-      <PopularScentsAlt title={HOME_TITLE} heading="h1" />
-      <ComingSoon initialCategories={comingSoonCategories} />
+      <StoryBlock initialStories={stories} />
+      <PopularScentsAlt
+        title={HOME_TITLE}
+        heading="h1"
+        initialProducts={popularProducts}
+      />
+      <ComingSoon initialCategories={categoryPicks.comingSoon} />
       <Choice initialProducts={choiceProducts} />
       <ChannelOneSection />
       <HistoryLine />
-      <ProductGrid />
-      <GiftPackagesBanner initialCategory={giftPackagesCategory} />
-      <CollectionNoseBlock />
+      <ProductGrid initialItems={allAromas} />
+      <GiftPackagesBanner initialCategory={categoryPicks.giftPackages} />
+      <CollectionNoseBlock initialProducts={noseProducts} />
       <CandlesSoonBanner
         imageUrl={candlesSoon?.imageUrl ?? null}
         bannerText={candlesSoon?.bannerText ?? candlesSoon?.title ?? null}
       />
-      <NewsBlock />
+      <NewsBlock initialArticles={newsArticles} />
       <FaqBlock initialFaqs={faqs} />
     </>
   )

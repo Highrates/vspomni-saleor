@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run build -w @vspomni/hero-types --prefix ..",
+    "prebuild": "npm run build -w @vspomni/media-path -w @vspomni/catalog-constants -w @vspomni/hero-types --prefix ..",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@vspomni/catalog-constants": "file:../packages/catalog-constants",
     "@vspomni/hero-types": "file:../packages/hero-types",
+    "@vspomni/media-path": "file:../packages/media-path",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.4",

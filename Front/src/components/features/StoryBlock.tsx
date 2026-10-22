@@ -1,9 +1,15 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
-import StoryViewer, { type StoryGroup } from './StoryViewer'
+import type { StoryGroup } from './StoryViewer'
 import StoryCirclePreview from './StoryCirclePreview'
 import { getAllStories, StoryNode } from '@/graphql/queries/stories.service'
+
+const StoryViewer = dynamic(() => import('./StoryViewer'), {
+  ssr: false,
+  loading: () => null,
+})
 
 function getCirclePreviewSources(story: StoryNode) {
   const imageUrl =
@@ -51,31 +57,46 @@ function StoryCircle({
   )
 }
 
-export default function StoryBlock() {
+type Props = {
+  /** Сторис с RSC — без client waterfall. */
+  initialStories?: StoryNode[]
+}
+
+export default function StoryBlock({ initialStories }: Props) {
+  const fromServer = initialStories !== undefined
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null)
   const [initialStoryIndex, setInitialStoryIndex] = useState(0)
-  const [stories, setStories] = useState<StoryNode[]>([])
-  const [loading, setLoading] = useState(true)
+  const [stories, setStories] = useState<StoryNode[]>(initialStories ?? [])
+  const [loading, setLoading] = useState(!fromServer)
 
   useEffect(() => {
+    if (fromServer) {
+      setStories(initialStories ?? [])
+      setLoading(false)
+      return
+    }
+    let cancelled = false
     const fetchStories = async () => {
       try {
         const data = await getAllStories()
-        setStories(data)
+        if (!cancelled) setStories(data)
       } catch (error) {
         console.error('Failed to fetch stories:', error)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
-    fetchStories()
-  }, [])
+    void fetchStories()
+    return () => {
+      cancelled = true
+    }
+  }, [fromServer, initialStories])
 
   if (loading) {
     return (
       <section className="mt-4 mb-4 px-0 sm:mt-5 sm:mb-5 sm:px-6 md:mt-6 md:mb-6 md:px-8 lg:mt-8">
-        <div className="flex justify-center">
-          <div className="flex gap-3 overflow-x-auto px-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max min-w-full justify-center gap-3 px-0 pb-1 sm:gap-[14px] md:gap-4 lg:gap-[18px]">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex shrink-0 flex-col items-center gap-2">
                 <div className="h-[70px] w-[70px] animate-pulse rounded-full bg-neutral-200 sm:h-20 sm:w-20 md:h-[88px] md:w-[88px] lg:h-24 lg:w-24" />
@@ -140,15 +161,9 @@ export default function StoryBlock() {
   return (
     <>
       <section className="mt-4 mb-4 px-0 sm:mt-5 sm:mb-5 sm:px-6 md:mt-6 md:mb-6 md:px-8 lg:mt-8">
-        {/* Mobile: горизонтальный скролл */}
-        <div className="flex gap-3 overflow-x-auto px-0 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
-          {renderCircles('m')}
-        </div>
-
-        {/* Desktop: всегда по центру (каждый ряд независимо) */}
-        <div className="hidden w-full justify-center sm:flex">
-          <div className="flex w-full flex-wrap justify-center gap-[14px] md:gap-4 lg:gap-[18px]">
-            {renderCircles('d')}
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max min-w-full justify-center gap-3 px-0 pb-1 sm:gap-[14px] md:gap-4 lg:gap-[18px]">
+            {renderCircles('all')}
           </div>
         </div>
       </section>

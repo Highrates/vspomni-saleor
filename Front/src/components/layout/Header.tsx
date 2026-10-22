@@ -348,12 +348,6 @@ export default function Header({ variant = 'default' }: HeaderProps) {
                   </Link>
                 ))}
                 <Link
-                  href="/#vse-aromaty"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Все ароматы
-                </Link>
-                <Link
                   href="https://t.me/vspomni_corp"
                   target="_blank"
                   rel="noopener noreferrer"

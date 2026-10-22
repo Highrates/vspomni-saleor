@@ -37,7 +37,7 @@ export default function ChoiceCard({ product }: ChoiceCardProps) {
           <div className="relative w-[57px] h-[52px] rounded-[4px] overflow-hidden bg-gray-50 shrink-0">
             <Image
               src={thumbSrc}
-              alt={product.star}
+              alt={product.name}
               fill
               sizes="57px"
               className="object-cover"

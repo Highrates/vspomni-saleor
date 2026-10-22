@@ -2,15 +2,26 @@
 
 import { useEffect, useRef } from 'react'
 import AllAromasItem from '@/components/home/AllAromasItem'
+import type { AllAromasItem as AllAromasItemType } from '@/graphql/queries/allAromas.service'
 import { useAllAromasStore } from '@/stores/useAllAromas'
 
-export default function ProductGrid() {
-  const { items, fetchItems } = useAllAromasStore()
+type Props = {
+  /** Ароматы с RSC — без client waterfall. */
+  initialItems?: AllAromasItemType[]
+}
+
+export default function ProductGrid({ initialItems }: Props) {
+  const { items, setItems, fetchItems } = useAllAromasStore()
   const sectionRef = useRef<HTMLElement>(null)
+  const fromServer = initialItems !== undefined
 
   useEffect(() => {
-    fetchItems()
-  }, [])
+    if (fromServer) {
+      setItems(initialItems ?? [])
+      return
+    }
+    void fetchItems()
+  }, [fromServer, initialItems, setItems, fetchItems])
 
   // При переходе с другой страницы по «Ароматы» (/#vse-aromaty) скролл срабатывает до отрисовки — повторяем после монтирования
   useEffect(() => {
@@ -22,6 +33,8 @@ export default function ProductGrid() {
     }, 150)
     return () => clearTimeout(timer)
   }, [])
+
+  const list = items.length > 0 ? items : initialItems ?? []
 
   return (
     <section
@@ -37,7 +50,7 @@ export default function ProductGrid() {
       </div>
       {/* Mobile: 2 кол.; sm–md: 3; lg+: 5 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5 md:gap-6 p-1 sm:p-2 -m-1 sm:-m-2">
-        {items.map((item) => (
+        {list.map((item) => (
           <div key={item.id} className="w-full min-w-0">
             <AllAromasItem item={item} />
           </div>

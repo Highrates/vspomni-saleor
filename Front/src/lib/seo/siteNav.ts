@@ -18,8 +18,9 @@ export const SITE_CATEGORY_NAV: readonly SiteNavLink[] = [
   { href: '/category/podarochnye-pakety', label: 'Подарки' },
 ] as const
 
-/** Полный первичный ряд: каталог + категории. */
+/** Полный первичный ряд: каталог + категории + все ароматы. */
 export const SITE_PRIMARY_NAV: readonly SiteNavLink[] = [
   { href: '/catalog', label: 'Каталог' },
   ...SITE_CATEGORY_NAV,
+  { href: '/#vse-aromaty', label: 'Все ароматы' },
 ] as const

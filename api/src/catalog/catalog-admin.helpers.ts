@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { PrismaService } from '../prisma/prisma.service';
 
 type NullableStr = string | null | undefined;
@@ -59,6 +60,41 @@ export function normalizeCardAromaLabels(
     if (out.length >= 12) break;
   }
   return out;
+}
+
+/**
+ * Дата «Выбор ⭐» (день без времени).
+ * `undefined` — поле не трогаем; `null`/пусто — очистить; иначе Date (UTC noon).
+ */
+export function parseOptionalDateOnly(
+  v: string | null | undefined,
+): Date | null | undefined {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (m) {
+    const y = Number(m[1]);
+    const mo = Number(m[2]);
+    const d = Number(m[3]);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) {
+      throw new BadRequestException('Некорректная дата «Выбор ⭐»');
+    }
+    return new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+  }
+  const parsed = new Date(s);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new BadRequestException('Некорректная дата «Выбор ⭐»');
+  }
+  return parsed;
+}
+
+/** Absolute Nest URL → `/uploads/…` для хранения в БД. */
+export function normalizeStoredUploadUrl(v: string | null): string | null {
+  if (!v) return null;
+  const rel = toRelativeMediaPath(v);
+  return rel || v;
 }
 
 /** Используется коллекциями и наборами товаров при валидации productIds. */

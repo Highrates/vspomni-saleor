@@ -1,12 +1,11 @@
 'use client'
 
 import ChoiceCard from './ChoiceCard'
-import { useStarChoiceStore } from '@/stores/useStarChoice'
 import { useEffect, useState, type ComponentType } from 'react'
 import type { StarChoiceItem } from '@/types/product'
 
 interface ChoiceProps {
-  /** Товары с сервера — карточки видны сразу; клиентский fetch подстраховывает */
+  /** Товары с RSC — единственный источник данных */
   initialProducts?: StarChoiceItem[]
 }
 
@@ -30,19 +29,8 @@ function ChoiceScrollFallback({ products }: { products: StarChoiceItem[] }) {
 }
 
 export default function Choice({ initialProducts = [] }: ChoiceProps) {
-  const { products, fetchProducts, setProducts } = useStarChoiceStore()
   const [SwiperComponent, setSwiperComponent] =
     useState<ComponentType<{ products: StarChoiceItem[] }> | null>(null)
-
-  const list =
-    products.length > 0 ? products : initialProducts
-
-  useEffect(() => {
-    if (initialProducts.length > 0) {
-      setProducts(initialProducts)
-    }
-    void fetchProducts()
-  }, [initialProducts, fetchProducts, setProducts])
 
   useEffect(() => {
     let cancelled = false
@@ -63,10 +51,10 @@ export default function Choice({ initialProducts = [] }: ChoiceProps) {
         <span className="text-[20px] sm:text-[24px] leading-none">⭐</span>
       </h2>
 
-      {list.length === 0 ? null : SwiperComponent ? (
-        <SwiperComponent products={list} />
+      {initialProducts.length === 0 ? null : SwiperComponent ? (
+        <SwiperComponent products={initialProducts} />
       ) : (
-        <ChoiceScrollFallback products={list} />
+        <ChoiceScrollFallback products={initialProducts} />
       )}
     </section>
   )

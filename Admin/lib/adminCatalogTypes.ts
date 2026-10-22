@@ -109,6 +109,12 @@ export type AdminProduct = {
   aromaNotes?: AdminAromaNote[];
   /** Лейбл на карточке витрины (NEW и т.п.) */
   badgeLabel?: string | null;
+  /** «Выбор ⭐»: имя знаменитости */
+  choiceStarName?: string | null;
+  /** «Выбор ⭐»: дата YYYY-MM-DD */
+  choiceStarDate?: string | null;
+  /** «Выбор ⭐»: фото знаменитости */
+  choiceStarImageUrl?: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
   ogImageUrl: string | null;

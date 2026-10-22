@@ -12,18 +12,28 @@ type Props = {
   title?: string
   /** На главной — H1 для SEO; на остальных страницах H2 */
   heading?: 'h1' | 'h2'
+  /** Товары с RSC (главная) — без client fetch. */
+  initialProducts?: ProductCardItem[]
 }
 
 export default function PopularScentsAlt({
   title = 'Диффузоры для дома',
   heading = 'h2',
+  initialProducts,
 }: Props) {
-  const { greed, fetchGrid } = usePopularScentsStore()
+  const { greed, setGrid, fetchGrid } = usePopularScentsStore()
   const Heading = heading
+  const fromServer = initialProducts !== undefined
 
   useEffect(() => {
-    fetchGrid()
-  }, [])
+    if (fromServer) {
+      setGrid(initialProducts ?? [])
+      return
+    }
+    void fetchGrid()
+  }, [fromServer, initialProducts, setGrid, fetchGrid])
+
+  const list = (greed.length > 0 ? greed : initialProducts ?? []).slice(0, 4)
 
   return (
     <section className="mb-4 mt-4 px-0 py-2 sm:mb-6 sm:mt-6 sm:px-6 md:mb-8 md:mt-8 md:px-8 lg:mb-10 lg:mt-10">
@@ -50,7 +60,7 @@ export default function PopularScentsAlt({
         </Link>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {greed.slice(0, 4).map((product: ProductCardItem, index: number) => (
+        {list.map((product: ProductCardItem) => (
           <ProductCard product={product} key={product.id} />
         ))}
       </div>

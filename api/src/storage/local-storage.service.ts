@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { toRelativeMediaPath } from '@vspomni/hero-types';
+import { toRelativeMediaPath } from '@vspomni/media-path';
 import { mkdir, readdir, stat, unlink, writeFile } from 'fs/promises';
 import { join, extname } from 'path';
 import { randomBytes } from 'crypto';

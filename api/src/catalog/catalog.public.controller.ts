@@ -115,8 +115,15 @@ export class CatalogPublicController {
   }
 
   @Get('categories')
-  listCategories() {
-    return this.catalogPublic.listCategories();
+  listCategories(@Query('slugs') slugs?: string) {
+    const slugList = slugs
+      ?.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 20);
+    return this.catalogPublic.listCategories(
+      slugList?.length ? slugList : undefined,
+    );
   }
 
   @Get('tags')

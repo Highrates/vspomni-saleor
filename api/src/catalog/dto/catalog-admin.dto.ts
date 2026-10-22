@@ -1,7 +1,10 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsDateString,
   IsIn,
   IsInt,
   IsNumber,
@@ -10,8 +13,19 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
+
+/** Orphan cleanup после неудачного save (upload без записи в БД). */
+export class DiscardCatalogUploadsDto {
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(50)
+  @IsString({ each: true })
+  @MaxLength(2000, { each: true })
+  urls!: string[];
+}
 
 /** Пирамида нот на PDP: BASIC / MIDDLE / HEAD. definitionId или name (find-or-create). */
 export class ProductAromaNoteInputDto {
@@ -412,6 +426,24 @@ export class CreateProductDto {
   @MaxLength(32)
   badgeLabel?: string | null;
 
+  /** «Выбор ⭐»: имя знаменитости */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  choiceStarName?: string | null;
+
+  /** «Выбор ⭐»: дата (YYYY-MM-DD или ISO). null/пусто — очистить. */
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && v !== '')
+  @IsDateString()
+  choiceStarDate?: string | null;
+
+  /** «Выбор ⭐»: фото знаменитости */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  choiceStarImageUrl?: string | null;
+
   @IsOptional()
   @IsBoolean()
   active?: boolean;
@@ -573,6 +605,24 @@ export class UpdateProductDto {
   @IsString()
   @MaxLength(32)
   badgeLabel?: string | null;
+
+  /** «Выбор ⭐»: имя знаменитости */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  choiceStarName?: string | null;
+
+  /** «Выбор ⭐»: дата (YYYY-MM-DD или ISO). null/пусто — очистить. */
+  @IsOptional()
+  @ValidateIf((_, v) => v != null && v !== '')
+  @IsDateString()
+  choiceStarDate?: string | null;
+
+  /** «Выбор ⭐»: фото знаменитости */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  choiceStarImageUrl?: string | null;
 
   @IsOptional()
   @IsBoolean()
