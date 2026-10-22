@@ -159,13 +159,13 @@ export default function Header({ variant = 'default' }: HeaderProps) {
             </Link>
           )}
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu — без жёсткого max-w: после «Все ароматы» 52rem обрезало «Каталог» */}
           <div
-            className={`hidden md:flex items-center justify-center rounded-full border px-3 lg:px-6 xl:px-8 shrink-0 max-w-[min(100%,52rem)] ${getMenuBackground()}`}
+            className={`hidden md:flex shrink-0 items-center justify-center rounded-full border px-5 lg:px-7 xl:px-9 ${getMenuBackground()}`}
             style={{ height: '46px', width: 'auto' }}
           >
             <nav
-              className={`flex items-center gap-2.5 lg:gap-4 xl:gap-6 text-[13px] lg:text-sm xl:text-[15px] font-medium ${isOverlay && !scrolled ? 'text-white' : 'text-black/80'}`}
+              className={`flex items-center gap-2.5 lg:gap-3.5 xl:gap-5 text-[13px] lg:text-sm xl:text-[15px] font-medium ${isOverlay && !scrolled ? 'text-white' : 'text-black/80'}`}
               aria-label="Основное меню"
             >
               {SITE_PRIMARY_NAV.map((item) => (
