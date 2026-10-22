@@ -1,8 +1,9 @@
 'use client'
 
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination } from 'swiper/modules'
+import { Navigation, Pagination } from 'swiper/modules'
 import 'swiper/css'
+import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 import Image from 'next/image'
 import {
@@ -31,15 +32,17 @@ export default function HeroCarousel({
     imagePosition === 'top'
       ? 'object-cover object-top'
       : 'object-cover object-center'
+  const multi = slides.length > 1
 
   return (
     <Swiper
-      modules={[Pagination]}
+      modules={[Pagination, Navigation]}
       pagination={{
         clickable: true,
         dynamicBullets: true,
         enabled: paginationEnabled,
       }}
+      navigation={multi}
       spaceBetween={0}
       slidesPerView={1}
       grabCursor

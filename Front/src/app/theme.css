@@ -83,6 +83,82 @@
     cursor: grabbing;
 }
 
+/* Лёгкие стрелки баннера — только desktop (!important: перебиваем globals) */
+.hero-swiper .swiper-button-next,
+.hero-swiper .swiper-button-prev {
+    all: unset;
+    position: absolute !important;
+    top: 50% !important;
+    z-index: 20;
+    box-sizing: border-box;
+    display: none !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    margin-top: -22px !important;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.28) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.hero-swiper .swiper-button-prev {
+    left: 20px !important;
+}
+
+.hero-swiper .swiper-button-next {
+    right: 20px !important;
+}
+
+@media (min-width: 768px) {
+    .hero-swiper .swiper-button-next,
+    .hero-swiper .swiper-button-prev {
+        display: flex !important;
+    }
+}
+
+.hero-swiper .swiper-button-next:hover,
+.hero-swiper .swiper-button-prev:hover {
+    background: rgba(255, 255, 255, 0.48) !important;
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: scale(1.04);
+}
+
+.hero-swiper .swiper-button-next::after,
+.hero-swiper .swiper-button-prev::after {
+    content: '' !important;
+    display: block !important;
+    width: 8px !important;
+    height: 14px !important;
+    font-size: 0 !important;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.hero-swiper .swiper-button-next::after {
+    mask-image: url("data:image/svg+xml,%3Csvg width='8' height='14' viewBox='0 0 8 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6-6 6' stroke='white' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='8' height='14' viewBox='0 0 8 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l6 6-6 6' stroke='white' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.hero-swiper .swiper-button-prev::after {
+    mask-image: url("data:image/svg+xml,%3Csvg width='8' height='14' viewBox='0 0 8 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 1L1 7l6 6' stroke='white' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='8' height='14' viewBox='0 0 8 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 1L1 7l6 6' stroke='white' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.hero-swiper .swiper-button-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
 .choice-swiper .swiper-button-next,
 .choice-swiper .swiper-button-prev {
     color: #000;

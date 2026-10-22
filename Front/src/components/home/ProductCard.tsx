@@ -50,10 +50,10 @@ export default function ProductCard({
       .catch(() => {})
   }, [singleImage, Gallery])
 
-  const onMediaPointer = useCallback(
+  const onMediaPointerDown = useCallback(
     (e: PointerEvent) => {
       if (singleImage) return
-      // touch / pen — сразу; mouse — hover (pointerenter)
+      // Только touch/pen: на mouse hover раньше подменяли Image→Swiper и картинка мигала
       if (e.pointerType === 'touch' || e.pointerType === 'pen') {
         enableGallery()
       }
@@ -69,10 +69,7 @@ export default function ProductCard({
     <>
       <div
         className="relative aspect-square w-full overflow-hidden rounded-[12px] bg-neutral-50 sm:aspect-[369/384] sm:rounded-[16px]"
-        onPointerDown={onMediaPointer}
-        onPointerEnter={(e) => {
-          if (e.pointerType === 'mouse') enableGallery()
-        }}
+        onPointerDown={onMediaPointerDown}
       >
         {Gallery && !singleImage ? (
           <Gallery images={images} productName={product.name} />
