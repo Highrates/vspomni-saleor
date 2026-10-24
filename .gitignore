@@ -26,6 +26,9 @@ Front/.env.local
 .DS_Store
 .tmp-ozonpkg/
 
+# Исходники брендбука — не в репозиторий (тяжёлые PDF)
+/Бренд-бук*.pdf
+
 # Saleor removed in phase 4 — never re-add as runtime
 Back/
 Front/saleor-yandex-plugin/

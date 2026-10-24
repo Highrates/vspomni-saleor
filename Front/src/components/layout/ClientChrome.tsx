@@ -20,6 +20,9 @@ export default function ClientChrome({
     '/checkout',
   ].includes(pathname)
 
+  const fullBleedRoutes = ['/korporativnye-podarki']
+  const fullBleed = fullBleedRoutes.includes(pathname)
+
   const overlayRoutes = ['/profile', '/catalog']
   const headerVariant = overlayRoutes.includes(pathname) ? 'overlay' : 'default'
 
@@ -27,9 +30,9 @@ export default function ClientChrome({
     <>
       {!hideChrome && <Header variant={headerVariant} />}
       <main
-        className={`${!hideChrome ? 'pt-[80px]' : ''} w-full min-h-screen`}
+        className={`${!hideChrome ? 'pt-[80px]' : ''} w-full min-h-screen ${fullBleed ? 'bg-[#0c0c0c]' : ''}`}
       >
-        <div className="container">{children}</div>
+        {fullBleed ? children : <div className="container">{children}</div>}
       </main>
       <ToastContainer
         className="vspomni-toast-container"

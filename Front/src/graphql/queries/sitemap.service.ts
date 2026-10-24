@@ -77,6 +77,7 @@ export async function buildSitemapEntries(): Promise<MetadataRoute.Sitemap> {
   push('/catalog')
   push('/news')
   push('/partners')
+  push('/korporativnye-podarki')
 
   try {
     const categories = await getAllCategory(100)

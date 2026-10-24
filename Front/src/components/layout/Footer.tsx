@@ -118,7 +118,7 @@ export default function Footer() {
           >
             Служба заботы
           </Link>
-          <Link href="/article/korporativnye-podarki-2" className={footerNavLinkClass}>
+          <Link href="/korporativnye-podarki" className={footerNavLinkClass}>
             Корпоративные подарки
           </Link>
           <Link

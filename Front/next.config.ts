@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
       { source: '/goldapple', destination: 'https://vspomni.mobz.click/goldapple', permanent: false },
       { source: '/lamoda', destination: 'https://vspomni.mobz.click/lamoda', permanent: false },
       { source: '/yandexmarket', destination: 'https://vspomni.mobz.click/yandexmarket', permanent: false },
+      {
+        source: '/article/korporativnye-podarki-2',
+        destination: '/korporativnye-podarki',
+        permanent: true,
+      },
     ]
   },
   images: {
