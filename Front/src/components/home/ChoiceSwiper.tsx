@@ -1,56 +1,20 @@
 'use client'
 
-import 'swiper/css'
-import 'swiper/css/navigation'
-import { Navigation } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
-
-import { motion } from 'framer-motion'
 import ChoiceCard from './ChoiceCard'
+import StarStyleSwiper from './StarStyleSwiper'
 import type { StarChoiceItem } from '@/types/product'
 
 type Props = {
   products: StarChoiceItem[]
 }
 
-const slideClass =
-  '!box-border !shrink-0 !h-auto !w-[calc(100vw-48px)] sm:!w-[340px] md:!w-[420px] lg:!w-[420px]'
-
 export default function ChoiceSwiper({ products }: Props) {
-  if (products.length === 0) return null
-
   return (
-    <Swiper
-      modules={[Navigation]}
-      slidesPerView="auto"
-      spaceBetween={12}
-      grabCursor
-      allowTouchMove
-      simulateTouch
-      threshold={5}
-      touchRatio={1}
-      preventClicks
-      preventClicksPropagation
-      navigation={{ enabled: true }}
-      className="choice-swiper pb-10 rounded-[20px] [&_.swiper-button-prev]:hidden [&_.swiper-button-next]:hidden sm:[&_.swiper-button-prev]:flex sm:[&_.swiper-button-next]:flex"
-      breakpoints={{
-        640: { spaceBetween: 20 },
-        768: { spaceBetween: 22 },
-        1024: { spaceBetween: 24 },
-      }}
-    >
-      {products.map((product) => (
-        <SwiperSlide key={product.id} className={slideClass}>
-          <motion.div
-            initial={false}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="h-auto w-full"
-          >
-            <ChoiceCard product={product} />
-          </motion.div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <StarStyleSwiper
+      slides={products.map((product) => ({
+        key: product.id,
+        node: <ChoiceCard product={product} />,
+      }))}
+    />
   )
 }

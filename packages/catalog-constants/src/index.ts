@@ -1,8 +1,14 @@
 /** Коллекция блока «Выбор ⭐» на витрине (Admin + Front). */
 export const CHOICE_COLLECTION_SLUG = 'vybor'
 
-/** Сколько карточек «Выбор» тянуть на SSR (карусель ~3–4 вьюпорта). */
-export const CHOICE_CAROUSEL_LIMIT = 12
+/** Рилсы «Распаковка» на главной (тяжёлые video — не все сразу). */
+export const UNPACKING_CAROUSEL_LIMIT = 12
+
+/**
+ * Потолок видео «Распаковка» (МБ): админка + API при `purpose=unpacking`.
+ * Gallery/Hero по-прежнему до 80 МБ.
+ */
+export const UNPACKING_VIDEO_MAX_MB = 20
 
 /** Сетка «носовые сосочки» на главной. */
 export const NOSE_HOME_LIMIT = 12

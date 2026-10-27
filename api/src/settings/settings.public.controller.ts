@@ -32,6 +32,20 @@ export class SettingsPublicController {
     return this.settings.listHomepageSets();
   }
 
+  @Get('unpacking')
+  listUnpacking(
+    @Query('limit') limitRaw?: string,
+    @Query('offset') offsetRaw?: string,
+  ) {
+    const limit = limitRaw != null && limitRaw.trim() !== '' ? Number(limitRaw) : undefined;
+    const offset =
+      offsetRaw != null && offsetRaw.trim() !== '' ? Number(offsetRaw) : undefined;
+    return this.settings.listUnpackingReelsPublic({
+      limit: Number.isFinite(limit) ? limit : undefined,
+      offset: Number.isFinite(offset) ? offset : undefined,
+    });
+  }
+
   @Get('gratitude')
   getGratitude() {
     return this.settings.getGratitude();

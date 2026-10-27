@@ -72,6 +72,13 @@ function makePrisma() {
       count: vi.fn().mockResolvedValue(0),
       updateMany: vi.fn().mockResolvedValue({ count: 0 }),
     },
+    unpackingReel: {
+      findMany: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      deleteMany: vi.fn(),
+    },
     $transaction: vi.fn(),
   };
 }
@@ -823,6 +830,161 @@ describe('SettingsAdminService.replaceProductAttributes', () => {
   });
 });
 
+describe('SettingsAdminService.replaceUnpackingReels', () => {
+  let prisma: ReturnType<typeof makePrisma>;
+  let svc: SettingsAdminService;
+  let storage: {
+    tryPublicUrlToKey: ReturnType<typeof vi.fn>;
+    deleteManagedUpload: ReturnType<typeof vi.fn>;
+  };
+
+  beforeEach(() => {
+    prisma = makePrisma();
+    storage = {
+      tryPublicUrlToKey: vi.fn((u: string) =>
+        u.includes('/uploads/') ? u.replace(/^.*\/uploads\//, '') : null,
+      ),
+      deleteManagedUpload: vi.fn(async () => true),
+    };
+    svc = new SettingsAdminService(prisma as never, storage as never);
+  });
+
+  function reelRow(partial: {
+    id: string;
+    videoUrl?: string;
+    posterUrl?: string | null;
+    captionName?: string | null;
+    productId?: string;
+    sortOrder?: number;
+  }) {
+    const now = new Date('2026-01-01T00:00:00.000Z');
+    return {
+      id: partial.id,
+      videoUrl: partial.videoUrl ?? '/uploads/v.mp4',
+      posterUrl: partial.posterUrl ?? '/uploads/p.jpg',
+      captionName: partial.captionName ?? null,
+      captionDate: null,
+      productId: partial.productId ?? 'prod1',
+      sortOrder: partial.sortOrder ?? 0,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+      product: {
+        id: partial.productId ?? 'prod1',
+        name: 'Товар',
+        slug: 'tovar',
+        images: [{ url: '/uploads/cover.jpg' }],
+        variants: [{ price: 990 }],
+      },
+    };
+  }
+
+  it('replace: create/update/delete + пустой caption → null + GC старого video', async () => {
+    prisma.product.findMany.mockResolvedValue([{ id: 'prod1' }]);
+    prisma.unpackingReel.findMany.mockResolvedValue([
+      {
+        id: 'a',
+        videoUrl: '/uploads/old.mp4',
+        posterUrl: '/uploads/old-p.jpg',
+      },
+      {
+        id: 'gone',
+        videoUrl: '/uploads/gone.mp4',
+        posterUrl: '/uploads/gone-p.jpg',
+      },
+    ]);
+    prisma.unpackingReel.count.mockResolvedValue(0);
+
+    const updated = reelRow({
+      id: 'a',
+      videoUrl: '/uploads/new.mp4',
+      posterUrl: '/uploads/new-p.jpg',
+      captionName: null,
+    });
+    const created = reelRow({
+      id: 'b',
+      videoUrl: '/uploads/b.mp4',
+      posterUrl: '/uploads/b-p.jpg',
+      captionName: 'Анна',
+      sortOrder: 1,
+    });
+
+    const tx = {
+      unpackingReel: {
+        deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+        update: vi.fn().mockResolvedValue(updated),
+        create: vi.fn().mockResolvedValue(created),
+      },
+    };
+    prisma.$transaction.mockImplementation(async (fn: (t: typeof tx) => unknown) =>
+      fn(tx),
+    );
+
+    const res = await svc.replaceUnpackingReels({
+      items: [
+        {
+          id: 'a',
+          videoUrl: '/uploads/new.mp4',
+          posterUrl: '/uploads/new-p.jpg',
+          captionName: '   ',
+          productId: 'prod1',
+          active: true,
+        },
+        {
+          videoUrl: '/uploads/b.mp4',
+          posterUrl: '/uploads/b-p.jpg',
+          captionName: 'Анна',
+          productId: 'prod1',
+          active: true,
+        },
+      ],
+    });
+
+    expect(tx.unpackingReel.deleteMany).toHaveBeenCalledWith({
+      where: { id: { in: ['gone'] } },
+    });
+    expect(tx.unpackingReel.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'a' },
+        data: expect.objectContaining({
+          captionName: null,
+          videoUrl: '/uploads/new.mp4',
+          posterUrl: '/uploads/new-p.jpg',
+          sortOrder: 0,
+        }),
+      }),
+    );
+    expect(tx.unpackingReel.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          captionName: 'Анна',
+          sortOrder: 1,
+        }),
+      }),
+    );
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith('/uploads/old.mp4');
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith('/uploads/old-p.jpg');
+    expect(storage.deleteManagedUpload).toHaveBeenCalledWith('/uploads/gone.mp4');
+    expect(res.items).toHaveLength(2);
+    expect(res.items[0]!.captionName).toBeNull();
+  });
+
+  it('replace: без постера → BadRequest', async () => {
+    await expect(
+      svc.replaceUnpackingReels({
+        items: [
+          {
+            videoUrl: '/uploads/v.mp4',
+            posterUrl: '',
+            productId: 'prod1',
+          },
+        ],
+      }),
+    ).rejects.toThrow(/постер/i);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+});
+
 describe('SettingsPublicService', () => {
   it('listFaq отдаёт только active', async () => {
     const prisma = makePrisma();
@@ -880,6 +1042,67 @@ describe('SettingsPublicService', () => {
     expect(res.titleLeft).toBe('НАШИ');
     expect(res.items).toHaveLength(1);
     expect(res.items[0]!.id).toBe('a');
+  });
+
+  it('listUnpackingReelsPublic: active+product filter, limit/offset, total', async () => {
+    const prisma = makePrisma();
+    prisma.unpackingReel.count.mockResolvedValue(15);
+    prisma.unpackingReel.findMany.mockResolvedValue([
+      {
+        id: 'r1',
+        videoUrl: '/uploads/v.mp4',
+        posterUrl: '/uploads/p.jpg',
+        captionName: 'Имя',
+        captionDate: new Date('2026-03-01T00:00:00.000Z'),
+        product: {
+          id: 'p1',
+          slug: 'scent',
+          name: 'Аромат',
+          productType: null,
+          shortDescription: null,
+          images: [{ url: '/uploads/c.jpg', mediaType: 'image' }],
+          variants: [
+            {
+              id: 'v1',
+              name: '50 мл',
+              price: 1200,
+              compareAt: null,
+              orderMinQty: 1,
+              orderMaxQty: null,
+              stock: 5,
+              stockReserve: 0,
+              shades: [],
+            },
+          ],
+          category: { slug: 'aroma' },
+        },
+      },
+    ]);
+    const svc = new SettingsPublicService(prisma as never);
+    const res = await svc.listUnpackingReelsPublic({ limit: 12, offset: 0 });
+
+    expect(prisma.unpackingReel.count).toHaveBeenCalledWith({
+      where: {
+        active: true,
+        product: { active: true, excludeFromCatalog: false },
+      },
+    });
+    expect(prisma.unpackingReel.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          active: true,
+          product: { active: true, excludeFromCatalog: false },
+        },
+        skip: 0,
+        take: 12,
+      }),
+    );
+    expect(res.total).toBe(15);
+    expect(res.limit).toBe(12);
+    expect(res.offset).toBe(0);
+    expect(res.items).toHaveLength(1);
+    expect(res.items[0]!.id).toBe('r1');
+    expect(res.items[0]!.product.slug).toBe('scent');
   });
 
   it('listHero: полная plaque → объект; неполная/пустая → null', async () => {

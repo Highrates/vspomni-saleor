@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { UNPACKING_VIDEO_MAX_MB } from '@vspomni/catalog-constants';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { parseOptionalPositiveInt } from '../common/parse-positive-int';
@@ -68,13 +69,15 @@ export class CatalogAdminController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      // VIDEO_MAX 80 МБ; картинки режет LocalStorageService.assertImage (6 МБ)
+      // VIDEO_MAX 80 МБ (галерея); unpacking режет ниже по purpose=
+      // Картинки — LocalStorageService.assertImage (6 МБ)
       limits: { fileSize: 80 * 1024 * 1024 },
     }),
   )
   uploadRichMedia(
     @UploadedFile() file: Express.Multer.File,
     @Query('type') type?: string,
+    @Query('purpose') purpose?: string,
   ) {
     if (!file) throw new BadRequestException('Файл не передан');
     const kind =
@@ -82,7 +85,18 @@ export class CatalogAdminController {
     if (!kind) {
       throw new BadRequestException('Поддерживается type=image или type=video');
     }
-    return this.products.uploadRichMedia(file, kind);
+    const unpacking =
+      purpose === 'unpacking' || purpose === 'unpack';
+    return this.products.uploadRichMedia(
+      file,
+      kind,
+      unpacking && kind === 'video'
+        ? {
+            maxVideoBytes: UNPACKING_VIDEO_MAX_MB * 1024 * 1024,
+            maxVideoLabelMb: UNPACKING_VIDEO_MAX_MB,
+          }
+        : undefined,
+    );
   }
 
   /** Best-effort GC: удаляет /uploads URL, если ни на что не ссылаются. */

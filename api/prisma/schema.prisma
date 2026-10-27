@@ -367,6 +367,7 @@ model Product {
   promoLinks         PromoCodeProduct[]
   reviews            ProductReview[]
   homepageSets       HomepageSet[]
+  unpackingReels     UnpackingReel[]
   menuSettings       MenuSettings[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -1172,6 +1173,27 @@ model HomepageSet {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@index([productId])
+}
+
+/// «Распаковка» на главной: рилс (видео) + плашка товара (как «Выбор ⭐»).
+model UnpackingReel {
+  id          String    @id @default(cuid())
+  videoUrl    String
+  /// Постер до play (обязателен для LCP на главной)
+  posterUrl   String
+  /// Подпись над плашкой (как choiceStarName); пустая → null
+  captionName String?
+  /// Дата в подписи (как choiceStarDate)
+  captionDate DateTime? @db.Date
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  sortOrder   Int       @default(0)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([active, sortOrder])
   @@index([productId])

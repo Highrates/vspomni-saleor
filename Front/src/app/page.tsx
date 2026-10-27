@@ -9,6 +9,7 @@ import StoryBlock from '@/components/features/StoryBlock'
 import PopularScentsAlt from '@/components/features/PopularScentsAlt'
 import ComingSoon from '@/components/features/ComingSoon'
 import Choice from '@/components/home/Choice'
+import Unpacking from '@/components/home/Unpacking'
 import FaqBlock from '@/components/home/FaqBlock'
 import FaqNoscript from '@/components/home/FaqNoscript'
 import CandlesSoonBanner from '@/components/home/CandlesSoonBanner'
@@ -19,6 +20,7 @@ import {
   getNoseHomeProducts,
   getPopularProducts,
 } from '@/graphql/queries/product.service'
+import { getUnpackingHomeReels } from '@/lib/unpacking/getUnpackingHomeReels'
 import { getAllFaqs } from '@/graphql/queries/faq.service'
 import { getAllStories } from '@/graphql/queries/stories.service'
 import { getAllAromas } from '@/graphql/queries/allAromas.service'
@@ -88,6 +90,7 @@ export default async function Home() {
     allAromas,
     noseProducts,
     newsArticles,
+    unpackingHome,
   ] = await Promise.all([
     getCandlesSoonBanner().catch(() => null),
     getChoiceProducts().catch(() => []),
@@ -99,6 +102,7 @@ export default async function Home() {
     getAllAromas().catch(() => []),
     getNoseHomeProducts().catch(() => []),
     getAllArticles(2).catch(() => []),
+    getUnpackingHomeReels().catch(() => ({ items: [], total: 0 })),
   ])
 
   const faqJsonLd = faqPageJsonLd(faqs)
@@ -122,6 +126,10 @@ export default async function Home() {
       <ComingSoon initialCategories={categoryPicks.comingSoon} />
       <Choice initialProducts={choiceProducts} />
       <ChannelOneSection />
+      <Unpacking
+        initialItems={unpackingHome.items}
+        initialTotal={unpackingHome.total}
+      />
       <HistoryLine />
       <ProductGrid initialItems={allAromas} />
       <GiftPackagesBanner initialCategory={categoryPicks.giftPackages} />

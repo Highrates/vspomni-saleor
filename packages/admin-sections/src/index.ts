@@ -67,7 +67,8 @@ export const ADMIN_SECTION_LABELS_RU: Record<AdminSectionId, string> = {
 
 /**
  * - certificates_read — GET номиналов/списка сертификатов
- * - media_upload — общий `catalog/admin/upload-rich-media` (Hero/Stories/каталог/CMS)
+ * - media_upload — общий `catalog/admin/upload-rich-media` (Hero/Stories/Распаковка/каталог/CMS);
+ *   доступен при секции settings | catalog | blog
  */
 export type AdminApiAccessTarget =
   | AdminSectionId
@@ -174,6 +175,7 @@ export function resolveAdminSectionFromPathname(pathname: string): AdminPathAcce
   if (
     p.startsWith('/admin/hero') ||
     p.startsWith('/admin/stories') ||
+    p.startsWith('/admin/unpacking') ||
     p.startsWith('/admin/homepage-sets') ||
     p.startsWith('/admin/settings/hero') ||
     p.startsWith('/admin/settings/home')

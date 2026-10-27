@@ -34,7 +34,25 @@ describe('admin-sections ACL', () => {
     expect(
       resolveAdminSectionFromPathname('/admin/catalog/aroma-note-definitions'),
     ).toBe('catalog');
+    expect(resolveAdminSectionFromPathname('/admin/unpacking')).toBe('settings');
     expect(resolveAdminSectionFromPathname('/admin/quiz')).toBe(null);
+  });
+
+  it('unpacking settings API + media_upload for video', () => {
+    expect(
+      resolveAdminSectionFromApiPath('/api/v1/settings/admin/unpacking'),
+    ).toBe('settings');
+    expect(
+      resolveAdminSectionFromApiPath(
+        '/api/v1/catalog/admin/upload-rich-media?type=video',
+      ),
+    ).toBe('media_upload');
+    expect(
+      staffCanAccessAdminPath('/admin/unpacking', ['settings'], false),
+    ).toBe(true);
+    expect(staffCanAccessAdminPath('/admin/unpacking', ['orders'], false)).toBe(
+      false,
+    );
   });
 
   it('staff path access', () => {

@@ -7,7 +7,6 @@ import {
   uploadsUrl,
 } from '@/api/apiClient'
 import {
-  CHOICE_CAROUSEL_LIMIT,
   CHOICE_COLLECTION_SLUG as NEST_CHOICE_COLLECTION_SLUG,
   NOSE_HOME_LIMIT,
   POPULAR_HOME_LIMIT,
@@ -238,17 +237,13 @@ export async function getCatalogAllProducts(
 /** Коллекция «Выбор ⭐» */
 export const CHOICE_COLLECTION_SLUG = NEST_CHOICE_COLLECTION_SLUG
 
-/** Товары коллекции «Выбор ⭐» (slug: vybor) — лимит под карусель, не весь каталог. */
-export async function getChoiceProducts(
-  limit: number = CHOICE_CAROUSEL_LIMIT,
-): Promise<StarChoiceItem[]> {
-  const cap = Math.min(Math.max(1, limit), 24)
-  const { items } = await fetchProductList({
-    collection: CHOICE_COLLECTION_SLUG,
-    page: 1,
-    limit: cap,
-  })
-  return (items ?? [])
+/** Товары коллекции «Выбор ⭐» (slug: vybor) — без усечения на главной. */
+export async function getChoiceProducts(): Promise<StarChoiceItem[]> {
+  const cards = await fetchAllProductCards(
+    { collection: CHOICE_COLLECTION_SLUG },
+    500,
+  )
+  return cards
     .filter((c) => c.imageUrl || (c.imageUrls?.length ?? 0) > 0)
     .map(cardToStarChoiceItem)
 }

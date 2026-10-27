@@ -28,6 +28,12 @@ import type {
 import type { ReplaceStoriesDto } from './dto/stories.dto';
 import { slugify } from '../catalog/slug.util';
 import type { ReplaceHomepageSetsDto } from './dto/homepage-sets.dto';
+import type { ReplaceUnpackingReelsDto } from './dto/unpacking.dto';
+import {
+  normalizeStoredUploadUrl,
+  parseOptionalDateOnly,
+} from '../catalog/catalog-admin.helpers';
+import { UNPACKING_CAROUSEL_LIMIT } from '@vspomni/catalog-constants';
 import type { ReplaceHomePromoDto } from './dto/home-promo.dto';
 import {
   HOME_PROMO_HREF_PATTERN,
@@ -349,6 +355,70 @@ function serializeHomepageSetAdmin(row: {
     product: row.product,
   };
 }
+
+const unpackingAdminProductSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  images: {
+    take: 1,
+    orderBy: { sortOrder: 'asc' as const },
+    select: { url: true },
+  },
+  variants: {
+    where: { active: true },
+    orderBy: [{ price: 'asc' as const }, { createdAt: 'asc' as const }],
+    take: 1,
+    select: { price: true },
+  },
+};
+
+function serializeUnpackingReelAdmin(row: {
+  id: string;
+  videoUrl: string;
+  posterUrl: string;
+  captionName: string | null;
+  captionDate: Date | null;
+  productId: string;
+  sortOrder: number;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    images?: Array<{ url: string }>;
+    variants?: Array<{ price: number }>;
+  };
+}) {
+  return {
+    id: row.id,
+    videoUrl: row.videoUrl,
+    posterUrl: row.posterUrl,
+    captionName: row.captionName?.trim() || null,
+    captionDate: row.captionDate
+      ? row.captionDate.toISOString().slice(0, 10)
+      : null,
+    productId: row.productId,
+    sortOrder: row.sortOrder,
+    active: row.active,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    product: {
+      id: row.product.id,
+      name: row.product.name,
+      slug: row.product.slug,
+      imageUrl: row.product.images?.[0]?.url ?? null,
+      price: row.product.variants?.[0]?.price ?? null,
+    },
+  };
+}
+
+const unpackingProductSelect = {
+  ...homepageSetProductSelect,
+  category: { select: { slug: true } },
+} as const;
 
 function serializeCart(row: {
   id: string;
@@ -1189,6 +1259,183 @@ export class SettingsAdminService {
     return { items: rows.map(serializeHomepageSetAdmin) };
   }
 
+  async listUnpackingReels() {
+    const rows = await this.prisma.unpackingReel.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        product: { select: unpackingAdminProductSelect },
+      },
+    });
+    return { items: rows.map(serializeUnpackingReelAdmin) };
+  }
+
+  async replaceUnpackingReels(dto: ReplaceUnpackingReelsDto) {
+    const cleaned = (dto.items ?? []).map((it) => ({
+      id: typeof it.id === 'string' && it.id.trim() ? it.id.trim() : undefined,
+      videoUrl:
+        normalizeStoredUploadUrl(it.videoUrl.trim()) || it.videoUrl.trim(),
+      posterUrl:
+        normalizeStoredUploadUrl(
+          typeof it.posterUrl === 'string' ? it.posterUrl.trim() : '',
+        ) || (typeof it.posterUrl === 'string' ? it.posterUrl.trim() : ''),
+      captionName: (it.captionName ?? '').trim() || null,
+      captionDate: parseOptionalDateOnly(it.captionDate ?? null) ?? null,
+      productId: it.productId.trim(),
+      active: it.active ?? true,
+    }));
+    const incomplete = cleaned.filter(
+      (it) => !it.videoUrl || !it.posterUrl || !it.productId,
+    );
+    if (incomplete.length > 0) {
+      throw new BadRequestException(
+        incomplete.length === 1
+          ? 'Добавьте видео, постер и товар или удалите пустую строку'
+          : `Есть неполные рилсы (${incomplete.length})`,
+      );
+    }
+
+    const productIds = [...new Set(cleaned.map((it) => it.productId))];
+    if (productIds.length > 0) {
+      const found = await this.prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true },
+      });
+      const foundIds = new Set(found.map((p) => p.id));
+      const missing = productIds.filter((id) => !foundIds.has(id));
+      if (missing.length > 0) {
+        throw new BadRequestException(
+          missing.length === 1
+            ? 'Товар не найден'
+            : 'Один или несколько товаров не найдены',
+        );
+      }
+    }
+
+    const before = await this.prisma.unpackingReel.findMany({
+      select: { id: true, videoUrl: true, posterUrl: true },
+    });
+
+    const rows = await this.prisma.$transaction(async (tx) => {
+      const existingIds = new Set(before.map((r) => r.id));
+      const keepIds = new Set(
+        cleaned
+          .map((it) => it.id)
+          .filter((id): id is string => Boolean(id && existingIds.has(id))),
+      );
+      const toDelete = [...existingIds].filter((id) => !keepIds.has(id));
+      if (toDelete.length > 0) {
+        await tx.unpackingReel.deleteMany({ where: { id: { in: toDelete } } });
+      }
+
+      const productInclude = {
+        product: { select: unpackingAdminProductSelect },
+      } as const;
+
+      const out = [];
+      for (let i = 0; i < cleaned.length; i++) {
+        const it = cleaned[i]!;
+        const data = {
+          videoUrl: it.videoUrl,
+          posterUrl: it.posterUrl,
+          captionName: it.captionName,
+          captionDate: it.captionDate,
+          productId: it.productId,
+          active: it.active,
+          sortOrder: i,
+        };
+        if (it.id && existingIds.has(it.id)) {
+          out.push(
+            await tx.unpackingReel.update({
+              where: { id: it.id },
+              data,
+              include: productInclude,
+            }),
+          );
+        } else {
+          out.push(
+            await tx.unpackingReel.create({
+              data,
+              include: productInclude,
+            }),
+          );
+        }
+      }
+      return out;
+    });
+
+    const stillUsed = new Set<string>();
+    for (const it of cleaned) {
+      if (it.videoUrl) stillUsed.add(it.videoUrl);
+      if (it.posterUrl) stillUsed.add(it.posterUrl);
+    }
+    const orphanCandidates = new Set<string>();
+    for (const old of before) {
+      const kept = old.id && cleaned.some((it) => it.id === old.id);
+      if (!kept) {
+        if (old.videoUrl) orphanCandidates.add(old.videoUrl);
+        if (old.posterUrl) orphanCandidates.add(old.posterUrl);
+        continue;
+      }
+      const next = cleaned.find((it) => it.id === old.id);
+      if (!next) continue;
+      if (old.videoUrl && old.videoUrl !== next.videoUrl) {
+        orphanCandidates.add(old.videoUrl);
+      }
+      if (old.posterUrl && old.posterUrl !== next.posterUrl) {
+        orphanCandidates.add(old.posterUrl);
+      }
+    }
+    for (const url of orphanCandidates) {
+      if (stillUsed.has(url)) continue;
+      await this.gcUnpackingMediaIfUnused(url);
+    }
+
+    return { items: rows.map(serializeUnpackingReelAdmin) };
+  }
+
+  /** Best-effort GC: URL не ссылается ни один рилс. */
+  private async gcUnpackingMediaIfUnused(url: string): Promise<void> {
+    const t =
+      normalizeStoredUploadUrl(url.trim()) || url.trim();
+    if (!t || !this.storage.tryPublicUrlToKey(t)) return;
+    const n = await this.prisma.unpackingReel.count({
+      where: { OR: [{ videoUrl: t }, { posterUrl: t }] },
+    });
+    if (n > 0) return;
+    try {
+      await this.storage.deleteManagedUpload(t);
+    } catch (e) {
+      this.logger.warn(
+        `gcUnpackingMediaIfUnused ${t}: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+  }
+
+  /** Orphan cleanup после неудачного save (upload без записи в БД). */
+  async discardUnpackingUploads(urls: string[]) {
+    const candidates = [
+      ...new Set(
+        (urls ?? [])
+          .map(
+            (u) =>
+              normalizeStoredUploadUrl(String(u ?? '').trim()) ||
+              String(u ?? '').trim(),
+          )
+          .filter((u) => Boolean(u) && Boolean(this.storage.tryPublicUrlToKey(u))),
+      ),
+    ].slice(0, 50);
+    if (!candidates.length) return { deleted: 0 };
+    let deleted = 0;
+    for (const url of candidates) {
+      const n = await this.prisma.unpackingReel.count({
+        where: { OR: [{ videoUrl: url }, { posterUrl: url }] },
+      });
+      if (n > 0) continue;
+      if (await this.storage.deleteManagedUpload(url)) deleted += 1;
+    }
+    return { deleted };
+  }
+
   async getCart() {
     const row = await this.prisma.cartSettings.findUnique({
       where: { id: 'default' },
@@ -1801,6 +2048,55 @@ export class SettingsPublicService {
         name: row.product.name,
         product: toHomepageSetProductCard(row.product),
       })),
+    };
+  }
+
+  /**
+   * «Распаковка» на главной — активные рилсы с карточкой товара.
+   * По умолчанию лимит (тяжёлые video); offset для «Ещё».
+   */
+  async listUnpackingReelsPublic(opts?: { limit?: number; offset?: number }) {
+    const limit = Math.min(
+      Math.max(1, opts?.limit ?? UNPACKING_CAROUSEL_LIMIT),
+      50,
+    );
+    const offset = Math.max(0, opts?.offset ?? 0);
+    const where = {
+      active: true,
+      product: { active: true, excludeFromCatalog: false },
+    };
+    const [total, rows] = await Promise.all([
+      this.prisma.unpackingReel.count({ where }),
+      this.prisma.unpackingReel.findMany({
+        where,
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        skip: offset,
+        take: limit,
+        include: {
+          product: { select: unpackingProductSelect },
+        },
+      }),
+    ]);
+    return {
+      total,
+      limit,
+      offset,
+      items: rows.map((row) => {
+        const card = toHomepageSetProductCard(row.product);
+        return {
+          id: row.id,
+          videoUrl: row.videoUrl,
+          posterUrl: row.posterUrl,
+          captionName: row.captionName?.trim() || '',
+          captionDate: row.captionDate
+            ? row.captionDate.toISOString().slice(0, 10)
+            : null,
+          product: {
+            ...card,
+            categorySlug: row.product.category?.slug ?? null,
+          },
+        };
+      }),
     };
   }
 

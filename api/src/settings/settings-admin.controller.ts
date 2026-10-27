@@ -21,6 +21,7 @@ import {
 } from './dto/hero.dto';
 import { ReplaceStoriesDto } from './dto/stories.dto';
 import { ReplaceHomepageSetsDto } from './dto/homepage-sets.dto';
+import { ReplaceUnpackingReelsDto } from './dto/unpacking.dto';
 import { ReplaceHomePromoDto } from './dto/home-promo.dto';
 import { ReplaceProductAttributeOptionsDto } from './dto/product-attributes.dto';
 import { UpdateDeliverySettingsDto } from './dto/delivery.dto';
@@ -107,6 +108,21 @@ export class SettingsAdminController {
   @Put('homepage-sets')
   replaceHomepageSets(@Body() dto: ReplaceHomepageSetsDto) {
     return this.settings.replaceHomepageSets(dto);
+  }
+
+  @Get('unpacking')
+  listUnpacking() {
+    return this.settings.listUnpackingReels();
+  }
+
+  @Put('unpacking')
+  replaceUnpacking(@Body() dto: ReplaceUnpackingReelsDto) {
+    return this.settings.replaceUnpackingReels(dto);
+  }
+
+  @Post('unpacking/discard-uploads')
+  discardUnpackingUploads(@Body() dto: { urls?: string[] }) {
+    return this.settings.discardUnpackingUploads(dto.urls ?? []);
   }
 
   @Get('delivery')

@@ -96,6 +96,7 @@ export const ADMIN_NAV: NavItem[] = [
       '/admin/hero',
       '/admin/homepage-sets',
       '/admin/stories',
+      '/admin/unpacking',
       '/admin/settings/home',
       '/admin/settings/menu',
       '/admin/settings/promo',
@@ -103,6 +104,7 @@ export const ADMIN_NAV: NavItem[] = [
     children: [
       { href: '/admin/hero', label: 'Hero', section: 'settings' },
       { href: '/admin/stories', label: 'Сторис', section: 'settings' },
+      { href: '/admin/unpacking', label: 'Распаковка', section: 'settings' },
       { href: '/admin/homepage-sets', label: 'Наборы на главной', section: 'settings' },
       { href: '/admin/settings/promo', label: 'Промо', section: 'settings' },
       { href: '/admin/faq', label: 'FAQ', section: 'settings' },

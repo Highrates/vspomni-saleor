@@ -83,11 +83,19 @@ describe('StaffAccessService', () => {
         '/api/v1/catalog/admin/upload-rich-media?type=image',
       ),
     ).toBe(true);
+    // Распаковка (settings) грузит video через тот же endpoint
     expect(
       await svc.canAccessApiPath(
         'm1',
         UserRole.MODERATOR,
         '/api/v1/catalog/admin/upload-rich-media?type=video',
+      ),
+    ).toBe(true);
+    expect(
+      await svc.canAccessApiPath(
+        'm1',
+        UserRole.MODERATOR,
+        '/api/v1/settings/admin/unpacking',
       ),
     ).toBe(true);
 
@@ -102,6 +110,13 @@ describe('StaffAccessService', () => {
         'm1',
         UserRole.MODERATOR,
         '/api/v1/catalog/admin/upload-rich-media',
+      ),
+    ).toBe(false);
+    expect(
+      await svc.canAccessApiPath(
+        'm1',
+        UserRole.MODERATOR,
+        '/api/v1/settings/admin/unpacking',
       ),
     ).toBe(false);
   });

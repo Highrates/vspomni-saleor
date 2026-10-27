@@ -95,6 +95,7 @@ function makePrisma() {
       count: vi.fn(),
     },
     orderItem: { count: vi.fn() },
+    unpackingReel: { count: vi.fn() },
     $transaction: vi.fn(),
   };
 }
@@ -117,6 +118,7 @@ describe('CatalogProductsAdminService', () => {
   let svc: CatalogProductsAdminService;
   const storage = {
     saveImage: vi.fn(),
+    saveGalleryMedia: vi.fn(),
     deleteByPublicUrl: vi.fn(),
     deleteManagedUpload: vi.fn(),
     tryPublicUrlToKey: vi.fn(),
@@ -132,6 +134,7 @@ describe('CatalogProductsAdminService', () => {
     prisma.collection.findFirst.mockResolvedValue(null);
     prisma.collectionItem.findFirst.mockResolvedValue(null);
     prisma.collectionItem.findMany.mockResolvedValue([]);
+    prisma.unpackingReel.count.mockResolvedValue(0);
     const categories = new CatalogCategoriesAdminService(prisma as never);
     svc = new CatalogProductsAdminService(prisma as never, storage as never, categories);
   });
@@ -216,6 +219,22 @@ describe('CatalogProductsAdminService', () => {
     prisma.orderItem.count.mockResolvedValue(1);
 
     await expect(svc.deleteProduct('p1')).rejects.toThrow(ConflictException);
+    expect(prisma.product.delete).not.toHaveBeenCalled();
+  });
+
+  it('deleteProduct блокирует при рилсах Распаковки', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      variants: [],
+      images: [],
+      choiceStarImageUrl: null,
+    });
+    prisma.orderItem.count.mockResolvedValue(0);
+    prisma.unpackingReel.count.mockResolvedValue(2);
+
+    await expect(svc.deleteProduct('p1')).rejects.toThrow(
+      /используется в «Распаковке» \(2\)/,
+    );
     expect(prisma.product.delete).not.toHaveBeenCalled();
   });
 
@@ -455,6 +474,22 @@ describe('CatalogProductsAdminService', () => {
         choiceStarName: null,
       }),
     ).rejects.toThrow(/Выбор/);
+  });
+
+  it('uploadRichMedia purpose unpacking режет video > maxVideoBytes', async () => {
+    const big = {
+      buffer: Buffer.alloc(21 * 1024 * 1024),
+      mimetype: 'video/mp4',
+      size: 21 * 1024 * 1024,
+      originalname: 'big.mp4',
+    };
+    await expect(
+      svc.uploadRichMedia(big, 'video', {
+        maxVideoBytes: 20 * 1024 * 1024,
+        maxVideoLabelMb: 20,
+      }),
+    ).rejects.toThrow(/20 МБ/);
+    expect(storage.saveGalleryMedia).not.toHaveBeenCalled();
   });
 
   it('discardUploads удаляет непривязанный URL', async () => {

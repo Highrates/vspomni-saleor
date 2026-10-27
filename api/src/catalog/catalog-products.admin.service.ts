@@ -484,6 +484,15 @@ export class CatalogProductsAdminService {
       }
     }
 
+    const unpackingCount = await this.prisma.unpackingReel.count({
+      where: { productId: id },
+    });
+    if (unpackingCount > 0) {
+      throw new ConflictException(
+        `Нельзя удалить: товар используется в «Распаковке» (${unpackingCount}). Снимите рилсы в Настройки → Распаковка.`,
+      );
+    }
+
     const choiceStarUrl = product.choiceStarImageUrl?.trim() || null;
     await this.prisma.product.delete({ where: { id } });
     for (const img of product.images) {
@@ -801,8 +810,14 @@ export class CatalogProductsAdminService {
       originalname?: string;
     },
     kind: 'image' | 'video' = 'image',
+    opts?: { maxVideoBytes?: number; maxVideoLabelMb?: number },
   ) {
     if (kind === 'video') {
+      const max = opts?.maxVideoBytes;
+      if (max != null && file.size > max) {
+        const mb = opts?.maxVideoLabelMb ?? Math.round(max / (1024 * 1024));
+        throw new BadRequestException(`Видео больше ${mb} МБ`);
+      }
       const saved = await this.storage.saveGalleryMedia(file, 'rich');
       if (saved.mediaType !== 'video') {
         throw new BadRequestException('Ожидалось видео MP4 или MOV');
