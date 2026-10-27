@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { StoryGroup } from './StoryViewer'
 import StoryCirclePreview from './StoryCirclePreview'
 import { getAllStories, StoryNode } from '@/graphql/queries/stories.service'
@@ -57,6 +57,46 @@ function StoryCircle({
   )
 }
 
+function StoryScrollArrow({
+  direction,
+  disabled,
+  onClick,
+}: {
+  direction: 'prev' | 'next'
+  disabled: boolean
+  onClick: () => void
+}) {
+  const isPrev = direction === 'prev'
+  return (
+    <button
+      type="button"
+      aria-label={isPrev ? 'Прокрутить сторис влево' : 'Прокрутить сторис вправо'}
+      disabled={disabled}
+      onClick={onClick}
+      className={`absolute top-[34px] z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition hover:scale-105 hover:shadow-[0_6px_18px_rgba(0,0,0,0.14)] disabled:pointer-events-none disabled:opacity-0 sm:top-10 sm:flex md:top-[44px] lg:top-12 ${
+        isPrev ? 'left-0' : 'right-0'
+      }`}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-4 w-4 text-black"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        {isPrev ? (
+          <path d="M15 18l-6-6 6-6" />
+        ) : (
+          <path d="M9 6l6 6-6 6" />
+        )}
+      </svg>
+    </button>
+  )
+}
+
 type Props = {
   /** Сторис с RSC — без client waterfall. */
   initialStories?: StoryNode[]
@@ -68,6 +108,22 @@ export default function StoryBlock({ initialStories }: Props) {
   const [initialStoryIndex, setInitialStoryIndex] = useState(0)
   const [stories, setStories] = useState<StoryNode[]>(initialStories ?? [])
   const [loading, setLoading] = useState(!fromServer)
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(false)
+
+  const syncScrollArrows = useCallback(() => {
+    const el = scrollerRef.current
+    if (!el) {
+      setCanScrollPrev(false)
+      setCanScrollNext(false)
+      return
+    }
+    const max = el.scrollWidth - el.clientWidth
+    const overflow = max > 2
+    setCanScrollPrev(overflow && el.scrollLeft > 2)
+    setCanScrollNext(overflow && el.scrollLeft < max - 2)
+  }, [])
 
   useEffect(() => {
     if (fromServer) {
@@ -91,6 +147,31 @@ export default function StoryBlock({ initialStories }: Props) {
       cancelled = true
     }
   }, [fromServer, initialStories])
+
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el || loading) return
+    syncScrollArrows()
+    el.addEventListener('scroll', syncScrollArrows, { passive: true })
+    const ro =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => syncScrollArrows())
+        : null
+    ro?.observe(el)
+    window.addEventListener('resize', syncScrollArrows)
+    return () => {
+      el.removeEventListener('scroll', syncScrollArrows)
+      ro?.disconnect()
+      window.removeEventListener('resize', syncScrollArrows)
+    }
+  }, [loading, stories, syncScrollArrows])
+
+  const scrollByPage = (dir: -1 | 1) => {
+    const el = scrollerRef.current
+    if (!el) return
+    const delta = Math.max(160, Math.round(el.clientWidth * 0.7)) * dir
+    el.scrollBy({ left: delta, behavior: 'smooth' })
+  }
 
   if (loading) {
     return (
@@ -158,12 +239,33 @@ export default function StoryBlock({ initialStories }: Props) {
       )
     })
 
+  const showDesktopArrows = canScrollPrev || canScrollNext
+
   return (
     <>
       <section className="mt-4 mb-4 px-0 sm:mt-5 sm:mb-5 sm:px-6 md:mt-6 md:mb-6 md:px-8 lg:mt-8">
-        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max min-w-full justify-center gap-3 px-0 pb-1 sm:gap-[14px] md:gap-4 lg:gap-[18px]">
-            {renderCircles('all')}
+        <div className="relative">
+          {showDesktopArrows ? (
+            <>
+              <StoryScrollArrow
+                direction="prev"
+                disabled={!canScrollPrev}
+                onClick={() => scrollByPage(-1)}
+              />
+              <StoryScrollArrow
+                direction="next"
+                disabled={!canScrollNext}
+                onClick={() => scrollByPage(1)}
+              />
+            </>
+          ) : null}
+          <div
+            ref={scrollerRef}
+            className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <div className="flex w-max min-w-full justify-center gap-3 px-0 pb-1 sm:gap-[14px] md:gap-4 lg:gap-[18px]">
+              {renderCircles('all')}
+            </div>
           </div>
         </div>
       </section>

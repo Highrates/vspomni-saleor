@@ -87,11 +87,10 @@ export default function Unpacking({
   const hasMore = items.length < total
 
   return (
-    <section className="mt-4 sm:mt-6 md:mt-8 lg:mt-10 py-2 px-0">
-      <h2 className="text-xl sm:text-[36px] md:text-[42px] lg:text-[48px] font-semibold text-black mb-6 sm:mb-8">
-        Распаковка
-      </h2>
-
+    <section
+      className="mt-4 sm:mt-6 md:mt-8 lg:mt-10 py-2 px-0"
+      aria-label="Распаковка"
+    >
       {SwiperComponent ? (
         <SwiperComponent items={items} />
       ) : (

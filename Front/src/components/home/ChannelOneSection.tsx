@@ -164,9 +164,20 @@ export default function ChannelOneSection() {
         </div>
 
         <div className="flex min-w-0 w-full flex-col justify-center gap-3 bg-[#F5F5F5] px-4 py-5 sm:h-full sm:w-1/2 sm:gap-3 sm:px-6 sm:py-0 md:px-8 lg:gap-4 lg:px-10">
-          <p className="m-0 font-semibold uppercase tracking-[0.12em] text-brand/50 text-[10px] sm:text-xs">
-            Первый канал · Доброе утро
-          </p>
+          <div className="flex flex-col gap-2 sm:gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/channel-one-logo.svg"
+              alt="Первый канал"
+              className="h-8 w-auto object-contain object-left sm:h-9 md:h-10"
+              width={62}
+              height={80}
+              decoding="async"
+            />
+            <p className="m-0 font-semibold uppercase tracking-[0.12em] text-brand/50 text-[10px] sm:text-xs">
+              Первый канал · Доброе утро
+            </p>
+          </div>
           <div className="flex flex-col gap-2.5 sm:gap-2 md:gap-3">
             {LINES.map((line) => (
               <p key={line} className={LINE_CLASS}>
