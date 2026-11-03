@@ -156,9 +156,13 @@ export class TelegramNotifyService {
     text: string,
   ): Promise<void> {
     const url = `${this.apiBase()}/bot${token}/sendMessage`;
+    // Cloudflare Worker (TELEGRAM_API_BASE) отдаёт 1010 на дефолтный UA Node/undici.
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'VspomniBot/1.0 (order-notify)',
+      },
       body: JSON.stringify({
         chat_id: chatId,
         text,

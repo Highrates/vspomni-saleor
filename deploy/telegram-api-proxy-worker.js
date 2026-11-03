@@ -21,9 +21,17 @@ export default {
       return new Response('not found', { status: 404 });
     }
     const target = `https://api.telegram.org${url.pathname}${url.search}`;
+    // Не прокидываем Host/CF-заголовки воркера — только полезные.
+    const headers = new Headers();
+    const ct = request.headers.get('content-type');
+    if (ct) headers.set('content-type', ct);
+    headers.set(
+      'user-agent',
+      request.headers.get('user-agent') || 'VspomniTgProxy/1.0',
+    );
     const init = {
       method: request.method,
-      headers: request.headers,
+      headers,
       body:
         request.method === 'GET' || request.method === 'HEAD'
           ? undefined
